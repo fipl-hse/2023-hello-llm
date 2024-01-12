@@ -3,74 +3,50 @@
 Classification
 ==============
 
-
 .. contents:: Content
    :depth: 2
-
-
-Emotion detection
------------------
 
 Models
 ~~~~~~
 
-+------------------------------------------------------------------------------+------+
-| Model                                                                        | Lang |
-+==============================================================================+======+
-| `DistilRoBERTa-base                                                          | EN   |
-| <https://huggingface.co/michellejieli/emotion_text_classifier>`__            |      |
-+------------------------------------------------------------------------------+------+
-| `rubert-tiny2                                                                | RU   |
-| <https://huggingface.co/cointegrated/rubert-tiny2-cedr-emotion-detection>`__ |      |
-+------------------------------------------------------------------------------+------+
++--------------------------------------------------------------+------+
+| Model                                                        | Lang |
++==============================================================+======+
+| `rubert-tiny-toxicity <https                                 | EN   |
+| ://huggingface.co/cointegrated/rubert-tiny-toxicityr>`__     |      |
++--------------------------------------------------------------+------+
+| `rubert-tiny2-cedr-emotion-detection <https://hugging        | RU   |
+| face.co/cointegrated/rubert-tiny2-cedr-emotion-detection>`__ |      |
++--------------------------------------------------------------+------+
+| `xlm-roberta-base-language-detection <https://hugging        | RU   |
+| face.co/papluca/xlm-roberta-base-language-detection>`__      |      |
++--------------------------------------------------------------+------+
+| `bert-base-uncased-ag_news <https://hugging                  | RU   |
+| face.co/fabriceyhc/bert-base-uncased-ag_news>`__             |      |
++--------------------------------------------------------------+------+
+| `albert-base-v2-imdb-calssification <https://hugging         | RU   |
+| face.co/XSY/albert-base-v2-imdb-calssification>`__           |      |
++--------------------------------------------------------------+------+
+| `it-emotion-analyzer <https://hugging                        | RU   |
+| face.co/aiknowyou/it-emotion-analyzer>`__                    |      |
++--------------------------------------------------------------+------+
 
 Datasets
 ~~~~~~~~
 
-1. `go_emotions <https://huggingface.co/datasets/go_emotions>`__
+1. `wiki_toxic <https://huggingface.co/datasets/OxAISH-AL-LLM/wiki_toxic/viewer/default/validation>`__
 
    1. **Lang**: EN
-   2. **Rows**: 5430
+   2. **Rows**: 31915
    3. **Preprocess**:
 
       1. Cut to 100 rows.
       2. Drop column ``id``.
-      3. Rename column ``labels`` to ``target``.
-      4. Remove unnecessary emotions
-         ``[0, 4, 5, 6, 7, 8, 10, 12, 15, 18, 21, 22, 23]``.
-      5. Group emotions:
+      3. Rename column ``labels`` to ``label``.
+      4. Rename column ``text`` to ``target``.
+      5. Reset indexes
 
-         1. joy - ``[1, 13, 17, 20]``
-         2. sadness - ``[9, 16, 24, 25]``
-         3. fear - ``[14, 19]``
-         4. anger - ``[2, 3]``
-         5. disgust - ``11``
-         6. surprise - ``26``
-         7. neutral - ``27``
-         8. other
-
-      6. Delete duplicates in ``label``.
-      7. Clean column ``text``.
-
-2. `emotion-detection-from-text <https://www.kaggle.com/datasets/pashupatigupta/emotion-detection-from-text>`__
-
-   1. **Lang**: EN
-   2. **Rows**: 39827
-   3. **Preprocess**:
-
-      1. Cut to 100 rows.
-      2. Drop column ``tweet_id``.
-      3. Rename columns ``sentiment`` to ``target`` and ``content`` to ``source``.
-      4. Remove unnecessary emotions ``['love', 'boredom', 'relief', 'worry']``.
-      5. Group emotions:
-
-         1. joy - ``['enthusiasm', 'fun', 'happiness']``
-         2. sadness - ``empty``
-         3. anger - ``hate``
-
-      6. Clean column ``text``.
-
-3. `seara/ru_go_emotions <https://huggingface.co/datasets/seara/ru_go_emotions>`__
+2. `seara/ru_go_emotions <https://huggingface.co/datasets/seara/ru_go_emotions>`__
 
    1. **Lang**: RU
    2. **Rows**: 5430
@@ -78,78 +54,59 @@ Datasets
 
       1. Cut to 100 rows.
       2. Drop columns ``id`` and ``text``.
-      3. Rename columns ``labels`` to ``target`` and ``ru_text`` to
-         ``source``.
-      4. Remove unnecessary emotions
-         ``[0, 4, 5, 6, 7, 8, 10, 11, 12, 15, 18, 21, 22, 23]``.
-      5. Group emotions:
-
-         1. joy - ``[1, 13, 17, 20]``
-         2. sadness - ``[9, 16, 24, 25]``
-         3. fear - ``[14, 19]``
-         4. anger - ``[2, 3]``
-         5. surprise - ``26``
-         6. neutral - ``27``
-         7. other
-
+      3. Rename columns ``labels`` to ``label``.
+      4. Rename column ``text`` to ``target``.
+      5. Group emotions and change numbers to words.
       6. Delete duplicates in ``label``.
-      7. Clean column ``text``.
+      7. Clean column ``target``.
+      8. Reset indexes
 
-Toxicity detection
-------------------
-
-Models
-~~~~~~
-
-+----------------------------------------------------------------------------+------+
-| Model                                                                      | Lang |
-+============================================================================+======+
-| `roberta <https://huggingface.co/cointegrated/rubert-tiny-toxicity>`__     | EN   |
-+----------------------------------------------------------------------------+------+
-| `DistilBERT <https://huggingface.co/martin-ha/toxic-comment-model>`__      | EN   |
-+----------------------------------------------------------------------------+------+
-| `rubert-tiny <https://huggingface.co/cointegrated/rubert-tiny-toxicity>`__ | RU   |
-+----------------------------------------------------------------------------+------+
-
-
-Datasets
-~~~~~~~~
-
-1. `OxAISH-AL-LLM/wiki_toxic <https://huggingface.co/datasets/OxAISH-AL-LLM/wiki_toxic>`__
+3. `language-identification <https://huggingface.co/datasets/papluca/language-identification>`__
 
    1. **Lang**: EN
-   2. **Rows**: 25900
+   2. **Rows**: 10000
    3. **Preprocess**:
 
       1. Cut to 100 rows.
-      2. Drop column ``id``.
-      3. Rename column ``comment_text`` to ``source``.
-      4. Clean column ``text``.
+      2. Rename column ``labels`` to ``label``.
+      3. Rename column ``text`` to ``target``.
+      4. Map language abbreviation to label classes.
+      5. Reset indexes
 
-2. `toxic-tweets-dataset <https://www.kaggle.com/datasets/ashwiniyer176/toxic-tweets-dataset>`__
+4. `ag_news <https://huggingface.co/datasets/ag_news>`__
 
    1. **Lang**: EN
-   2. **Rows**: 54313
+   2. **Rows**: 7600
    3. **Preprocess**:
 
       1. Cut to 100 rows.
-      2. Drop column ``Unnamed: 0``.
-      3. Rename columns ``Toxicity`` to ``target`` and ``tweet`` to ``source``.
-      4. Clean column ``text``.
+      2. Rename column ``labels`` to ``label``.
+      3. Rename column ``text`` to ``target``.
+      4. Reset indexes
 
-3. `russian-language-toxic-comments <https://www.kaggle.com/datasets/blackmoon/russian-language-toxic-comments>`__
+5. `imdb <https://huggingface.co/datasets/imdb>`__
 
-   1. **Lang**: RU
-   2. **Rows**: 14412
+   1. **Lang**: EN
+   2. **Rows**: 25000
    3. **Preprocess**:
 
       1. Cut to 100 rows.
-      2. Rename columns ``toxic`` to ``target`` and ``comment`` to ``source``.
-      3. Clean column ``text``.
+      2. Rename column ``labels`` to ``label``.
+      3. Rename column ``text`` to ``target``.
+      4. Reset indexes
+
+6. `dair-ai/emotion <https://huggingface.co/datasets/dair-ai/emotion>`__
+
+   1. **Lang**: EN
+   2. **Rows**: 2000
+   3. **Preprocess**:
+
+      1. Cut to 100 rows.
+      2. Rename column ``labels`` to ``label``.
+      3. Rename column ``text`` to ``target``.
+      4. Reset indexes
 
 Metrics
 -------
 
--  Precision
--  Recall
 -  F1-score

@@ -41,11 +41,34 @@
       "squad": 3.49928
     }
   },
+  "cointegrated/rubert-tiny-toxicity": {
+    "OxAISH-AL-LLM/wiki_toxic": {
+      "f1": 0.80000
+    }
+  },
   "cointegrated/rubert-tiny2-cedr-emotion-detection": {
     "seara/ru_go_emotions": {
-      "f1": 0.33333,
-      "precision": 0.33333,
-      "recall": 0.33333
+      "f1": 0.14925
+    }
+  },
+  "papluca/xlm-roberta-base-language-detection": {
+    "papluca/language-identification": {
+      "f1": 1.0
+    }
+  },
+  "fabriceyhc/bert-base-uncased-ag_news": {
+    "ag_news": {
+      "f1": 0.96
+    }
+  },
+  "XSY/albert-base-v2-imdb-calssification": {
+    "imdb": {
+      "f1": 0.74
+    }
+  },
+  "aiknowyou/it-emotion-analyzer": {
+    "dair-ai/emotion": {
+      "f1": 0.31
     }
   },
   "cointegrated/rubert-base-cased-nli-threeway": {
