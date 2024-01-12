@@ -15,7 +15,7 @@ try:
     from torch.utils.data.dataset import Dataset
 except ImportError:
     print('Library "torch" not installed. Failed to import.')
-    Dataset = None
+    Dataset = None  # type: ignore
 
 
 class HFModelLike(Protocol):
