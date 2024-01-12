@@ -1,0 +1,122 @@
+[tool.pytest.ini_options]
+markers = [
+    "mark4: tests for level 4",
+    "mark6: tests for level 6",
+    "mark8: tests for level 8",
+    "mark10: tests for level 10",
+    "reference_lab_nmt: tests for NMT task",
+    "reference_lab_classification: tests for classification task",
+    "reference_lab_summarization: tests for summarization task",
+    "reference_lab_nli: tests for nli task",
+    "reference_lab_generation: tests for generation task",
+    "lab_7_llm: tests for lab 7",
+]
+norecursedirs = [
+    "venv*"
+]
+
+[tool.coverage.run]
+omit = [
+    '*/tests/*',
+    '*/start.py'
+]
+
+[tool.mypy]
+python_version = '3.10'
+exclude = [
+    'venv*',
+    'test.py'
+]
+
+disallow_untyped_defs = true
+disallow_any_unimported = true
+no_implicit_optional = true
+check_untyped_defs = true
+warn_return_any = true
+show_error_codes = true
+warn_unused_ignores = false
+
+# simplifications
+disable_error_code = [
+    'var-annotated',
+    'union-attr',
+    # needed for seminars, to this moment not fixed: https://github.com/python/mypy/issues/9440
+    'attr-defined'
+]
+
+[[tool.mypy.overrides]]
+module = [
+    'ast_comments',
+    'datasets',
+    'evaluate',
+    'ghapi.all',
+    'memory_profiler',
+    'pydantic',
+    'transformers',
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ['seminars.*', ]
+disable_error_code = [
+    'empty-body'
+]
+
+[[tool.mypy.overrides]]
+module = [
+    '*.main_stub',
+    '*.start_stub',
+    '*.service_stub',
+]
+disable_error_code = [
+    'empty-body',
+    'name-defined'
+]
+
+[[tool.mypy.overrides]]
+module = ['*.nmt_demo.*', ]
+disable_error_code = [
+    'no-any-unimported',
+    'no-any-return'
+]
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+
+[tool.isort]
+py_version = '310'
+skip_gitignore = true
+line_length = 100
+order_by_type = true
+remove_redundant_aliases = true
+group_by_package = true
+force_alphabetical_sort_within_sections = true
+
+[tool.doc8]
+allow-long-titles = true
+max-line-length = 100
+ignore = ['D004']
+ignore-path = [
+    'venv*',
+    'build/'
+]
+
+[tool.pydocstyle]
+convention = 'google'
+add-select = ['D213']
+add-ignore = [
+    'D212',
+    'D200'
+]
+
+[tool.flake8]
+max-line-length = 100
+exclude = [
+    'venv*',
+    'build/'
+]
+application_import_names = ['config']
+select = ['I']
+count = true
+
