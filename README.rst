@@ -2,7 +2,7 @@ Hello, LLM! для 4-го курса ФПЛ (2023/2024)
 ==========================================
 
 В рамках предмета
-`“Программирование для лингвистов” <https://www.hse.ru/edu/courses/835199210>`__
+`“Информационный поиск и извлечение данных” <https://nnov.hse.ru/ba/ling/courses/835194511.html>`__
 в НИУ ВШЭ - Нижний Новгород.
 
 **Преподаватели:**
@@ -91,7 +91,7 @@ Hello, LLM! для 4-го курса ФПЛ (2023/2024)
 -------
 
 1. `Таблица
-   успеваемости <https://docs.google.com/spreadsheets/d/1mx9N7tmkaWjwK0h4oNnKFspjTheNVoDd>`__
+   успеваемости <https://docs.google.com/spreadsheets/d/1-HdXUVbMZtLjgy2wUT7hFgLtJ_OtfmCpIt26c0XlFR8/edit?usp=sharing>`__
 2. :ref:`starting-guide-label`
 3. :ref:`running-tests-label`
 4. :ref:`faq-label`
