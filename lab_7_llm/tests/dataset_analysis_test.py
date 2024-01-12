@@ -1,7 +1,7 @@
 """
 Checks that datasets gets analyzed proreprly
 """
-# pylint: disable=duplicate-code
+# pylint: disable=duplicate-code, assignment-from-no-return
 import unittest
 from pathlib import Path
 

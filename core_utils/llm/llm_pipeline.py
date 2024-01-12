@@ -1,12 +1,21 @@
 """
 Module with description of abstract llm pipeline.
 """
-# pylint: disable=too-few-public-methods, too-many-arguments
+# pylint: disable=too-few-public-methods, too-many-arguments, duplicate-code
 from abc import ABC, abstractmethod
 from typing import Any, Protocol
 
-import pandas as pd
-from torch.utils.data.dataset import Dataset
+try:
+    from pandas import DataFrame
+except ImportError:
+    print('Library "pandas" not installed. Failed to import.')
+    DataFrame = dict  # type: ignore
+
+try:
+    from torch.utils.data.dataset import Dataset
+except ImportError:
+    print('Library "torch" not installed. Failed to import.')
+    Dataset = None
 
 
 class HFModelLike(Protocol):
@@ -50,7 +59,7 @@ class AbstractLLMPipeline(ABC):
         """
 
     @abstractmethod
-    def infer_dataset(self) -> pd.DataFrame:
+    def infer_dataset(self) -> DataFrame:
         """
         Infer model on a whole dataset.
         """

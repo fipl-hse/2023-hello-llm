@@ -1,11 +1,15 @@
 """
 Module with description of abstract task evaluator.
 """
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods, duplicate-code
 from abc import ABC, abstractmethod
 from typing import Iterable
 
-import pandas as pd
+try:
+    from pandas import DataFrame
+except ImportError:
+    print('Library "pandas" not installed. Failed to import.')
+    DataFrame = dict  # type: ignore
 
 from core_utils.llm.metrics import Metrics
 
@@ -18,7 +22,7 @@ class AbstractTaskEvaluator(ABC):
         self._metrics = metrics
 
     @abstractmethod
-    def run(self) -> pd.DataFrame:
+    def run(self) -> DataFrame:
         """
         Entrypoint for task evaluation versus a number of specified metrics.
         """

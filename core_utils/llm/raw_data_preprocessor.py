@@ -1,11 +1,16 @@
 """
 Module with description of abstract raw data preprocessor.
 """
+# pylint: disable=duplicate-code
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Any
 
-import pandas as pd
+try:
+    from pandas import DataFrame
+except ImportError:
+    print('Library "pandas" not installed. Failed to import.')
+    DataFrame = dict  # type: ignore
 
 
 class ColumnNames(Enum):
@@ -30,9 +35,9 @@ class AbstractRawDataPreprocessor(ABC):
     """
     Abstract Raw Data Preprocessor.
     """
-    _data: pd.DataFrame | None
+    _data: DataFrame | None
 
-    def __init__(self, raw_data: pd.DataFrame):
+    def __init__(self, raw_data: DataFrame):
         self._raw_data = raw_data
         self._data = None
 
@@ -49,7 +54,7 @@ class AbstractRawDataPreprocessor(ABC):
         """
 
     @property
-    def data(self) -> pd.DataFrame | None:
+    def data(self) -> DataFrame | None:
         """
         Property for original dataset.
         """

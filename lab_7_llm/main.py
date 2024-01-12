@@ -1,9 +1,30 @@
 """
 Neural machine translation module.
 """
-# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments
+# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+from collections import namedtuple
+from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
+try:
+    import torch
+    from torch.utils.data.dataset import Dataset
+except ImportError:
+    print('Library "torch" not installed. Failed to import.')
+    Dataset = dict
+    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
+
+try:
+    from pandas import DataFrame
+except ImportError:
+    print('Library "pandas" not installed. Failed to import.')
+    DataFrame = dict  # type: ignore
+
+from core_utils.llm.llm_pipeline import AbstractLLMPipeline
+from core_utils.llm.metrics import Metrics
+from core_utils.llm.raw_data_importer import AbstractRawDataImporter
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
 
@@ -44,7 +65,7 @@ class TaskDataset(Dataset):
     Dataset with translation data.
     """
 
-    def __init__(self, data: pd.DataFrame) -> None:
+    def __init__(self, data: DataFrame) -> None:
         """
         Initialize an instance of TaskDataset.
 
@@ -92,7 +113,12 @@ class LLMPipeline(AbstractLLMPipeline):
     """
 
     def __init__(
-        self, model_name: str, dataset: TaskDataset, max_length: int, batch_size: int, device: str
+            self,
+            model_name: str,
+            dataset: TaskDataset,
+            max_length: int,
+            batch_size: int,
+            device: str
     ) -> None:
         """
         Initialize an instance of HelsinkiNLPModel.
@@ -120,7 +146,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
 
     @report_time
-    def infer_dataset(self) -> pd.DataFrame:
+    def infer_dataset(self) -> DataFrame:
         """
         Translate the dataset sentences.
 

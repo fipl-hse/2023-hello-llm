@@ -1,10 +1,17 @@
 """
 Checks that E2E scenario allows to get desired metrics values
 """
+# pylint: disable=duplicate-code
 import unittest
+from collections import namedtuple
 
 import pytest
-from fastapi.testclient import TestClient
+
+try:
+    from fastapi.testclient import TestClient
+except ImportError:
+    print('Library "fastapi" not installed. Failed to import.')
+    TestClient = namedtuple('TestClient', 'post')
 
 from lab_7_llm.service import app
 
@@ -13,12 +20,12 @@ class WebServiceTest(unittest.TestCase):
     """
     Tests tokenize function
     """
+
     @classmethod
     def setUpClass(cls) -> None:
         cls._app = app
 
-        with TestClient(app) as client:
-            cls._client = client
+        cls._client = TestClient(app)
 
     @pytest.mark.lab_7_llm
     @pytest.mark.mark10
