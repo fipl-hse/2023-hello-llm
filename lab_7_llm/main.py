@@ -5,6 +5,7 @@ Neural machine translation module.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
+from datasets import load_dataset
 
 try:
     import torch
@@ -32,12 +33,15 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     Custom implementation of data importer.
     """
+    def __init__(self, hf_name: str | None):
+        super().__init__(hf_name)
 
     @report_time
-    def obtain(self) -> None:
+    def obtain(self, split: str) -> None:
         """
         Import dataset.
         """
+        self._raw_data = load_dataset('XNLI', split=split).to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -52,6 +56,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: dataset key properties.
         """
+
 
     @report_time
     def transform(self) -> None:
@@ -189,5 +194,3 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric.
         """
-
-# comment for pull request
