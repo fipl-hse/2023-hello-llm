@@ -14,6 +14,7 @@ except ImportError:
     Dataset = dict
     torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
 
+
 try:
     from pandas import DataFrame
 except ImportError:
