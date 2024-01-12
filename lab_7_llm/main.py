@@ -38,6 +38,7 @@ class RawDataImporter(AbstractRawDataImporter):
         """
         Import dataset.
         """
+        pass
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
