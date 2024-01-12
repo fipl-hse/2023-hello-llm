@@ -1,11 +1,11 @@
 """
 Neural machine translation module.
 """
-# hello world
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
+from datasets import load_dataset
 
 try:
     import torch
@@ -33,12 +33,17 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     Custom implementation of data importer.
     """
+    def __init__(self, hf_name: str | None):
+        super().__init__(hf_name)
 
     @report_time
     def obtain(self) -> None:
         """
         Import dataset.
         """
+        # TODO: ask about split parameter
+        self._raw_data = load_dataset('cointegrated/nli-rus-translated-v2021', split='test').\
+            to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -53,6 +58,13 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: dataset key properties.
         """
+        return {'num_dt_samples': self._raw_data.shape[0],
+                'num_dt_columns': self._raw_data.shape[1],
+                'num_dt_duplicates': self._raw_data.duplicated().sum(),
+                'num_dt_empty_rows': self._raw_data.isna().sum().sum(),
+                'len_dt_min_sample': self._raw_data.min().count(),
+                'len_dt_max_sample': self._raw_data.max().count()
+                }
 
     @report_time
     def transform(self) -> None:
