@@ -144,6 +144,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         Infer model on a single sample.
         """
+    m
 
     @report_time
     def infer_dataset(self) -> DataFrame:
