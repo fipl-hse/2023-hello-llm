@@ -40,7 +40,6 @@ class RawDataImporter(AbstractRawDataImporter):
         """
 
 
-
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     Custom implementation of data preprocessor.
