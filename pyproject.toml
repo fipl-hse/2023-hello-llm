@@ -49,9 +49,11 @@ module = [
     'ast_comments',
     'datasets',
     'evaluate',
+    'fastapi',
     'ghapi.all',
     'memory_profiler',
     'pydantic',
+    'torch.*',
     'transformers',
 ]
 ignore_missing_imports = true
@@ -64,8 +66,21 @@ disable_error_code = [
 
 [[tool.mypy.overrides]]
 module = [
+    'core_utils.llm.llm_pipeline',
+    'lab_7_llm.service',
+    'lab_7_llm.main',
+]
+disable_error_code = [
+    'no-any-unimported'
+]
+
+[[tool.mypy.overrides]]
+module = [
+    '*.main',
     '*.main_stub',
+    '*.start',
     '*.start_stub',
+    '*.service',
     '*.service_stub',
 ]
 disable_error_code = [

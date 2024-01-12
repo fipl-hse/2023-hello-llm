@@ -1,10 +1,15 @@
 """
 Module with description of abstract data importer.
 """
+# pylint: disable=duplicate-code
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-import pandas as pd
+try:
+    from pandas import DataFrame
+except ImportError:
+    print('Library "pandas" not installed. Failed to import.')
+    DataFrame = dict  # type: ignore
 
 
 class AbstractRawDataImporter(ABC):
@@ -13,7 +18,7 @@ class AbstractRawDataImporter(ABC):
     """
 
     _local_path: Path | None
-    _raw_data: pd.DataFrame | None
+    _raw_data: DataFrame | None
 
     def __init__(self, hf_name: str | None):
         self._hf_name = hf_name
@@ -26,7 +31,7 @@ class AbstractRawDataImporter(ABC):
         """
 
     @property
-    def raw_data(self) -> pd.DataFrame | None:
+    def raw_data(self) -> DataFrame | None:
         """
         Property for original dataset in a table format.
         """
