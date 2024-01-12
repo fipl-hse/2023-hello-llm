@@ -1,28 +1,8 @@
 {
     "labs": [
         {
-            "name": "reference_lab_nmt",
-            "coverage": 95
-        },
-        {
-            "name": "reference_lab_generation",
-            "coverage": 58
-        },
-        {
-            "name": "reference_lab_classification",
-            "coverage": 60
-        },
-        {
-            "name": "reference_lab_summarization",
-            "coverage": 58
-        },
-        {
-            "name": "reference_lab_nli",
-            "coverage": 76
-        },
-        {
             "name": "lab_7_llm",
-            "coverage": 76
+            "coverage": 0
         },
         {
             "name": "lab_8_llm",
