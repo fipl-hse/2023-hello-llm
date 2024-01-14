@@ -18,9 +18,9 @@ def main() -> None:
     else:
         settings = open("../settings.json", "r")
     settings = json.load(settings)
-    result = RawDataImporter(settings["parameters"]["dataset"])
-    result.obtain()
-    result = RawDataPreprocessor(result.raw_data())
+    ds = RawDataImporter(settings["parameters"]["dataset"])
+    ds.obtain()
+    result = RawDataPreprocessor(ds.raw_data)
     result.analyze()
     assert result is not None, "Demo does not work correctly"
 
