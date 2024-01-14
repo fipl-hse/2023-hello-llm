@@ -1,8 +1,8 @@
 {
   "parameters": {
-    "model": "",
-    "dataset": "",
-    "metrics": []
+    "model": "cointegrated/rubert-tiny-bilingual-nli",
+    "dataset": "RussianNLP/russian_super_glue",
+    "metrics": ["accuracy"]
   },
-  "target_score": 0
+  "target_score": 4
 }

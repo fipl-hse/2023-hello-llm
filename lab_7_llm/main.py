@@ -5,6 +5,8 @@ Neural machine translation module.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
+from datasets import load_dataset
+
 
 try:
     import torch
@@ -33,18 +35,29 @@ class RawDataImporter(AbstractRawDataImporter):
     Custom implementation of data importer.
     """
 
+    def __init__(self, _hf_name):
+        super().__init__(_hf_name)
+
     @report_time
     def obtain(self) -> None:
         """
         Import dataset.
         """
-        pass
+
+        raw_dataset = load_dataset(self._hf_name, 'terra', split='validation')
+        self._raw_data = raw_dataset.to_pandas()
+
+    def raw_data(self) -> DataFrame | None:
+        return self._raw_data
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     Custom implementation of data preprocessor.
     """
+
+    def __init__(self, _raw_data):
+        super().__init__(_raw_data)
 
     def analyze(self) -> dict:
         """
@@ -53,6 +66,15 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: dataset key properties.
         """
+        analyze_dict = {
+            "dataset_number_of_samples": self._raw_data.shape[0],
+            "dataset_columns": self._raw_data.shape[1],
+            "dataset_duplicates": self._raw_data.duplicated(keep='first').sum(),
+            "dataset_empty_rows": self._raw_data.isna().sum().sum(),
+            "dataset_sample_min_len": self._raw_data['premise'].str.len().min(),
+            "dataset_sample_max_len": self._raw_data['premise'].str.len().max()
+        }
+        return analyze_dict
 
     @report_time
     def transform(self) -> None:
