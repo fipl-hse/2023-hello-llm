@@ -33,6 +33,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     Custom implementation of data importer.
     """
+
     def __init__(self, hf_name: str | None):
         super().__init__(hf_name)
 
@@ -41,8 +42,7 @@ class RawDataImporter(AbstractRawDataImporter):
         """
         Import dataset.
         """
-        # TODO: ask about split parameter
-        self._raw_data = load_dataset('cointegrated/nli-rus-translated-v2021', split='test').\
+        self._raw_data = load_dataset('cointegrated/nli-rus-translated-v2021', split='train'). \
             to_pandas()
 
 
@@ -58,12 +58,12 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: dataset key properties.
         """
-        return {'num_dt_samples': self._raw_data.shape[0],
-                'num_dt_columns': self._raw_data.shape[1],
-                'num_dt_duplicates': self._raw_data.duplicated().sum(),
-                'num_dt_empty_rows': self._raw_data.isna().sum().sum(),
-                'len_dt_min_sample': self._raw_data.min().count(),
-                'len_dt_max_sample': self._raw_data.max().count()
+        return {'dataset_number_of_samples': self._raw_data.shape[0],
+                'dataset_columns': self._raw_data.shape[1],
+                'dataset_duplicates': self._raw_data.duplicated().sum(),
+                'dataset_empty_rows': self._raw_data.isna().sum().sum(),
+                'dataset_sample_min_len': len(min(self._raw_data["premise_ru"])),
+                'dataset_sample_max_len': len(max(self._raw_data["premise_ru"]))
                 }
 
     @report_time
@@ -71,6 +71,15 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        # TODO: ask about «Map target with class labels»
+        # self._raw_data = self._raw_data[self._raw_data["source"].isin(["mnli"])]
+        # self._raw_data = self._raw_data.loc[:, ["premise_ru", "hypothesis_ru", "label"]]
+        self._raw_data = self._raw_data.loc[self._raw_data["source"] == "mnli"]. \
+            loc[:, ["premise_ru", "hypothesis_ru", "label"]].\
+            rename(columns={
+                "premise_ru": "premise",
+                "hypothesis_ru": "hypothesis",
+                "label": "target"}, inplace=True).dropna().reset_index()
 
 
 class TaskDataset(Dataset):
@@ -85,6 +94,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): original data.
         """
+        super().__init__(data)
 
     def __len__(self) -> int:
         """
