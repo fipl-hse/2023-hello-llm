@@ -5,6 +5,8 @@ Neural machine translation module.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
+
+import numpy as np
 from datasets import load_dataset
 
 try:
@@ -33,15 +35,13 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     Custom implementation of data importer.
     """
-    def __init__(self, hf_name: str | None):
-        super().__init__(hf_name)
 
     @report_time
-    def obtain(self, split: str) -> None:
+    def obtain(self) -> None:
         """
         Import dataset.
         """
-        self._raw_data = load_dataset('XNLI', split=split).to_pandas()
+        self._raw_data = load_dataset(self._hf_name, 'ru', split='validation').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -56,7 +56,41 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: dataset key properties.
         """
+        info = {
+            'dataset_number_of_samples': self._count_samples(),
+            'dataset_columns': self._count_columns(),
+            'dataset_duplicates': self._count_duplicates(),
+            'dataset_empty_rows': self._count_empty(),
+            'dataset_sample_min_len': self._count_min(),
+            'dataset_sample_max_len': self._count_max()
+            }
+        return info
 
+    def _count_samples(self):
+        """Count number of rows in a DataFrame"""
+        return len(self._raw_data)
+
+    def _count_columns(self):
+        """Count number of columns in a DataFrame"""
+        return self._raw_data.shape[1]
+
+    def _count_duplicates(self):
+        """Count number of duplicates in a DataFrame"""
+        return self._raw_data.duplicated().sum()
+
+    def _count_empty(self):
+        """Count number of empty rows in a DataFrame including those having empty strings"""
+        return len(self._raw_data) - len(self._raw_data.replace('', np.nan).dropna())
+
+    def _count_min(self):
+        """Count length of the shortest sample"""
+        return min(len(min(self._raw_data['premise'], key=len)),
+                   len(min(self._raw_data['hypothesis'], key=len)))
+
+    def _count_max(self):
+        """Count length of the longest sample"""
+        return max(len(max(self._raw_data['premise'], key=len)),
+                   len(max(self._raw_data['hypothesis'], key=len)))
 
     @report_time
     def transform(self) -> None:
