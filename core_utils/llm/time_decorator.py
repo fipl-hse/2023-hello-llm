@@ -11,6 +11,12 @@ logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - 
 def report_time(fn_to_wrap: Callable) -> Callable:
     """
     Decorator for logging time spends.
+
+    Args:
+        fn_to_wrap (Callable): A function for which log time
+
+    Returns:
+        Callable: Internal function
     """
     def _internal(*args: Any, **kwargs: Any) -> Any:
         start = time.time()
