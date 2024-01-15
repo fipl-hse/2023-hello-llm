@@ -10,13 +10,13 @@ Laboratory work №7. Large Language Models no. 1
     ../core_utils/llm/core_utils_llm.api.rst
 
 
-Python competencies required to complete this tutorial:
+**Python competencies required to complete this tutorial:**
     * working with Transformers models;
     * working with HuggingFace datasets;
     * estimating result using metric;
     * making server for the chosen task using FastAPI.
 
-Model pipeline contains the following steps:
+**Model pipeline contains the following steps:**
 
     1. Downloading the chosen dataset from HuggingFace.
     2. Retrieving dataset's properties.
@@ -30,6 +30,7 @@ Model pipeline contains the following steps:
 
 Configuring model
 -----------------
+
 Model behavior is fully defined by a configuration file that is called ``settings.json``
 and it is placed on the same level as ``main.py``.
 
@@ -48,7 +49,8 @@ and it is placed on the same level as ``main.py``.
 +----------------------------+------------------------------------------------+--------------+
 
 Assessment criteria
-----------------------
+-------------------
+
 1. Desired mark **4**:
     1. ``pylint`` level: **5/10**.
     2. The script downloads dataset and retrieves its properties.
@@ -87,13 +89,14 @@ and import them into ``start.py``.
    if __name__ == '__main__':
        main()
 
-.. note:: You need to set the desired score: 4, 6, 8 or 10 in ``target_score`` field
-          in the file `settings.json <reference_lab_nmt/settings.json>`__.
-          The higher the desired score, the more
+.. note:: You need to set the desired mark: 4, 6, 8 or 10 in ``target_score`` field
+          in the file ``settings.json``.
+          The higher the desired mark, the more
           number of tests run when checking your Pull Request.
 
 Stage 1. Introduce importer abstraction: ``RawDataImporter``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 To work with the model first of all you need to import the chosen HuggingFace dataset.
 
 To be able to download dataset inside your program you need to implement special
@@ -103,11 +106,12 @@ This class inherits from
 :py:class:`core_utils.llm.raw_data_importer.AbstractRawDataImporter` abstraction.
 
 It has the following internal attributes:
-    * ``self._hf_name`` - string with the name of the HuggingFace dataset.
+    * ``self._hf_name`` - string with the name of the HuggingFace dataset;
     * ``self._raw_data`` - downloaded pd.DataFrame.
 
 Stage 1.1. Download dataset
-"""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""
+
 Implement a method
 :py:meth:`lab_7_llm.main.RawDataImporter.obtain`
 which allows to download dataset and filling ``_raw_data`` attribute.
@@ -130,6 +134,7 @@ You have to use
 
 Stage 2. Introduce preprocessor abstraction: ``RawDataPreprocessor``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Before putting dataset into model we have to preprocess it.
 
 To be able to perform all needed preprocessing and analyze the chosen dataset
@@ -140,11 +145,12 @@ This class inherits from
 :py:class:`core_utils.llm.raw_data_preprocessor.AbstractRawDataPreprocessor` abstraction.
 
 It has the following internal attributes:
-    * ``self._raw_data`` - downloaded pd.DataFrame.
+    * ``self._raw_data`` - downloaded pd.DataFrame;
     * ``self._data`` - preprocessed pd.DataFrame.
 
 Stage 2.1. Analyze dataset properties
-""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""
+
 Implement method
 :py:meth:`lab_7_llm.main.RawDataPreprocessor.analyze`
 which allows to analyze dataset.
@@ -161,13 +167,15 @@ Method should return a dictionary with dataset properties.
 
 Stage 2.2. Demonstrate the result in ``start.py``
 """""""""""""""""""""""""""""""""""""""""""""""""
-.. important:: Stages 1 - 2.1 are required to get the mark **4**.
+
+.. important:: **Stages 0 - 2.2** are required to get the mark **4**.
 
 Demonstrate your dataset analysis
 in the ``main()`` function of the ``start.py`` module.
 
 Stage 2.3. Preprocess dataset
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""
+
 Implement method
 :py:meth:`lab_7_llm.main.RawDataPreprocessor.transform`
 which allows to preprocess dataset.
@@ -188,6 +196,7 @@ which allows to preprocess dataset.
 
 Stage 3. Introduce dataset abstraction: ``TaskDataset``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 To work with the model we will use
 `Dataset <https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset>`__ abstraction.
 
@@ -204,25 +213,28 @@ It has one internal attribute:
     * ``self._data`` - pd.DataFrame with preprocessed data.
 
 .. important:: When initializing ``TaskDataset`` abstraction in ``start.py`` module,
-               limit the pd.DataFrame to the first 100 samples.
+               limit the ``pd.DataFrame`` to the first 100 samples.
 
 Stage 3.1. Implement magic methods
 """"""""""""""""""""""""""""""""""
-    * Implement method :py:meth:`lab_7_llm.main.TaskDataset.__len__`
-      which allows to get the number of items in dataset.
-    * Implement method :py:meth:`lab_7_llm.main.TaskDataset.__getitem__`
-      which allows to retrieve an item from the dataset by index.
-    * Implement method :py:meth:`lab_7_llm.main.TaskDataset.__iter__`
-      which allows to override iter method for static checks.
+
+    1. Implement method :py:meth:`lab_7_llm.main.TaskDataset.__len__`
+       which allows to get the number of items in dataset.
+    2. Implement method :py:meth:`lab_7_llm.main.TaskDataset.__getitem__`
+       which allows to retrieve an item from the dataset by index.
+    3. Implement method :py:meth:`lab_7_llm.main.TaskDataset.__iter__`
+       which allows to override iter method for static checks.
 
 Stage 3.2. Retrieve data
 """"""""""""""""""""""""
+
 Implement method
 :py:meth:`lab_7_llm.main.TaskDataset.data`
-which allows to access to preprocessed pd.Dataframe.
+which allows to access preprocessed ``pd.Dataframe``.
 
 Stage 4. Introduce model pipeline abstraction: ``LLMPipeline``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Now we are ready to run our model.
 
 To be able to initialize our model, analyze its properties,
@@ -233,16 +245,17 @@ This class inherits from
 :py:class:`core_utils.llm.llm_pipeline.AbstractLLMPipeline` abstraction.
 
 It has the following internal attributes:
-    * ``self._model_name`` - a string with the model name.
-    * ``self._model`` - the model instance.
-    * ``self._dataset`` - ``Dataset`` instance.
-    * ``self._device`` - a string with a device type (``cpu``, ``cuda`` or ``mps``).
-    * ``self._tokenizer`` - the tokenizer instance suitable for your model.
-    * ``self._batch_size`` - an integer with batch size.
+    * ``self._model_name`` - a string with the model name;
+    * ``self._model`` - the model instance;
+    * ``self._dataset`` - ``Dataset`` instance;
+    * ``self._device`` - a string with a device type (``cpu``, ``cuda`` or ``mps``);
+    * ``self._tokenizer`` - the tokenizer instance suitable for your model;
+    * ``self._batch_size`` - an integer with batch size;
     * ``self._max_length`` - an integer with maximum length of generated sequence.
 
 Stage 4.1. Analyze model properties
-""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""
+
 Implement method
 :py:meth:`lab_7_llm.main.LLMPipeline.analyze_model`
 which allows to analyze model properties.
@@ -261,7 +274,8 @@ Method should return a dictionary with model properties.
 .. note:: If the model does not have one of these properties, return **None**.
 
 Stage 4.2. Infer one sample from dataset
-""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""
+
 Implement method
 :py:meth:`lab_7_llm.main.LLMPipeline.infer_sample`,
 which allows to infer one sample from dataset.
@@ -270,7 +284,8 @@ which allows to infer one sample from dataset.
 
 Stage 4.3. Demonstrate the result in ``start.py``
 """""""""""""""""""""""""""""""""""""""""""""""""
-.. important:: Stages 2.3 - 4.2 are required to get the mark **6**.
+
+.. important:: **Stages 2.3 - 4.3** are required to get the mark **6**.
 
 Demonstrate model properties analysis and dataset sample inference
 in the ``main()`` function of the ``start.py`` module.
@@ -278,13 +293,14 @@ in the ``main()`` function of the ``start.py`` module.
 As parameters for initialization ``LLMPipeline`` abstraction,
 use:
 
-    * ``batch_size`` = 64
+    * ``batch_size`` = 64;
     * ``max_length`` = 120.
 
 .. note:: For generation task use ``max_length`` = 512.
 
 Stage 4.4. Infer dataset
-"""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""
+
 Implement method
 :py:meth:`lab_7_llm.main.LLMPipeline.infer_dataset`,
 which allows to infer the dataset.
@@ -295,10 +311,11 @@ which allows to infer the dataset.
 .. note:: When using tokenizer, set parameters
           ``padding=True``, ``truncation=True`` to handle varying sequence lengths.
 
-Method returns pd.DataFrame with ``target`` and ``predictions`` columns.
+Method returns ``pd.DataFrame`` with ``target`` and ``predictions`` columns.
 
 Stage 4.5. Infer batch
-"""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""
+
 LLMs typically work with datasets with thousands of samples.
 Consequently, iterating through these datasets one sample at a
 time proves highly inefficient, particularly when considering
@@ -324,7 +341,8 @@ Method returns a list with model predictions.
           for one sample and for the whole dataset.
 
 Stage 5. Introduce evaluation abstraction: ``TaskEvaluator``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Now we have our predictions and can evaluate obtained result.
 
 To be able to evaluate the performance of the model
@@ -337,11 +355,12 @@ This class inherits from
 It has the following internal attributes:
     * ``self._metrics`` - a field of
       :py:class:`core_utils.llm.metrics.Metrics` abstraction
-      with suitable metric.
+      with suitable metric;
     * ``self._data_path`` - a string with the path to the `predictions.csv`.
 
 Stage 5.1. Evaluate model performance
-"""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""
+
 Implement method
 :py:meth:`lab_7_llm.main.TaskEvaluator.run`
 which allows to evaluate the predictions against the
@@ -359,7 +378,8 @@ Method returns a dictionary with metric result.
 
 Stage 5.2. Demonstrate the result in ``start.py``
 """""""""""""""""""""""""""""""""""""""""""""""""
-.. important:: Stages 4.4 - 5.1 are required to get the mark **8**.
+
+.. important:: **Stages 4.4 - 5.2** are required to get the mark **8**.
 
 Demonstrate dataset inference and model performance evaluation
 in the ``main()`` function of the ``start.py`` module.
@@ -368,7 +388,8 @@ in the ``main()`` function of the ``start.py`` module.
           you predictions to ``predictions.csv`` in ``start.py``.
 
 Stage 6. Implement Model as a Service
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 The next step after making an LLM pipeline is the implementation
 of a **FastAPI** service utilizing Transformers
 for the chosen task.
@@ -380,7 +401,8 @@ for the chosen task.
 .. important:: All logic should be implemented in the module ``service.py``
 
 Stage 6.1. Initialize core application
-"""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""
+
 Implement method
 which allows to initialize all needed
 instances for pipeline and web-service.
@@ -389,7 +411,8 @@ instances for pipeline and web-service.
               `FastAPI <https://fastapi.tiangolo.com/>`__ web framework.
 
 Stage 6.2. Make root endpoint
-"""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""
+
 Implement method
 which allows to create a root endpoint of the service.
 
@@ -402,8 +425,8 @@ Your start page should be made using
 .. note:: Put file with your CSS markup into ``assets/main.css`` module.
 
 User interface should contain:
-    * ``Entry field`` where you write your query.
-    * ``Button`` to send data to the server.
+    * ``Entry field`` where you write your query;
+    * ``Button`` to send data to the server;
     * ``Output`` field to display the results received from the server.
 
 Method returns a dictionary with your page content.
@@ -411,7 +434,8 @@ Method returns a dictionary with your page content.
 .. note:: Use ``@app.get("/")`` decorator to create a route for the root URL.
 
 Stage 6.2. Make main endpoint
-"""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""
+
 When a user clicks the button on the start page,
 a POST request must be initiated to the main endpoint
 which is responsible for processing the data using LLM pipeline.
@@ -434,8 +458,9 @@ the value containing response.
           main endpoint URL.
 
 Stage 6.3. Demonstrate the result
-"""""""""""""""""""""""""""""""""""""""""""""""""
-.. important:: Stage 6 is required to get the mark **10**.
+"""""""""""""""""""""""""""""""""
+
+.. important:: **Stage 6** is required to get the mark **10**.
 
 Demonstrate work of your service by running server
 implemented in ``service.py`` module
