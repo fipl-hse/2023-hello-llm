@@ -1,6 +1,2 @@
 datasets~=2.16.1
-pydantic~=2.5.3
-pytest~=7.4.4
-fastapi~=0.109.0
-torch~=2.1.1+cu121
 pandas~=2.2.0rc0
