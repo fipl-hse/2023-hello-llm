@@ -39,7 +39,7 @@ class WebServiceTest(unittest.TestCase):
         payload = {"question": input_text}
         response = self._client.post(url, json=payload)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(200, response.status_code)
         self.assertIn('infer', response.json())
         print(response.json().get('infer'))
         self.assertIsNotNone(response.json().get('infer'))
