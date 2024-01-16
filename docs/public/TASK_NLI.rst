@@ -33,14 +33,14 @@ Datasets
    3. **Preprocess**:
 
       1. Filter the dataset by the column ``source`` with the value ``mnli``.
-      2. Cut to 100 rows.
-      3. Leave only columns ``premise_ru``, ``hypothesis_ru`` and ``label``.
-      4. Rename column ``premise_ru`` to ``premise``.
-      5. Rename column ``hypothesis_ru`` to ``hypothesis``.
-      6. Rename column ``label`` to  ``target``.
-      7. Map ``target`` with class labels.
-      8. Delete empty rows in dataset.
-      9. Reset index.
+            ( This step you should implement in obtain method )
+      2. Leave only columns ``premise_ru``, ``hypothesis_ru`` and ``label``.
+      3. Rename column ``premise_ru`` to ``premise``.
+      4. Rename column ``hypothesis_ru`` to ``hypothesis``.
+      5. Rename column ``label`` to  ``target``.
+      6. Map ``target`` with class labels.
+      7. Delete empty rows in dataset.
+      8. Reset index.
 
 2. `Russian Super GLUE TERRA <https://huggingface.co/datasets/RussianNLP/russian_super_glue>`__
 
@@ -48,11 +48,10 @@ Datasets
    2. **Rows**: 307
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
-      2. Rename column ``label`` to  ``target``.
-      3. Delete duplicates in dataset.
-      4. Delete empty rows in dataset.
-      5. Reset index.
+      1. Rename column ``label`` to  ``target``.
+      2. Delete duplicates in dataset.
+      3. Delete empty rows in dataset.
+      4. Reset index.
 
 3. `XNLI <https://huggingface.co/datasets/xnli>`__
 
@@ -60,11 +59,10 @@ Datasets
    2. **Rows**: 2490
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
-      2. Rename column ``label`` to  ``target``.
-      3. Delete duplicates in dataset.
-      4. Delete empty rows in dataset.
-      5. Reset index.
+      1. Rename column ``label`` to  ``target``.
+      2. Delete duplicates in dataset.
+      3. Delete empty rows in dataset.
+      4. Reset index.
 
 4. `GLUE QNLI <https://huggingface.co/datasets/glue>`__
 
@@ -72,13 +70,12 @@ Datasets
    2. **Rows**: 5463
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
-      2. Rename column ``question`` to  ``premise``.
-      3. Rename column ``sentence`` to  ``hypothesis``.
-      4. Rename column ``label`` to  ``target``.
-      5. Delete duplicates in dataset.
-      6. Delete empty rows in dataset.
-      7. Reset index.
+      1. Rename column ``question`` to  ``premise``.
+      2. Rename column ``sentence`` to  ``hypothesis``.
+      3. Rename column ``label`` to  ``target``.
+      4. Delete duplicates in dataset.
+      5. Delete empty rows in dataset.
+      6. Reset index.
 
 5. `GLUE MNLI <https://huggingface.co/datasets/glue>`__
 
@@ -86,11 +83,10 @@ Datasets
    2. **Rows**: 9815
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
-      2. Rename column ``label`` to  ``target``.
-      3. Delete duplicates in dataset.
-      4. Delete empty rows in dataset.
-      5. Reset index.
+      1. Rename column ``label`` to  ``target``.
+      2. Delete duplicates in dataset.
+      3. Delete empty rows in dataset.
+      4. Reset index.
 
 Metrics
 -------
