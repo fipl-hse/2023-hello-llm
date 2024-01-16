@@ -171,6 +171,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
 
 
+
 class TaskEvaluator(AbstractTaskEvaluator):
     """
     A class that compares prediction quality using the specified metric.
