@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 from datasets import load_dataset
 
-
 try:
     import torch
     from torch.utils.data.dataset import Dataset
@@ -44,11 +43,9 @@ class RawDataImporter(AbstractRawDataImporter):
         Import dataset.
         """
 
-        raw_dataset = load_dataset("RussianNLP/russian_super_glue", self._hf_name, split='validation')
+        raw_dataset = load_dataset("RussianNLP/russian_super_glue", self._hf_name,
+                                   split='validation')
         self._raw_data = raw_dataset.to_pandas()
-
-    # def raw_data(self) -> DataFrame | None:
-    #     return self._raw_data
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -71,8 +68,10 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             "dataset_columns": self._raw_data.shape[1],
             "dataset_duplicates": self._raw_data.duplicated(keep='first').sum(),
             "dataset_empty_rows": self._raw_data.isna().sum().sum(),
-            "dataset_sample_min_len": min(self._raw_data['premise'].str.len().min(), self._raw_data['hypothesis'].str.len().min()),
-            "dataset_sample_max_len": max(self._raw_data['premise'].str.len().max(), self._raw_data['hypothesis'].str.len().max())
+            "dataset_sample_min_len": min(self._raw_data['premise'].str.len().min(),
+                                          self._raw_data['hypothesis'].str.len().min()),
+            "dataset_sample_max_len": max(self._raw_data['premise'].str.len().max(),
+                                          self._raw_data['hypothesis'].str.len().max())
         }
         return analyze_dict
 
