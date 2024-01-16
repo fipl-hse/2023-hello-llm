@@ -1,0 +1,321 @@
+{
+  "Helsinki-NLP/opus-mt-en-fr": {
+    "input_shape": [
+      1,
+      512
+    ],
+    "embedding_size": 512,
+    "output_shape": [
+      1,
+      512,
+      59514
+    ],
+    "num_trainable_params": 184937472,
+    "vocab_size": 59514,
+    "size": 422420480,
+    "max_context_length": 512
+  },
+  "Helsinki-NLP/opus-mt-ru-en": {
+    "input_shape": [
+      1,
+      512
+    ],
+    "embedding_size": 512,
+    "output_shape": [
+      1,
+      512,
+      62518
+    ],
+    "num_trainable_params": 191089664,
+    "vocab_size": 62518,
+    "size": 434724864,
+    "max_context_length": 512
+  },
+  "Helsinki-NLP/opus-mt-ru-es": {
+    "input_shape": [
+      1,
+      512
+    ],
+    "embedding_size": 512,
+    "output_shape": [
+      1,
+      512,
+      63430
+    ],
+    "num_trainable_params": 192957440,
+    "vocab_size": 63430,
+    "size": 438460416,
+    "max_context_length": 512
+  },
+  "t5-small": {
+    "input_shape": [
+      1,
+      512
+    ],
+    "embedding_size": 512,
+    "output_shape": [
+      1,
+      512,
+      32128
+    ],
+    "num_trainable_params": 128736512,
+    "vocab_size": 32128,
+    "size": 307824640,
+    "max_context_length": 20
+  },
+  "VMware/electra-small-mrqa": {
+    "input_shape": {
+      "input_ids": [
+        1,
+        512
+      ],
+      "attention_mask": [
+        1,
+        512
+      ]
+    },
+    "embedding_size": 512,
+    "output_shape": [
+      1,
+      512,
+      256
+    ],
+    "num_trainable_params": 13483008,
+    "vocab_size": 30522,
+    "size": 53932032,
+    "max_context_length": 20
+  },
+  "timpal0l/mdeberta-v3-base-squad2": {
+    "input_shape": {
+      "input_ids": [
+        1,
+        512
+      ],
+      "attention_mask": [
+        1,
+        512
+      ]
+    },
+    "embedding_size": 512,
+    "output_shape": [
+      1,
+      512,
+      768
+    ],
+    "num_trainable_params": 278218752,
+    "vocab_size": 251000,
+    "size": 1111302144,
+    "max_context_length": 20
+  },
+  "cointegrated/rubert-tiny2-cedr-emotion-detection": {
+    "input_shape": {
+      "input_ids": [
+        1,
+        2048
+      ],
+      "attention_mask": [
+        1,
+        2048
+      ]
+    },
+    "embedding_size": 2048,
+    "output_shape": [
+      1,
+      312
+    ],
+    "num_trainable_params": 29193768,
+    "vocab_size": 83828,
+    "size": 116775072,
+    "max_context_length": 20
+  },
+  "cointegrated/rubert-base-cased-nli-threeway": {
+    "input_shape": {
+      "input_ids": [
+        1,
+        512
+      ],
+      "attention_mask": [
+        1,
+        512
+      ]
+    },
+    "embedding_size": 512,
+    "output_shape": [
+      1,
+      768
+    ],
+    "num_trainable_params": 177853440,
+    "vocab_size": 119547,
+    "size": 711413760,
+    "max_context_length": 20
+  },
+  "cointegrated/rubert-tiny-bilingual-nli": {
+    "input_shape": {
+      "input_ids": [
+        1,
+        512
+      ],
+      "attention_mask": [
+        1,
+        512
+      ]
+    },
+    "embedding_size": 512,
+    "output_shape": [
+      1,
+      312
+    ],
+    "num_trainable_params": 11784168,
+    "vocab_size": 29564,
+    "size": 47136672,
+    "max_context_length": 20
+  },
+  "cross-encoder/qnli-distilroberta-base": {
+    "input_shape": {
+      "input_ids": [
+        1,
+        514
+      ],
+      "attention_mask": [
+        1,
+        514
+      ]
+    },
+    "embedding_size": 514,
+    "output_shape": [
+      1,
+      768
+    ],
+    "num_trainable_params": 82118400,
+    "vocab_size": 50265,
+    "size": 328473600,
+    "max_context_length": 20
+  },
+  "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli": {
+    "input_shape": {
+      "input_ids": [
+        1,
+        512
+      ],
+      "attention_mask": [
+        1,
+        512
+      ]
+    },
+    "embedding_size": 512,
+    "output_shape": [
+      1,
+      512,
+      768
+    ],
+    "num_trainable_params": 183831552,
+    "vocab_size": 128100,
+    "size": 733753344,
+    "max_context_length": 20
+  },
+  "mrm8488/bert-mini2bert-mini-finetuned-cnn_daily_mail-summarization": {
+    "input_shape": [
+      1,
+      512
+    ],
+    "embedding_size": 512,
+    "output_shape": [
+      1,
+      512,
+      30522
+    ],
+    "num_trainable_params": 31240506,
+    "vocab_size": 30522,
+    "size": 124962024,
+    "max_context_length": 142
+  },
+  "nandakishormpai/t5-small-machine-articles-tag-generation": {
+    "input_shape": [
+      1,
+      512
+    ],
+    "embedding_size": 512,
+    "output_shape": [
+      1,
+      512,
+      32128
+    ],
+    "num_trainable_params": 128736512,
+    "vocab_size": 32128,
+    "size": 307824640,
+    "max_context_length": 20
+  },
+  "mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization": {
+    "input_shape": [
+      1,
+      512
+    ],
+    "embedding_size": 512,
+    "output_shape": [
+      1,
+      512,
+      30522
+    ],
+    "num_trainable_params": 77392698,
+    "vocab_size": 30522,
+    "size": 309570792,
+    "max_context_length": 142
+  },
+  "stevhliu/my_awesome_billsum_model": {
+    "input_shape": [
+      1,
+      512
+    ],
+    "embedding_size": 512,
+    "output_shape": [
+      1,
+      512,
+      32128
+    ],
+    "num_trainable_params": 128736512,
+    "vocab_size": 32128,
+    "size": 307824640,
+    "max_context_length": 20
+  },
+  "UrukHan/t5-russian-summarization": {
+    "input_shape": [
+      1,
+      768
+    ],
+    "embedding_size": 768,
+    "output_shape": [
+      1,
+      768,
+      32128
+    ],
+    "num_trainable_params": 381880704,
+    "vocab_size": 32128,
+    "size": 990311424,
+    "max_context_length": 64
+  },
+  "dmitry-vorobiev/rubert_ria_headlines": {
+    "input_shape": [
+      1,
+      512
+    ],
+    "embedding_size": 512,
+    "output_shape": [
+      1,
+      512,
+      119547
+    ],
+    "num_trainable_params": 476006907,
+    "vocab_size": 119547,
+    "size": 1904027628,
+    "max_context_length": 48
+  },
+  "aiknowyou/it-emotion-analyzer": {
+    "embedding_size": 512,
+    "input_shape": {"attention_mask": [1, 512], "input_ids": [1, 512]},
+    "max_context_length": 96,
+    "num_trainable_params": 109927680,
+    "output_shape": [1, 768],
+    "size": 439710720,
+    "vocab_size": 31102
+  }
+}
