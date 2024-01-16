@@ -1,7 +1,7 @@
 {
   "Helsinki-NLP/opus-mt-en-fr": {
     "enimai/MuST-C-fr": {
-      "bleu": 0.44352
+      "bleu": 0.44680
     }
   },
   "Helsinki-NLP/opus-mt-ru-en": {
@@ -16,7 +16,7 @@
   },
   "t5-small": {
     "RocioUrquijo/en_de": {
-      "bleu": 0.24233
+      "bleu": 0.24444
     }
   },
   "VMware/electra-small-mrqa": {
@@ -81,12 +81,12 @@
   },
   "cointegrated/rubert-tiny-bilingual-nli": {
     "terra": {
-      "accuracy": 0.58
+      "accuracy": 0.43
     }
   },
   "cross-encoder/qnli-distilroberta-base": {
     "qnli": {
-      "accuracy": 0.09
+      "accuracy": 0.91
     }
   },
   "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli": {
@@ -192,6 +192,32 @@
     "trixdade/reviews_russian": {
       "bleu": 1.87213e-05,
       "rouge": 0.0
+    }
+  },
+  "test_mrm8488/bert-mini2bert-mini-finetuned-cnn_daily_mail-summarization": {
+    "cnn_dailymail": {
+      "bleu": 0.04108,
+      "rouge": 0.23664
+    }
+  },
+  "test_Helsinki-NLP/opus-mt-en-fr": {
+    "enimai/MuST-C-fr": {
+      "bleu": 0.44680
+    }
+  },
+  "test_cointegrated/rubert-base-cased-nli-threeway": {
+    "cointegrated/nli-rus-translated-v2021": {
+      "accuracy": 0.78
+    }
+  },
+  "test_VMware/electra-small-mrqa": {
+    "starmpcc/Asclepius-Synthetic-Clinical-Notes": {
+      "squad": 5.00464
+    }
+  },
+  "test_aiknowyou/it-emotion-analyzer": {
+    "dair-ai/emotion": {
+      "f1": 0.1
     }
   }
 }
