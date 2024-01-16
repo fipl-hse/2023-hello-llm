@@ -74,12 +74,15 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         # TODO: ask about «Map target with class labels»
         # self._raw_data = self._raw_data[self._raw_data["source"].isin(["mnli"])]
         # self._raw_data = self._raw_data.loc[:, ["premise_ru", "hypothesis_ru", "label"]]
-        self._raw_data = self._raw_data.loc[self._raw_data["source"] == "mnli"]. \
-            loc[:, ["premise_ru", "hypothesis_ru", "label"]].\
-            rename(columns={
-                "premise_ru": "premise",
-                "hypothesis_ru": "hypothesis",
-                "label": "target"}, inplace=True).dropna().reset_index()
+        self._raw_data = (self._raw_data.
+                          loc[self._raw_data["source"] == "mnli"].
+                          loc[:, ["premise_ru", "hypothesis_ru", "label"]].
+                          rename(columns={
+                                "premise_ru": "premise",
+                                "hypothesis_ru": "hypothesis",
+                                "label": "target"}, inplace=True).
+                          dropna().
+                          reset_index())
 
 
 class TaskDataset(Dataset):
