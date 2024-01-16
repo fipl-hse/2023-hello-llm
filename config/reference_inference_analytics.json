@@ -1,0 +1,26 @@
+{
+  "Helsinki-NLP/opus-mt-en-fr":
+  {
+    "hello": "Bonjour.",
+    "you are the best programmer": "vous êtes le meilleur programmeur",
+    "best wishes!": "mes meilleurs vœux!"
+  },
+  "t5-small":
+  {
+    "hello": "hello hello",
+    "you are the best programmer": "Sie sind der best programmer.",
+    "best wishes!": "Vielen schönen!"
+  },
+  "Helsinki-NLP/opus-mt-ru-en":
+  {
+    "привет": "Hey.",
+    "ты лучший программист!": "You're the best programmer!",
+    "успехов тебе!": "You're lucky!"
+  },
+  "Helsinki-NLP/opus-mt-ru-es":
+  {
+    "привет": "Hola.",
+    "ты лучший программист!": "¡Eres el mejor programador!",
+    "успехов тебе!": "¡Muy bien por ti!"
+  }
+}

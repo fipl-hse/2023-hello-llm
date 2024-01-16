@@ -40,10 +40,9 @@ Datasets
    2. **Rows**: 973
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
-      2. Rename column ``report`` to ``source``.
-      3. Rename column ``summary`` to ``target``.
-      4. Reset indexes.
+      1. Rename column ``report`` to ``source``.
+      2. Rename column ``summary`` to ``target``.
+      3. Reset indexes.
 
 2. `cnn_dailymail <https://huggingface.co/datasets/cnn_dailymail>`__
 
@@ -51,14 +50,13 @@ Datasets
    2. **Rows**: 11490
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
-      2. Select ``1.0.0`` subset.
-      3. Drop columns ``id``.
-      4. Rename column ``article`` to ``source``.
-      5. Rename column ``highlights`` to ``target``.
-      6. Delete duplicates in dataset.
-      7. Remove substring ``(CNN)`` for each ``source`` row.
-      8. Reset indexes.
+      1. Select ``1.0.0`` subset.
+      2. Drop columns ``id``.
+      3. Rename column ``article`` to ``source``.
+      4. Rename column ``highlights`` to ``target``.
+      5. Delete duplicates in dataset.
+      6. Remove substring ``(CNN)`` for each ``source`` row.
+      7. Reset indexes.
 
 3. `tomasg25/scientific_lay_summarisation <https://huggingface.co/datasets/tomasg25/scientific_lay_summarisation>`__
 
@@ -66,12 +64,11 @@ Datasets
    2. **Rows**: 1376
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
-      2. Select ``plos`` subset.
-      3. Drop columns ``section_headings``, ``keywords``, ``title``, ``year``.
-      4. Rename column ``article`` to ``source``.
-      5. Rename column ``summary`` to ``target``.
-      6. Reset indexes.
+      1. Select ``plos`` subset.
+      2. Drop columns ``section_headings``, ``keywords``, ``title``, ``year``.
+      3. Rename column ``article`` to ``source``.
+      4. Rename column ``summary`` to ``target``.
+      5. Reset indexes.
 
 4. `ccdv/pubmed-summarization <https://huggingface.co/datasets/ccdv/pubmed-summarization?row=0>`__
 
@@ -79,10 +76,9 @@ Datasets
    2. **Rows**: 6658
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
-      2. Rename column ``article`` to ``source``.
-      3. Rename column ``abstract`` to ``target``.
-      4. Reset indexes.
+      1. Rename column ``article`` to ``source``.
+      2. Rename column ``abstract`` to ``target``.
+      3. Reset indexes.
 
 5. `IlyaGusev/gazeta <https://huggingface.co/datasets/IlyaGusev/gazeta>`__
 
@@ -90,11 +86,10 @@ Datasets
    2. **Rows**: 6793
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
-      2. Drop columns ``title``, ``date``, ``url``.
-      3. Rename column ``text`` to ``source``.
-      4. Rename column ``summary`` to ``target``.
-      5. Reset indexes.
+      1. Drop columns ``title``, ``date``, ``url``.
+      2. Rename column ``text`` to ``source``.
+      3. Rename column ``summary`` to ``target``.
+      4. Reset indexes.
 
 6. `d0rj/curation-corpus-ru <https://huggingface.co/datasets/d0rj/curation-corpus-ru>`__
 
@@ -102,12 +97,11 @@ Datasets
    2. **Rows**: 30454
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
-      2. Select ``train`` subset.
-      3. Drop columns ``title``, ``date``, ``url``.
-      4. Rename column ``article_content`` to ``source``.
-      5. Rename column ``summary`` to ``target``.
-      6. Reset indexes.
+      1. Select ``train`` subset.
+      2. Drop columns ``title``, ``date``, ``url``.
+      3. Rename column ``article_content`` to ``source``.
+      4. Rename column ``summary`` to ``target``.
+      5. Reset indexes.
 
 7. `CarlBrendt/Summ_Dialog_News <https://huggingface.co/datasets/CarlBrendt/Summ_Dialog_News?row=1>`__
 
@@ -115,10 +109,9 @@ Datasets
    2. **Rows**: 7609
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
-      2. Rename column ``info`` to ``source``.
-      3. Rename column ``summary`` to ``target``.
-      4. Reset indexes.
+      1. Rename column ``info`` to ``source``.
+      2. Rename column ``summary`` to ``target``.
+      3. Reset indexes.
 
 8. `trixdade/reviews_russian <https://huggingface.co/datasets/trixdade/reviews_russian>`__
 
@@ -126,11 +119,10 @@ Datasets
    2. **Rows**: 95
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
-      2. Select ``train`` subset.
-      3. Rename column ``Reviews`` to ``source``.
-      4. Rename column ``Summary`` to ``target``.
-      5. Reset indexes.
+      1. Select ``train`` subset.
+      2. Rename column ``Reviews`` to ``source``.
+      3. Rename column ``Summary`` to ``target``.
+      4. Reset indexes.
 
 
 Metrics
@@ -138,3 +130,5 @@ Metrics
 
 -  BLEU
 -  ROUGE
+
+.. note:: Use the ``rougeL`` metric.
