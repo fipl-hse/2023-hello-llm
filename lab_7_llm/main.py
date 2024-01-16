@@ -6,8 +6,6 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
-
-
 try:
     import torch
     from torch.utils.data.dataset import Dataset
