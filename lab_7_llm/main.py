@@ -6,6 +6,8 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
+from datasets import load_dataset
+
 try:
     import torch
     from torch.utils.data.dataset import Dataset
@@ -41,6 +43,10 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        dataset = load_dataset(
+            'd0rj/curation-corpus-ru',
+            name=None
+        )
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
