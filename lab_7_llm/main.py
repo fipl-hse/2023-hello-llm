@@ -30,27 +30,30 @@ from core_utils.llm.time_decorator import report_time
 
 class RawDataImporter(AbstractRawDataImporter):
     """
-    Custom implementation of data importer.
+    A class that imports the HuggingFace dataset.
     """
 
     @report_time
     def obtain(self) -> None:
         """
-        Import dataset.
+        Download a dataset.
+
+        Raises:
+            TypeError: In case of downloaded dataset is not pd.DataFrame
         """
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
-    Custom implementation of data preprocessor.
+    A class that analyzes and preprocesses a dataset.
     """
 
     def analyze(self) -> dict:
         """
-        Analyze preprocessed dataset.
+        Analyze a dataset.
 
         Returns:
-            dict: dataset key properties.
+            dict: Dataset key properties
         """
 
     @report_time
@@ -62,7 +65,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
 
 class TaskDataset(Dataset):
     """
-    Dataset with translation data.
+    A class that converts pd.DataFrame to Dataset and works with it.
     """
 
     def __init__(self, data: DataFrame) -> None:
@@ -70,7 +73,7 @@ class TaskDataset(Dataset):
         Initialize an instance of TaskDataset.
 
         Args:
-            data (pandas.DataFrame): original data.
+            data (pandas.DataFrame): Original data
         """
 
     def __len__(self) -> int:
@@ -78,7 +81,7 @@ class TaskDataset(Dataset):
         Return the number of items in the dataset.
 
         Returns:
-            int: The number of items in the dataset.
+            int: The number of items in the dataset
         """
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
@@ -92,24 +95,19 @@ class TaskDataset(Dataset):
             tuple[str, ...]: The item to be received
         """
 
-    def __iter__(self) -> Iterator:
-        """
-        Overriden iter method for static checks.
-
-        Returns:
-            Iterator: The iterator instance.
-        """
-
     @property
     def data(self) -> DataFrame:
         """
         Property with access to preprocessed DataFrame.
+
+        Returns:
+            pandas.DataFrame: Preprocessed DataFrame
         """
 
 
 class LLMPipeline(AbstractLLMPipeline):
     """
-    Translation model.
+    A class that initializes a model, analyzes its properties and infers it.
     """
 
     def __init__(
@@ -121,14 +119,14 @@ class LLMPipeline(AbstractLLMPipeline):
             device: str
     ) -> None:
         """
-        Initialize an instance of HelsinkiNLPModel.
+        Initialize an instance of LLMPipeline.
 
         Args:
-            model_name (str): The name of the pre-trained model.
-            dataset (TaskDataset): The dataset to be used for translation.
-            max_length (int): The maximum length of generated sequence.
-            batch_size (int): The size of the batch inside DataLoader.
-            device (str): The device for inference.
+            model_name (str): The name of the pre-trained model
+            dataset (TaskDataset): The dataset used
+            max_length (int): The maximum length of generated sequence
+            batch_size (int): The size of the batch inside DataLoader
+            device (str): The device for inference
         """
 
     def analyze_model(self) -> dict:
@@ -136,41 +134,47 @@ class LLMPipeline(AbstractLLMPipeline):
         Analyze model computing properties.
 
         Returns:
-            dict: properties of a model
+            dict: Properties of a model
         """
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
         """
         Infer model on a single sample.
+
+        Args:
+            sample (tuple[str, ...]): The given sample for inference with model
+
+        Returns:
+            str | None: A prediction
         """
     m
 
     @report_time
     def infer_dataset(self) -> DataFrame:
         """
-        Translate the dataset sentences.
+        Infer model on a whole dataset.
 
         Returns:
-            list[str]: A list of predictions.
+            pd.DataFrame: Data with predictions
         """
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
         """
-        Infer single batch.
+        Infer model on a single batch.
 
         Args:
-            sample_batch (Sequence[tuple[str, ...]]): batch to infer the model
+            sample_batch (Sequence[tuple[str, ...]]): Batch to infer the model
 
         Returns:
-            list[str]: model predictions as strings
+            list[str]: Model predictions as strings
         """
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
     """
-    Evaluator for comparing prediction quality using the specified metric.
+    A class that compares prediction quality using the specified metric.
     """
 
     def __init__(self, data_path: Path, metrics: Iterable[Metrics]) -> None:
@@ -178,8 +182,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Initialize an instance of Evaluator.
 
         Args:
-            data_path (pathlib.Path): Path to predictions.
-            metrics (Iterable[Metrics]): List of metrics to check.
+            data_path (pathlib.Path): Path to predictions
+            metrics (Iterable[Metrics]): List of metrics to check
         """
 
     @report_time
@@ -188,5 +192,5 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Evaluate the predictions against the references using the specified metric.
 
         Returns:
-            dict | None: A dictionary containing information about the calculated metric.
+            dict | None: A dictionary containing information about the calculated metric
         """
