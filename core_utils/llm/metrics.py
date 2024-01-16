@@ -19,4 +19,10 @@ class Metrics(enum.Enum):
     ACCURACY = 'accuracy'
 
     def __str__(self) -> str:
+        """
+        String representation of a metric.
+
+        Returns:
+             str: Name of a metric
+        """
         return self.value
