@@ -10,7 +10,3 @@ Submodules
    :show-inheritance:
    :private-members:
    :special-members: __init__, __str__, __len__, __getitem__, __iter__
-
-.. automodule:: lab_7_llm.service
-   :members:
-   :undoc-members:
