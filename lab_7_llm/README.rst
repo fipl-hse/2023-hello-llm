@@ -222,8 +222,6 @@ Stage 3.1. Implement magic methods
        which allows to get the number of items in dataset.
     2. Implement method :py:meth:`lab_7_llm.main.TaskDataset.__getitem__`
        which allows to retrieve an item from the dataset by index.
-    3. Implement method :py:meth:`lab_7_llm.main.TaskDataset.__iter__`
-       which allows to override iter method for static checks.
 
 Stage 3.2. Retrieve data
 """"""""""""""""""""""""
