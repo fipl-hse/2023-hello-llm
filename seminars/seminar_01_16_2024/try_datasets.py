@@ -3,8 +3,17 @@ HuggingFace datasets listing.
 """
 from pathlib import Path
 
-import pandas as pd
-from datasets import load_dataset
+try:
+    from pandas import DataFrame
+except ImportError:
+    print('Library "pandas" not installed. Failed to import.')
+    DataFrame = None  # type: ignore
+
+try:
+    from datasets import load_dataset
+except ImportError:
+    print('Library "datasets" not installed. Failed to import.')
+    load_dataset = None  # type: ignore
 
 
 def main() -> None:
@@ -39,7 +48,7 @@ def main() -> None:
     print(f'Obtained sberquad dataset with one call: # of samples is {len(dataset)}')
 
     # 7. Cast dataset to pandas
-    dataset_df: pd.DataFrame = subset.to_pandas()
+    dataset_df: DataFrame = subset.to_pandas()
 
     # 8. Optionally save head of dataframe
     (

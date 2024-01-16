@@ -3,7 +3,11 @@ Pandas listing.
 """
 from pathlib import Path
 
-import pandas as pd
+try:
+    from pandas import read_csv
+except ImportError:
+    print('Library "pandas" not installed. Failed to import.')
+    read_csv = None  # type: ignore
 
 
 def main() -> None:
@@ -13,7 +17,7 @@ def main() -> None:
     data_path = Path(__file__).parent / 'assets' / 'danetqa_example.csv'
 
     # 1. Load from file - in lab it is in memory from dataset.to_pandas()
-    raw_data_df = pd.read_csv(data_path, encoding='utf-8')
+    raw_data_df = read_csv(data_path, encoding='utf-8')
 
     # 2. Get number of samples
     num_samples = len(raw_data_df)
