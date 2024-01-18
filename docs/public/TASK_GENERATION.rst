@@ -72,3 +72,8 @@ Metrics
 -------
 
 -  squad
+
+.. note:: To calculate the squad metric, you need to convert the data
+          into a special structure. This structure you can find in
+          `this repository <https://github.com/huggingface/datasets>`__
+          in the ``metrics`` directory.
