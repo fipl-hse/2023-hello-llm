@@ -56,7 +56,7 @@ def run_metrics_check(
 
 class MetricCheckTest(unittest.TestCase):
     """
-    Tests tokenize function
+    Tests e2e scenario
     """
 
     @pytest.mark.lab_7_llm
