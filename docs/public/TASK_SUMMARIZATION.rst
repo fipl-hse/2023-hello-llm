@@ -14,7 +14,8 @@ Models
 | finetuned-cnn_daily_mail-summarization>`__                           |       |
 +----------------------------------------------------------------------+-------+
 | `t5-small                                                            | EN    |
-| <https://huggingface.co/Abijith/Billsum-text-summarizer-t5-small>`__ |       |
+| <https://huggingface.co/nandakishormpai/t5-small-machine-articles-   |       |
+| tag-generation>`__                                                   |       |
 +----------------------------------------------------------------------+-------+
 | `bert-small                                                          | EN    |
 | <https://huggingface.co/mrm8488/bert-small2bert-                     |       |
@@ -131,4 +132,5 @@ Metrics
 -  BLEU
 -  ROUGE
 
-.. note:: Use the ``rougeL`` metric.
+.. note:: Use the ``rougeL`` metric and set ``seed=77`` parameter
+          when loading the rouge metric.
