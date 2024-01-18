@@ -1,5 +1,5 @@
 """
-Checks that E2E scenario allows to get desired metrics values
+Checks that the service is working properly
 """
 # pylint: disable=duplicate-code
 import unittest
@@ -18,7 +18,7 @@ from lab_7_llm.service import app
 
 class WebServiceTest(unittest.TestCase):
     """
-    Tests tokenize function
+    Tests web service
     """
 
     @classmethod
@@ -31,7 +31,7 @@ class WebServiceTest(unittest.TestCase):
     @pytest.mark.mark10
     def test_e2e_ideal(self):
         """
-        Ideal tokenize scenario
+        Ideal service scenario
         """
         url = "/infer"
         input_text = "What is the capital of France?"
