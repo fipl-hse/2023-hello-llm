@@ -65,6 +65,12 @@ disable_error_code = [
 ]
 
 [[tool.mypy.overrides]]
+module = ['seminars.seminar_01_16_2024.try_iter_data', ]
+disable_error_code = [
+    'arg-type'
+]
+
+[[tool.mypy.overrides]]
 module = [
     'core_utils.llm.llm_pipeline',
     'lab_7_llm.service',
@@ -72,6 +78,14 @@ module = [
 ]
 disable_error_code = [
     'no-any-unimported'
+]
+
+[[tool.mypy.overrides]]
+module = [
+    'config.get_datasets_analytics'
+]
+disable_error_code = [
+    'import-not-found'
 ]
 
 [[tool.mypy.overrides]]
