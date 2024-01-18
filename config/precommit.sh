@@ -3,6 +3,7 @@ set -x
 echo $1
 if [[ "$1" == "smoke" ]]; then
   DIRS_TO_CHECK=(
+    "config"
     "seminars"
   )
 else
