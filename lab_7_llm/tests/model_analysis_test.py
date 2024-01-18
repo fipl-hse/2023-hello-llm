@@ -1,5 +1,5 @@
 """
-Checks that datasets gets analyzed proreprly
+Checks that the model is being analyzed correctly
 """
 import unittest
 from pathlib import Path
