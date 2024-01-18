@@ -1,5 +1,5 @@
 """
-Checks that datasets gets analyzed proreprly
+Checks the inference of the model
 """
 # pylint: disable=R0801
 import unittest
@@ -53,6 +53,6 @@ class ModelWorkingTest(unittest.TestCase):
     @pytest.mark.mark10
     def test_analyze_ideal(self):
         """
-        Ideal analyze scenario
+        Ideal inference scenario
         """
         self.assertIsNone(run_model_analysis_check(Path(__file__).parent.parent, LLMPipeline))

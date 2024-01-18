@@ -1,5 +1,5 @@
 """
-Checks that datasets gets analyzed proreprly
+Checks that the dataset is being analyzed correctly
 """
 # pylint: disable=duplicate-code, assignment-from-no-return
 import unittest
