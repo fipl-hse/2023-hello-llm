@@ -1,13 +1,18 @@
 """
 Collects and stores model analytics
 """
+# pylint: disable=import-error
 import json
 from pathlib import Path
 from typing import Any
 
-import pandas as pd
+try:
+    from pandas import DataFrame
+except ImportError:
+    print('Library "pandas" not installed. Failed to import.')
+    DataFrame = dict  # type: ignore
 
-from reference_lab_nmt.main import LLMPipeline, TaskDataset
+from reference_lab_nmt.main import LLMPipeline, TaskDataset  # type: ignore
 
 
 def get_references(path: Path) -> Any:
@@ -48,7 +53,7 @@ def main() -> None:
     references = get_references(path=references_path)
     result = {}
     for model, _ in references.items():
-        pipeline = LLMPipeline(model, TaskDataset(pd.DataFrame([])), max_length, batch_size, device)
+        pipeline = LLMPipeline(model, TaskDataset(DataFrame([])), max_length, batch_size, device)
         print(model)
         model_analysis = pipeline.analyze_model()
         result[model] = model_analysis

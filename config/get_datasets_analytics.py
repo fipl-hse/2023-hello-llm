@@ -1,15 +1,9 @@
 """
 Collects and stores dataset analytics
 """
-# pylint: disable=R0912,R0915
-# mypy: ignore-errors
+# pylint: disable=import-error, too-many-branches, too-many-statements
 from pathlib import Path
 
-from tqdm import tqdm
-
-from config.get_model_analytics import get_references, save_reference
-from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from reference_lab_classification.main import (AgNewsDataImporter, AgNewsPreprocessor,
                                                DairAiEmotionDataImporter, DairAiEmotionPreprocessor,
                                                GoEmotionsDataImporter,
@@ -42,6 +36,11 @@ from reference_lab_summarization.main import (DailymailRawDataImporter,
                                               ScientificLiteratureRawDataImporter,
                                               ScientificLiteratureRawDataPreprocessor,
                                               SummarizationRawDataImporter)
+from tqdm import tqdm
+
+from config.get_model_analytics import get_references, save_reference
+from core_utils.llm.raw_data_importer import AbstractRawDataImporter
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 
 
 def main() -> None:
@@ -54,12 +53,12 @@ def main() -> None:
 
     references = get_references(path=references_path)
 
-    datasets_to_analyze = []
+    datasets_raw = []
     for model, dataset_pack in references.items():
         for dataset_name in dataset_pack.keys():
-            datasets_to_analyze.append(dataset_name)
+            datasets_raw.append(dataset_name)
 
-    datasets_to_analyze = set(datasets_to_analyze)
+    datasets_to_analyze = set(datasets_raw)
 
     result = {}
     for dataset_name in tqdm(datasets_to_analyze):

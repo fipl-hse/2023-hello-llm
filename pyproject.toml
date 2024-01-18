@@ -82,6 +82,14 @@ disable_error_code = [
 
 [[tool.mypy.overrides]]
 module = [
+    'config.get_datasets_analytics'
+]
+disable_error_code = [
+    'import-not-found'
+]
+
+[[tool.mypy.overrides]]
+module = [
     '*.main',
     '*.main_stub',
     '*.start',
