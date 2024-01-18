@@ -26,6 +26,8 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
+from datasets import load_dataset
+import pandas as pd
 
 
 class RawDataImporter(AbstractRawDataImporter):
@@ -41,6 +43,12 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        dataset = load_dataset("HuggingFaceH4/no_robots", split='train_sft')
+        print(len(dataset))
+        pd_dts = dataset.to_pandas()
+        pd_dts = pd_dts.drop(['prompt_id', 'category'], axis=1)
+        pd_dts = pd_dts.rename(columns={'prompt': 'questions'}, inplace=False)
+        print(pd_dts.head())
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -194,3 +202,6 @@ class TaskEvaluator(AbstractTaskEvaluator):
             dict | None: A dictionary containing information about the calculated metric
         """
 
+
+importer = RawDataImporter('')
+importer.obtain()
