@@ -3,6 +3,7 @@ Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
+from datasets import load_dataset
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
@@ -41,6 +42,11 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        self._raw_data = load_dataset(
+            path="cnn_dailymail",
+            name="1.0.0",
+            split="test"
+        ).to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -55,6 +61,18 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        return {
+            "dataset_number_of_samples": self._raw_data.shape[0],
+            "dataset_columns": self._raw_data.shape[1],
+            "dataset_duplicates": self._raw_data.duplicated().sum(),
+            "dataset_empty_rows": self._raw_data.isna().sum().sum(),
+            "dataset_sample_min_len": min(len(min(self._raw_data['article'], key=len)),
+                                          len(min(self._raw_data['highlights'], key=len)),
+                                          len(min(self._raw_data['id'], key=len))),
+            "dataset_sample_max_len": max(len(max(self._raw_data['article'], key=len)),
+                                          len(max(self._raw_data['highlights'], key=len)),
+                                          len(max(self._raw_data['id'], key=len))),
+        }
 
     @report_time
     def transform(self) -> None:
@@ -83,7 +101,6 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
-
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
