@@ -21,6 +21,12 @@ except ImportError:
     print('Library "pandas" not installed. Failed to import.')
     DataFrame = dict  # type: ignore
 
+try:
+    from datasets import load_dataset
+except ImportError:
+    print('Library "datasets" not installed. Failed to import.')
+
+
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
@@ -42,6 +48,7 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        self._raw_data = DataFrame(load_dataset(self._hf_name, split='f_test'))
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -56,6 +63,15 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        rows, cols = self._raw_data.shape
+        data_droped_empty = self._raw_data.dropna()
+
+        return {'dataset_number_of_samples': rows,
+                'dataset_columns': cols,
+                'dataset_duplicates': len(self._raw_data[self._raw_data.duplicated()]),
+                'dataset_empty_rows': rows - len(data_droped_empty),
+                'dataset_sample_min_len': min(data_droped_empty['en'].str.len()),
+                'dataset_sample_max_len': max(data_droped_empty['en'].str.len())}
 
     @report_time
     def transform(self) -> None:
