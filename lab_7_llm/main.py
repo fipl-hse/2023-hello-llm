@@ -14,7 +14,6 @@ except ImportError:
     Dataset = dict
     torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
 
-
 try:
     from pandas import DataFrame
 except ImportError:
@@ -25,7 +24,6 @@ try:
     from datasets import load_dataset
 except ImportError:
     print('Library "datasets" not installed. Failed to import.')
-
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
