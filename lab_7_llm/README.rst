@@ -212,7 +212,9 @@ from ``datasets`` module.
 .. important:: In our laboratory work we are going to get predictions of the model,
                so you have to download ``validation`` or ``test`` split of the
                chosen dataset by filling the parameter ``split`` of
-               the ``load_dataset()`` function.
+               the ``load_dataset()`` function. Also for some datasets you need
+               to select a specific subset. You can always find out
+               if you need to do this in the appropriate task card.
 
 .. note:: If downloaded dataset is not ``pd.DataFrame``, method raises ``TypeError``.
 
@@ -224,7 +226,7 @@ from ``datasets`` module.
 Stage 2. Introduce preprocessor abstraction: ``RawDataPreprocessor``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Before putting the dataset into model we have to analyze and preprocess it.
+Before putting the dataset into the model we have to analyze and preprocess it.
 
 To perform all needed preprocessing and analyze your dataset
 inside your program you need to implement
@@ -332,13 +334,10 @@ To work with the model we will use PyTorch
 We convert ``pd.Dataframe`` to ``Dataset``, because in the next step
 we will use PyTorch ``DataLoader`` abstraction, which will allow us
 to efficiently load the data into the model's memory,
-process it in batches, and pass it to the model.
+process it in batches and pass it to the model.
 
 Implement :py:class:`lab_7_llm.main.TaskDataset` abstraction
-to convert ``pd.DataFrame`` to ``Dataset``,
-get the number of samples in the dataset,
-retrieve an item from the dataset by index
-and override ``iter`` method for static checks.
+to convert ``pd.DataFrame`` to ``Dataset`` and override some methods.
 
 This class inherits from ``torch.utils.data.Dataset`` abstraction,
 which has one internal attribute:
@@ -379,7 +378,7 @@ PyTorch ``DataLoader`` calls this method to retrieve data for each batch.
 Implementing this method allows you to define how the data is retrieved
 from the dataset and how it is structured.
 It should return a tuple containing the item
-from ``source`` column to be retrieved.
+from the ``source`` column to be retrieved.
 
 Stage 3.3. Retrieve data
 """"""""""""""""""""""""
@@ -393,7 +392,7 @@ Stage 4. Introduce model pipeline abstraction: ``LLMPipeline``
 Now we are ready to run our model.
 
 To initialize our model, analyze its properties,
-infer the whole dataset and one sample from it you need to implement
+infer model on the whole dataset and one sample from it you need to implement
 :py:class:`lab_7_llm.main.LLMPipeline` abstraction.
 
 This class inherits from
@@ -403,10 +402,17 @@ which has the following internal attributes:
     * ``self._model_name`` - a string with the model name;
     * ``self._model`` - the model instance;
     * ``self._dataset`` - ``Dataset`` instance;
-    * ``self._device`` - a string with a device type (``cpu``, ``cuda`` or ``mps``);
+    * ``self._device`` - a string with a device type (``cpu``);
     * ``self._tokenizer`` - the tokenizer instance suitable for your model;
     * ``self._batch_size`` - an integer with batch size;
     * ``self._max_length`` - an integer with maximum length of generated sequence.
+
+.. note:: When loading a model and tokenizer, you will import special
+          `Auto Classes <https://huggingface.co/docs/transformers/model_doc/auto>`__.
+          However, for some models and tokenizers you need to use special classes
+          that are based on the architecture of the pre-trained model.
+          You can find out which class you need to use
+          through the ``architectures`` parameter of the model ``config`` object.
 
 See the intended instantiation:
 
@@ -430,8 +436,8 @@ Method should return a dictionary with the following model properties.
 |    Name                   | Description                              | Type    |
 +===========================+==========================================+=========+
 | ``input_shape``           | Represents the dimensions of the         | ``dict``|
-|                           | input data of the model.                 | ``list``|
-|                           | In our laboratory work it contains       |         |
+|                           | input data of the model.                 | or      |
+|                           | In our laboratory work it contains       | ``list``|
 |                           | batch size and maximum context length    |         |
 |                           | of the model.                            |         |
 |                           | For example, ``"input_shape": [1, 512]`` |         |
@@ -546,9 +552,9 @@ with appropriate metrics you need to implement
 :py:class:`lab_7_llm.main.TaskEvaluator` abstraction.
 
 This class inherits from
-:py:class:`core_utils.llm.task_evaluator.AbstractTaskEvaluator` abstraction.
+:py:class:`core_utils.llm.task_evaluator.AbstractTaskEvaluator` abstraction,
+which has the following internal attributes:
 
-It has the following internal attributes:
     * ``self._metrics`` - a field of
       :py:class:`core_utils.llm.metrics.Metrics` abstraction
       with suitable metric;
@@ -560,9 +566,9 @@ See the intended instantiation:
 
     evaluator = TaskEvaluator(predictions_path, settings.parameters.metrics)
 
-where ``predictions_path`` is a string with the path to the `predictions.csv`,
+where ``predictions_path`` is a string with the path to the ``predictions.csv`` file,
 ``settings.parameters.metrics`` is the name of the suitable metric
-written in ``settings.json``.
+written in ``settings.json`` file.
 
 Stage 5.1. Evaluate model performance
 """""""""""""""""""""""""""""""""""""
@@ -573,16 +579,16 @@ which allows to evaluate the predictions against the
 references using the specified metric.
 
 .. note:: To evaluate model performance using special metric you have to use
-         `load <https://huggingface.co/docs/evaluate/main/
-         en/package_reference/loading_methods#evaluate.load>`__ method from ``evaluate`` library.
+         `load() <https://huggingface.co/docs/evaluate/main/
+         en/package_reference/loading_methods#evaluate.load>`__ method from ``evaluate`` module.
 
-.. important:: There are some additional parameters for ``Summarization`` task
+.. important:: There are some additional parameters for **Summarization** task
                which you can find in :ref:`summarization-label`.
 
 .. note:: To compute the metrics you have to use
-          `compute <https://huggingface.co/docs/datasets/v2.15.0/
+          `compute() <https://huggingface.co/docs/datasets/v2.15.0/
           en/package_reference/main_classes#datasets.Metric.compute>`__
-          method from ``evaluate`` library.
+          method from ``evaluate`` module.
 
 Stage 5.2. Demonstrate the result in ``start.py``
 """""""""""""""""""""""""""""""""""""""""""""""""
@@ -595,21 +601,21 @@ in the ``main()`` function of the ``start.py`` module.
 .. important:: Set parameter ``batch_size`` = 64.
 
 .. note:: After dataset inference you have to save
-          you predictions to ``predictions.csv`` in ``start.py``.
+          you predictions to ``predictions.csv`` file in ``start.py``.
 
 Stage 6. Implement Model as a Service
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The next step after making an LLM pipeline is the implementation
-of a **FastAPI** service utilizing Transformers
+of a `FastAPI <https://fastapi.tiangolo.com/>`__ service utilizing Transformers
 for the chosen task. Implementing a service allows
 to see how LLMs can be deployed and integrated into practical applications.
 
-.. note:: For example, if you have chosen the NMT task,
+.. note:: For example, if you have chosen the **NMT** task,
           your service should accept sentence in one language
           and return translated sentence.
 
-.. important:: All logic should be implemented in the module ``service.py``
+.. important:: All logic should be implemented in the ``service.py`` module.
 
 Stage 6.1. Initialize core application
 """"""""""""""""""""""""""""""""""""""
@@ -620,7 +626,7 @@ which allows to initialize all needed
 instances for pipeline and web-service.
 
 .. important:: Remember, you have to implement your service using
-              `FastAPI <https://fastapi.tiangolo.com/>`__ web framework.
+              ``FastAPI`` web framework.
 
 Stage 6.2. Make root endpoint
 """""""""""""""""""""""""""""
@@ -634,11 +640,11 @@ where start web page with user interface for the service will be located.
 Some important points:
 
     * Your start page should be made using
-      `Jinja <https://jinja.palletsprojects.com/en/3.1.x/>`__ templating engine.
+      `Jinja <https://jinja.palletsprojects.com/en/3.1.x/>`__ templating engine;
     * The request from the HTML page must be performed
-      using `JavaScript <https://learn.javascript.ru/>`__.
+      using `JavaScript <https://learn.javascript.ru/>`__;
     * The code should be written in the ``assets/main.js`` file
-      which you should import into the ``assets/index.html`` file.
+      which you should import into the ``assets/index.html`` file;
     * CSS markup should be put in the ``assets/styles.css``.
 
 The code of the request should be placed inside
@@ -648,12 +654,12 @@ Specifically, you should call the asynchronous
 
 Fill the ``options`` parameter of ``fetch`` method with properties:
 
-    * ``method`` - corresponding to the one in FastAPI
-    * ``headers`` - appropriate for sending JSON
-    * ``body`` - containing a JSON request as a string
+    * ``method`` - corresponding to the one in ``FastAPI``;
+    * ``headers`` - appropriate for sending ``JSON``;
+    * ``body`` - containing a ``JSON`` request as a string.
 
-The request's JSON structure should match the
-expected format in your FastAPI service
+The request's ``JSON`` structure should match the
+expected format in your ``FastAPI`` service
 so that the query can be correctly processed.
 
 Example of the start page:
@@ -670,19 +676,16 @@ When a user clicks the button on the start page,
 a POST request must be initiated to the main endpoint
 which is responsible for processing the data using LLM pipeline.
 
-Implement method
-which allows to create a main endpoint for model call.
+Implement method which allows to create a main endpoint for model call.
 
 To be able to make a query in an ``entry field``
 you need to implement a class abstraction
-with the field ``question``
-which contains text of the query.
+with the field ``question`` which contains text of the query.
 
 Response obtained as a result of the pipeline
 will be displayed in the ``output field``.
 Response should be in the form of the **dictionary**
-with the key ``infer`` and
-the value containing response.
+with the key ``infer`` and the value containing response.
 
 .. note:: Use ``@app.post("/infer")`` decorator to create a route for the
           main endpoint URL.
@@ -693,8 +696,6 @@ Stage 6.3. Demonstrate the result
 .. important:: **Stage 6** is required to get the mark **10**.
 
 Demonstrate work of your service by running server
-implemented in ``service.py`` module
-and obtaining one sample inference result.
+implemented in ``service.py`` module and obtaining one sample inference result.
 
-.. note:: You can run you server using command:
-          ``uvicorn PATH:app --reload``.
+.. note:: You can run you server using ``uvicorn PATH:app --reload`` command.

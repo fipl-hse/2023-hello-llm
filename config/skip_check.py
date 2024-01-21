@@ -1,6 +1,7 @@
 """
-Checking whether PR author is admin or not
+Check whether PR author is admin or not.
 """
+
 import sys
 from pathlib import Path
 from typing import Optional
@@ -13,7 +14,7 @@ from config.constants import PROJECT_ROOT
 
 class ArgumentParser(Tap):
     """
-    Types for the argument parser
+    Types for the argument parser.
     """
     pr_name: Optional[str] = None
     pr_author: Optional[str] = None
@@ -22,7 +23,7 @@ class ArgumentParser(Tap):
 
 def main() -> None:
     """
-    Entrypoint for checking if PR has skip in name
+    Entrypoint for checking if PR has skip in name.
     """
     args = ArgumentParser().parse_args()
 
