@@ -1,10 +1,17 @@
 """
-Collects and stores dataset analytics
+Collect and store dataset analytics.
 """
-# pylint: disable=import-error, too-many-branches, too-many-statements
+# pylint: disable=import-error, too-many-branches, too-many-statements, wrong-import-order
+import sys
 from pathlib import Path
 
-from reference_lab_classification.main import (AgNewsDataImporter, AgNewsPreprocessor,
+from tqdm import tqdm
+
+from config.get_model_analytics import get_references, save_reference
+from core_utils.llm.raw_data_importer import AbstractRawDataImporter
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+
+from reference_lab_classification.main import (AgNewsDataImporter, AgNewsPreprocessor,  # isort:skip
                                                DairAiEmotionDataImporter, DairAiEmotionPreprocessor,
                                                GoEmotionsDataImporter,
                                                GoEmotionsRawDataPreprocessor, ImdbDataImporter,
@@ -13,19 +20,20 @@ from reference_lab_classification.main import (AgNewsDataImporter, AgNewsPreproc
                                                LanguageIdentificationPreprocessor,
                                                RuGoEmotionsRawDataPreprocessor, RuGoRawDataImporter,
                                                WikiToxicDataImporter, WikiToxicRawDataPreprocessor)
-from reference_lab_generation.main import (ClinicalNotesRawDataImporter,
+from reference_lab_generation.main import (ClinicalNotesRawDataImporter,  # isort:skip
                                            ClinicalNotesRawDataPreprocessor,
                                            DollyClosedRawDataImporter,
                                            DollyClosedRawDataPreprocessor, NoRobotsRawDataImporter,
                                            NoRobotsRawDataPreprocessor)
-from reference_lab_nli.main import (DatasetTypes, GlueDataImporter, NliDataPreprocessor,
+from reference_lab_nli.main import (DatasetTypes, GlueDataImporter,  # isort:skip
+                                    NliDataPreprocessor,
                                     NliRusDataImporter, NliRusTranslatedDataPreprocessor,
                                     QnliDataPreprocessor, RussianSuperGlueDataImporte,
                                     XnliDataImporter)
-from reference_lab_nmt.helpers import (EnDeRawDataPreprocessor, RuEnRawDataImporter,
+from reference_lab_nmt.helpers import (EnDeRawDataPreprocessor, RuEnRawDataImporter,  # isort:skip
                                        RuEnRawDataPreprocessor, RuEsRawDataPreprocessor)
-from reference_lab_nmt.main import RawDataImporter, RawDataPreprocessor
-from reference_lab_summarization.main import (DailymailRawDataImporter,
+from reference_lab_nmt.main import RawDataImporter, RawDataPreprocessor  # isort:skip
+from reference_lab_summarization.main import (DailymailRawDataImporter,  # isort:skip
                                               DailymailRawDataPreprocessor,
                                               GovReportRawDataPreprocessor,
                                               PubMedRawDataPreprocessor, RuCorpusRawDataImporter,
@@ -36,18 +44,13 @@ from reference_lab_summarization.main import (DailymailRawDataImporter,
                                               ScientificLiteratureRawDataImporter,
                                               ScientificLiteratureRawDataPreprocessor,
                                               SummarizationRawDataImporter)
-from tqdm import tqdm
 
-from config.get_model_analytics import get_references, save_reference
-from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 
 
 def main() -> None:
     """
     Run the collect dataset analytics.
     """
-
     references_path = Path(__file__).parent / 'reference_scores.json'
     dest = Path(__file__).parent / 'reference_dataset_analytics.json'
 
@@ -112,27 +115,24 @@ def main() -> None:
             importer = RawDataImporter(dataset_name)
         importer.obtain()
 
+        if importer.raw_data is None:
+            print('Raw data is empty')
+            sys.exit(1)
         preprocessor: AbstractRawDataPreprocessor
         if dataset_name == 'OxAISH-AL-LLM/wiki_toxic':
-            preprocessor = WikiToxicRawDataPreprocessor(
-                importer.raw_data)
+            preprocessor = WikiToxicRawDataPreprocessor(importer.raw_data)
         elif dataset_name == 'go_emotions':
-            preprocessor = GoEmotionsRawDataPreprocessor(
-                importer.raw_data)
+            preprocessor = GoEmotionsRawDataPreprocessor(importer.raw_data)
         elif dataset_name == 'seara/ru_go_emotions':
-            preprocessor = RuGoEmotionsRawDataPreprocessor(
-                importer.raw_data)
+            preprocessor = RuGoEmotionsRawDataPreprocessor(importer.raw_data)
         elif dataset_name == 'imdb':
-            preprocessor = ImdbDataPreprocessor(
-                importer.raw_data)
+            preprocessor = ImdbDataPreprocessor(importer.raw_data)
         elif dataset_name == 'dair-ai/emotion':
-            preprocessor = DairAiEmotionPreprocessor(
-                importer.raw_data)
+            preprocessor = DairAiEmotionPreprocessor(importer.raw_data)
         elif dataset_name == 'ag_news':
             preprocessor = AgNewsPreprocessor(importer.raw_data)
         elif dataset_name == 'papluca/language-identification':
-            preprocessor = LanguageIdentificationPreprocessor(
-                importer.raw_data)
+            preprocessor = LanguageIdentificationPreprocessor(importer.raw_data)
         elif dataset_name == 'lionelchg/dolly_closed_qa':
             preprocessor = DollyClosedRawDataPreprocessor(importer.raw_data)
         elif dataset_name == 'starmpcc/Asclepius-Synthetic-Clinical-Notes':
@@ -144,8 +144,7 @@ def main() -> None:
                               DatasetTypes.TERRA.value):
             preprocessor = NliDataPreprocessor(importer.raw_data)
         elif dataset_name == DatasetTypes.NLI_RUS.value:
-            preprocessor = NliRusTranslatedDataPreprocessor(
-                importer.raw_data)
+            preprocessor = NliRusTranslatedDataPreprocessor(importer.raw_data)
         elif dataset_name == DatasetTypes.QNLI.value:
             preprocessor = QnliDataPreprocessor(importer.raw_data)
         elif dataset_name == 'ccdv/pubmed-summarization':
