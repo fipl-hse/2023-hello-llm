@@ -1,5 +1,5 @@
 """
-Runner for generating and auto-formatting stubs
+Runner for generating and auto-formatting stubs.
 """
 
 import sys
@@ -11,7 +11,11 @@ from config.generate_stubs.generator import ArgumentParser, NoDocStringForAMetho
 
 def remove_implementation(source_code_path: Path, res_stub_path: Path) -> None:
     """
-    Wrapper for implementation removal from a listing
+    Wrapper for implementation removal from a listing.
+
+    Args:
+        source_code_path (Path): Path to source code
+        res_stub_path (Path): Path to resulting stub
     """
     stub_generator_path = Path(__file__).parent / 'generator.py'
     args = [
@@ -29,7 +33,10 @@ def remove_implementation(source_code_path: Path, res_stub_path: Path) -> None:
 
 def format_stub_file(res_stub_path: Path) -> None:
     """
-    Autoformatting resulting stub
+    Autoformat resulting stub.
+
+    Args:
+        res_stub_path (Path): Path to resulting path
     """
     args = [
         '-m',
@@ -45,7 +52,10 @@ def format_stub_file(res_stub_path: Path) -> None:
 
 def sort_stub_imports(res_stub_path: Path) -> None:
     """
-    Autoformatting resulting stub
+    Autoformat resulting stub.
+
+    Args:
+        res_stub_path (Path): Path to resulting stub
     """
     args = [
         str(res_stub_path)
@@ -57,7 +67,7 @@ def sort_stub_imports(res_stub_path: Path) -> None:
 
 def main() -> None:
     """
-    Entrypoint for stub generation
+    Entrypoint for stub generation.
     """
     args = ArgumentParser().parse_args()
 

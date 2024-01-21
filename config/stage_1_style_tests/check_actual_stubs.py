@@ -1,5 +1,5 @@
 """
-Checks the relevance of stubs
+Check the relevance of stubs.
 """
 
 import sys
@@ -13,7 +13,13 @@ from config.project_config import ProjectConfig
 
 def get_code(code_path: Path) -> str:
     """
-    Gets clear code from file
+    Get clear code from file.
+
+    Args:
+        code_path (Path): Path to file with code
+
+    Returns:
+        str: Clear code
     """
     with code_path.open(encoding='utf-8') as file:
         code_text = file.read()
@@ -22,7 +28,10 @@ def get_code(code_path: Path) -> str:
 
 def clear_examples(lab_path: Path) -> None:
     """
-    Cleans temp files
+    Clean temp files.
+
+    Args:
+        lab_path (Path): Path to temp files
     """
     example_main_stub_path = lab_path / 'example_main_stub.py'
     example_start_stub_path = lab_path / 'example_start_stub.py'
@@ -32,7 +41,7 @@ def clear_examples(lab_path: Path) -> None:
 
 def main() -> None:
     """
-    Checks the relevance of stubs
+    Check the relevance of stubs.
     """
     project_config = ProjectConfig(PROJECT_CONFIG_PATH)
     labs_paths = project_config.get_labs_paths()
