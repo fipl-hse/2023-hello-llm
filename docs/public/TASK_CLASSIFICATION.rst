@@ -10,7 +10,7 @@ Models
 | Model                                                               | Lang |
 +=====================================================================+======+
 | `cointegrated/rubert-tiny-toxicity <https                           | EN   |
-| ://huggingface.co/cointegrated/rubert-tiny-toxicityr>`__            |      |
+| ://huggingface.co/cointegrated/rubert-tiny-toxicity>`__             |      |
 +---------------------------------------------------------------------+------+
 | `cointegrated/rubert-tiny2-cedr-emotion-detection <https://hugging  | RU   |
 | face.co/cointegrated/rubert-tiny2-cedr-emotion-detection>`__        |      |
@@ -40,7 +40,7 @@ Datasets
       1. Drop column ``id``.
       2. Rename column ``label`` to ``target``.
       3. Rename column ``comment_text`` to ``source``.
-      4. Reset indexes
+      4. Reset indexes.
 
 2. `seara/ru_go_emotions <https://huggingface.co/datasets/seara/ru_go_emotions>`__
 
@@ -66,7 +66,7 @@ Datasets
       1. Rename column ``labels`` to ``target``.
       2. Rename column ``text`` to ``source``.
       3. Map language abbreviation to label classes.
-      4. Reset indexes
+      4. Reset indexes.
 
 4. `ag_news <https://huggingface.co/datasets/ag_news>`__
 
@@ -76,7 +76,7 @@ Datasets
 
       1. Rename column ``label`` to ``target``.
       2. Rename column ``text`` to ``source``.
-      3. Reset indexes
+      3. Reset indexes.
 
 5. `imdb <https://huggingface.co/datasets/imdb>`__
 
@@ -86,7 +86,7 @@ Datasets
 
       1. Rename column ``labels`` to ``target``.
       2. Rename column ``text`` to ``source``.
-      3. Reset indexes
+      3. Reset indexes.
 
 6. `dair-ai/emotion <https://huggingface.co/datasets/dair-ai/emotion>`__
 
@@ -97,7 +97,7 @@ Datasets
       1. Select ``split`` subset.
       2. Rename column ``label`` to ``target``.
       3. Rename column ``text`` to ``source``.
-      4. Reset indexes
+      4. Reset indexes.
 
 Metrics
 -------
