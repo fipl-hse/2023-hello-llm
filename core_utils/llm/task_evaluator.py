@@ -1,6 +1,7 @@
 """
 Module with description of abstract task evaluator.
 """
+
 # pylint: disable=too-few-public-methods, duplicate-code
 from abc import ABC, abstractmethod
 from typing import Iterable
