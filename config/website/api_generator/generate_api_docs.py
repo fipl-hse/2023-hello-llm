@@ -20,11 +20,10 @@ def generate_api_docs(labs_paths: list[Path],
     source_code_root/lab_name/lab_name.api.rst.
 
     Args:
-        labs_paths:
-        apidoc_templates_path:
-        overwrite:
+        labs_paths (list[Path]): Paths to labs
+        apidoc_templates_path (Path): Path to apidoc templates
+        overwrite (bool): Overwrite
     """
-
     for lab_path in labs_paths:
         lab_api_doc_path = lab_path
 
