@@ -10,10 +10,10 @@
     "HuggingFaceH4/no_robots": {
         "dataset_columns": 4,
         "dataset_duplicates": 0,
-        "dataset_empty_rows": 0,
+        "dataset_empty_rows": 1,
         "dataset_number_of_samples": 9500,
         "dataset_sample_max_len": 14005,
-        "dataset_sample_min_len": 136
+        "dataset_sample_min_len": 13
     },
     "IlyaGusev/gazeta": {
         "dataset_columns": 5,
@@ -77,7 +77,7 @@
         "dataset_empty_rows": 0,
         "dataset_number_of_samples": 19647,
         "dataset_sample_max_len": 1109,
-        "dataset_sample_min_len": 5
+        "dataset_sample_min_len": 2
     },
     "d0rj/curation-corpus-ru": {
         "dataset_columns": 5,
@@ -117,7 +117,7 @@
         "dataset_empty_rows": 0,
         "dataset_number_of_samples": 89,
         "dataset_sample_max_len": 8851,
-        "dataset_sample_min_len": 129
+        "dataset_sample_min_len": 15
     },
     "mnli": {
         "dataset_columns": 4,
@@ -125,7 +125,7 @@
         "dataset_empty_rows": 0,
         "dataset_number_of_samples": 9815,
         "dataset_sample_max_len": 967,
-        "dataset_sample_min_len": 9
+        "dataset_sample_min_len": 4
     },
     "nuvocare/Ted2020_en_es_fr_de_it_ca_pl_ru_nl": {
         "dataset_columns": 8,
@@ -149,7 +149,7 @@
         "dataset_empty_rows": 0,
         "dataset_number_of_samples": 5463,
         "dataset_sample_max_len": 1136,
-        "dataset_sample_min_len": 32
+        "dataset_sample_min_len": 4
     },
     "seara/ru_go_emotions": {
         "dataset_columns": 4,
@@ -173,7 +173,7 @@
         "dataset_empty_rows": 0,
         "dataset_number_of_samples": 158114,
         "dataset_sample_max_len": 5830,
-        "dataset_sample_min_len": 695
+        "dataset_sample_min_len": 25
     },
     "terra": {
         "dataset_columns": 4,
@@ -181,7 +181,7 @@
         "dataset_empty_rows": 0,
         "dataset_number_of_samples": 307,
         "dataset_sample_max_len": 717,
-        "dataset_sample_min_len": 39
+        "dataset_sample_min_len": 12
     },
     "tomasg25/scientific_lay_summarisation": {
         "dataset_columns": 6,
@@ -205,6 +205,6 @@
         "dataset_empty_rows": 0,
         "dataset_number_of_samples": 2490,
         "dataset_sample_max_len": 310,
-        "dataset_sample_min_len": 16
+        "dataset_sample_min_len": 8
     }
 }
