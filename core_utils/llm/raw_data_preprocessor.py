@@ -1,6 +1,7 @@
 """
 Module with description of abstract raw data preprocessor.
 """
+
 # pylint: disable=duplicate-code
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -17,7 +18,6 @@ class ColumnNames(Enum):
     """
     Column names for preprocessed DataFrame.
     """
-
     SOURCE_NLI = ['premise', 'hypothesis']
     SOURCE = 'source'
     TARGET = 'target'
