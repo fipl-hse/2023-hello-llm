@@ -1,6 +1,7 @@
 """
 Settings manager.
 """
+
 # pylint: disable=no-name-in-module
 from pathlib import Path
 
@@ -32,14 +33,15 @@ class LabSettings:
     """
     Main model for working with settings.
     """
+    # Labs settings
     _dto: LabSettingsModel
 
     def __init__(self, config_path: Path) -> None:
         """
-        Initialize lab settings.
+        Initialize LabSettings.
 
         Args:
-            config_path (Path): Configuration
+            config_path (Path): Path to configuration
         """
         super().__init__()
         with config_path.open(encoding='utf-8') as config_file:

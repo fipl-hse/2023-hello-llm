@@ -1,3 +1,7 @@
+"""
+Module for processing lint output and determining whether lint level is passed.
+"""
+
 # pylint: skip-file
 import argparse
 import re
@@ -5,6 +9,15 @@ import sys
 
 
 def transform_score_into_lint(target_score: int) -> int:
+    """
+    Transform target score into lint.
+
+    Args:
+         target_score (int): Desired score
+
+    Returns:
+        int: Lint score
+    """
     if target_score == 10 or target_score == 8:
         return 10
     elif target_score == 6:
@@ -16,6 +29,16 @@ def transform_score_into_lint(target_score: int) -> int:
 
 
 def is_passed(lint_output: str, target_lint_level: int) -> int:
+    """
+    Determine whether lint level is passed.
+
+    Args:
+        lint_output (str): Lint output
+        target_lint_level (int): Lint score
+
+    Returns:
+        int: Lint check passed or not
+    """
     if not lint_output:
         return 0
 
