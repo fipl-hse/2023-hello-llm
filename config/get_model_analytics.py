@@ -1,6 +1,7 @@
 """
-Collects and stores model analytics
+Collect and store model analytics.
 """
+
 # pylint: disable=import-error
 import json
 from pathlib import Path
@@ -17,7 +18,13 @@ from reference_lab_nmt.main import LLMPipeline, TaskDataset  # type: ignore
 
 def get_references(path: Path) -> Any:
     """
-    Load reference_scores.json file
+    Load reference_scores.json file.
+
+    Args:
+        path (Path): Path to file
+
+    Returns:
+        Any: File content
     """
     with open(path, encoding='utf-8') as file:
         return json.load(file)
@@ -25,7 +32,11 @@ def get_references(path: Path) -> Any:
 
 def save_reference(path: Path, refs: dict) -> None:
     """
-    Save analytics
+    Save analytics.
+
+    Args:
+        path (Path): Path to file with analytics
+        refs (dict): Model analysis for models
     """
     with open(path, mode='w', encoding='utf-8') as file:
         json.dump(
@@ -41,7 +52,7 @@ def save_reference(path: Path, refs: dict) -> None:
 
 def main() -> None:
     """
-    Run the collect models analytics.
+    Run collected models analytics.
     """
     batch_size = 64
     max_length = 120
