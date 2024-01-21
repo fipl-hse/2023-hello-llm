@@ -6,30 +6,30 @@ Summarization
 Models
 ------
 
-+----------------------------------------------------------------------+-------+
-| Model                                                                | Lang  |
-+======================================================================+=======+
-| `bert-mini                                                           | EN    |
-| <https://huggingface.co/mrm8488/bert-mini2bert-mini-                 |       |
-| finetuned-cnn_daily_mail-summarization>`__                           |       |
-+----------------------------------------------------------------------+-------+
-| `t5-small                                                            | EN    |
-| <https://huggingface.co/nandakishormpai/t5-small-machine-articles-   |       |
-| tag-generation>`__                                                   |       |
-+----------------------------------------------------------------------+-------+
-| `bert-small                                                          | EN    |
-| <https://huggingface.co/mrm8488/bert-small2bert-                     |       |
-| small-finetuned-cnn_daily_mail-summarization>`__                     |       |
-+----------------------------------------------------------------------+-------+
-| `t5-small                                                            | RU    |
-| <https://huggingface.co/stevhliu/my_awesome_billsum_model>`__        |       |
-+----------------------------------------------------------------------+-------+
-| `t5-russian                                                          | RU    |
-| <https://huggingface.co/UrukHan/t5-russian-summarization>`__         |       |
-+----------------------------------------------------------------------+-------+
-| `rubert                                                              | RU    |
-| <https://huggingface.co/dmitry-vorobiev/rubert_ria_headlines>`__     |       |
-+----------------------------------------------------------------------+-------+
++-----------------------------------------------------------------------+-------+
+| Model                                                                 | Lang  |
++=======================================================================+=======+
+| `mrm8488/bert-mini2bert-mini-finetuned-cnn_daily_mail-summarization   | EN    |
+| <https://huggingface.co/mrm8488/bert-mini2bert-mini-                  |       |
+| finetuned-cnn_daily_mail-summarization>`__                            |       |
++-----------------------------------------------------------------------+-------+
+| `nandakishormpai/t5-small-machine-articles-tag-generation             | EN    |
+| <https://huggingface.co/nandakishormpai                               |       |
+| /t5-small-machine-articles-tag-generation>`__                         |       |
++-----------------------------------------------------------------------+-------+
+| `mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization | EN    |
+| <https://huggingface.co/mrm8488/bert-small2bert-                      |       |
+| small-finetuned-cnn_daily_mail-summarization>`__                      |       |
++-----------------------------------------------------------------------+-------+
+| `stevhliu/my_awesome_billsum_model                                    | RU    |
+| <https://huggingface.co/stevhliu/my_awesome_billsum_model>`__         |       |
++-----------------------------------------------------------------------+-------+
+| `UrukHan/t5-russian-summarization                                     | RU    |
+| <https://huggingface.co/UrukHan/t5-russian-summarization>`__          |       |
++-----------------------------------------------------------------------+-------+
+| `dmitry-vorobiev/rubert_ria_headlines                                 | RU    |
+| <https://huggingface.co/dmitry-vorobiev/rubert_ria_headlines>`__      |       |
++-----------------------------------------------------------------------+-------+
 
 
 Datasets

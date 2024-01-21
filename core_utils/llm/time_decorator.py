@@ -1,6 +1,7 @@
 """
 Module with decorator for logging time spends.
 """
+
 import logging
 import time
 from typing import Any, Callable
