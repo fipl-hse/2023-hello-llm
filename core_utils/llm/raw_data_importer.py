@@ -1,6 +1,7 @@
 """
 Module with description of abstract data importer.
 """
+
 # pylint: disable=duplicate-code
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -16,7 +17,6 @@ class AbstractRawDataImporter(ABC):
     """
     Abstract Raw Data Importer.
     """
-
     #: A path to dataset
     _local_path: Path | None
 
