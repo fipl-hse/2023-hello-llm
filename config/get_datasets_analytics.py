@@ -25,7 +25,8 @@ from reference_lab_generation.main import (ClinicalNotesRawDataImporter,  # isor
                                            DollyClosedRawDataImporter,
                                            DollyClosedRawDataPreprocessor, NoRobotsRawDataImporter,
                                            NoRobotsRawDataPreprocessor)
-from reference_lab_nli.main import (DatasetTypes, GlueDataImporter, NliDataPreprocessor,  # isort:skip
+from reference_lab_nli.main import (DatasetTypes, GlueDataImporter,  # isort:skip
+                                    NliDataPreprocessor,
                                     NliRusDataImporter, NliRusTranslatedDataPreprocessor,
                                     QnliDataPreprocessor, RussianSuperGlueDataImporte,
                                     XnliDataImporter)
