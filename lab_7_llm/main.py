@@ -46,7 +46,7 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = DataFrame(load_dataset(self._hf_name, split='f_test'))
+        self._raw_data = DataFrame(load_dataset(self._hf_name, split='if_test'))
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -68,8 +68,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
                 'dataset_columns': cols,
                 'dataset_duplicates': len(self._raw_data[self._raw_data.duplicated()]),
                 'dataset_empty_rows': rows - len(data_droped_empty),
-                'dataset_sample_min_len': min(data_droped_empty['ru'].str.len()) + 1,
-                'dataset_sample_max_len': max(data_droped_empty['ru'].str.len()) + 1}
+                'dataset_sample_min_len': min(data_droped_empty['ru'].str.len()),
+                'dataset_sample_max_len': max(data_droped_empty['ru'].str.len())}
 
     @report_time
     def transform(self) -> None:
