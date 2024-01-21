@@ -1,6 +1,7 @@
 """
-Helper for reference results
+Helper for reference results.
 """
+
 # pylint: disable=too-few-public-methods
 import json
 from enum import Enum
@@ -9,9 +10,8 @@ from pathlib import Path
 
 class ReferenceAnalysisScoresType(Enum):
     """
-    Type for analysis
+    Type for analysis.
     """
-
     MODEL = 'model'
     DATASET = 'dataset'
     INFERENCE = 'inference'
@@ -24,7 +24,7 @@ class ReferenceScores:
 
     def __init__(self) -> None:
         """
-        Initialize lab settings.
+        Initialize ReferenceScores.
         """
         config_path = Path(__file__).parent / 'reference_scores.json'
 
@@ -39,6 +39,9 @@ class ReferenceScores:
             model (str): Model
             dataset (str): Dataset
             metric (str): Metric
+
+        Returns:
+            float: Reference result
         """
         return float(self._dto[model][dataset][metric])
 
@@ -52,7 +55,10 @@ class ReferenceAnalysisScores:
                  scores_type: ReferenceAnalysisScoresType = ReferenceAnalysisScoresType.DATASET
                  ) -> None:
         """
-        Initialize lab settings.
+        Initialize ReferenceAnalysisScores.
+
+        Args:
+            scores_type (ReferenceAnalysisScoresType): Type of score
         """
         config_path = Path(__file__).parent / f'reference_{scores_type.value}_analytics.json'
 
@@ -67,7 +73,7 @@ class ReferenceAnalysisScores:
             item (str): Dataset
 
         Returns:
-            dict[str, int]: A list of predictions.
+            dict[str, int]: A list of predictions
         """
         result: dict[str, int]
         result = self._dto[item]
