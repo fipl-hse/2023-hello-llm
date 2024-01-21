@@ -1,6 +1,7 @@
 """
 Module with description of abstract LLM pipeline.
 """
+
 # pylint: disable=too-few-public-methods, too-many-arguments, duplicate-code
 from abc import ABC, abstractmethod
 from typing import Any, Protocol
@@ -27,9 +28,9 @@ class HFModelLike(Protocol):
         Placeholder to claim HF models are callable.
 
         Args:
-             args (tuple): Arbitrary positional arguments
-             return_dict (bool): Special argument for QA models
-             kwargs (dict): Arbitrary named arguments
+            args (tuple): Arbitrary positional arguments
+            return_dict (bool): Special argument for QA models
+            kwargs (dict): Arbitrary named arguments
 
         Returns:
             Any: Custom value
