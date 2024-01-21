@@ -1,6 +1,7 @@
 """
-Generator of stubs for existing lab implementation
+Generator of stubs for existing lab implementation.
 """
+
 import ast
 from _ast import alias, stmt
 from pathlib import Path
@@ -12,14 +13,18 @@ from tap import Tap
 
 class NoDocStringForAMethodError(Exception):
     """
-    Error for a method that lacks docstring
+    Error for a method that lacks docstring.
     """
 
 
 def remove_implementation_from_function(original_declaration: ast.stmt,
                                         parent: Optional[ast.ClassDef] = None) -> None:
     """
-    Remove reference implementation
+    Remove reference implementation.
+
+    Args:
+        original_declaration (ast.stmt): Original declaration
+        parent (Optional[ast.ClassDef]): Parent
     """
     if not isinstance(original_declaration, ast.FunctionDef):
         return
@@ -49,7 +54,13 @@ def remove_implementation_from_function(original_declaration: ast.stmt,
 # pylint: disable=too-many-branches
 def cleanup_code(source_code_path: Path) -> str:
     """
-    Removing implementation based on AST parsing of code
+    Remove implementation based on AST parsing of code.
+
+    Args:
+        source_code_path (Path): Path to source code
+
+    Returns:
+        str: Implementation without AST parsing of code
     """
     with source_code_path.open(encoding='utf-8') as file:
         data = ast.parse(file.read(), source_code_path.name, type_comments=True)
@@ -133,7 +144,7 @@ def cleanup_code(source_code_path: Path) -> str:
 
 class ArgumentParser(Tap):
     """
-    Types for CLI interface of a module
+    Types for CLI interface of a module.
     """
     source_code_path: str
     target_code_path: str
@@ -141,7 +152,7 @@ class ArgumentParser(Tap):
 
 def main() -> None:
     """
-    Entrypoint for stub generation
+    Entrypoint for stub generation.
     """
     args = ArgumentParser().parse_args()
 
