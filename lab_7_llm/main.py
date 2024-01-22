@@ -36,17 +36,18 @@ class RawDataImporter(AbstractRawDataImporter):
     """
 
     @report_time
-    def obtain(self) -> None:
+    def obtain(self):
         """
         Download a dataset.
 
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        # dataset = load_dataset(
-        #     'd0rj/curation-corpus-ru',
-        #     name=None
-        # )
+        dataset = load_dataset('d0rj/curation-corpus-ru',
+                               split='train')
+        print(f'Obtained dataset with one call: # of samples is {len(dataset)}')
+
+        return dataset
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
