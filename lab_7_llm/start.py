@@ -22,6 +22,7 @@ def main() -> None:
 
     assert result is not None, "Demo does not work correctly"
 
+# Class Dataset:
 
 if __name__ == "__main__":
     main()

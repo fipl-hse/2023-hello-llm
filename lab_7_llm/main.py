@@ -45,8 +45,9 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = load_dataset('cointegrated/nli-rus-translated-v2021', split='train'). \
-            to_pandas()
+        self._raw_data = (load_dataset('cointegrated/nli-rus-translated-v2021', split='dev')
+                          .filter(lambda dataset: dataset['source'] == 'mnli')
+                          .to_pandas())
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -65,8 +66,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
                 'dataset_columns': self._raw_data.shape[1],
                 'dataset_duplicates': self._raw_data.duplicated().sum(),
                 'dataset_empty_rows': self._raw_data.isna().sum().sum(),
-                'dataset_sample_min_len': len(min(self._raw_data["premise_ru"])),
-                'dataset_sample_max_len': len(max(self._raw_data["premise_ru"]))
+                'dataset_sample_min_len': len(min(self._raw_data)),
+                'dataset_sample_max_len': len(max(self._raw_data))
                 }
 
     @report_time
@@ -109,6 +110,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+        return len(self.data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -120,6 +122,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
+        return self.data.iloc[index]
 
     @property
     def data(self) -> DataFrame:
