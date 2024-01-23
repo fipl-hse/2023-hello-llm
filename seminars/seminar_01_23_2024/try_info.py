@@ -3,7 +3,7 @@ HuggingFace model listing.
 """
 
 try:
-    from transformers import (AutoModel, AutoModelForCausalLM, AutoModelForSequenceClassification,
+    from transformers import (AutoModelForCausalLM, AutoModelForSequenceClassification,
                               BertForSequenceClassification)
 except ImportError:
     print('Library "pandas" not installed. Failed to import.')
