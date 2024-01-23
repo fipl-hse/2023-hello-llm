@@ -9,7 +9,7 @@ except ImportError:
     print('Library "pandas" not installed. Failed to import.')
 
 try:
-    from torchinfo import summary
+    from torchinfo import summary  # type: ignore
 except ImportError:
     print('Library "torchinfo" not installed. Failed to import.')
 
