@@ -1,5 +1,5 @@
 """
-Runner for collecting coverage
+Runner for collecting coverage.
 """
 
 import json
@@ -11,19 +11,25 @@ from config.lab_settings import LabSettings
 
 class CoverageRunError(Exception):
     """
-    Error for coverage collection
+    Error for coverage collection.
     """
 
 
 class CoverageCreateReportError(Exception):
     """
-    Error for report creation
+    Error for report creation.
     """
 
 
 def get_target_score(lab_path: Path) -> int:
     """
-    Get student's expectations on a final mark
+    Get student's expectations on a final mark.
+
+    Args:
+        lab_path (Path): Path to lab
+
+    Returns:
+        int: Desired score
     """
     settings = LabSettings(lab_path / 'settings.json')
     return settings.target_score
@@ -31,7 +37,13 @@ def get_target_score(lab_path: Path) -> int:
 
 def extract_percentage_from_report(report_path: Path) -> int:
     """
-    Load previous run value
+    Load previous run value.
+
+    Args:
+        report_path (Path): Path to report
+
+    Returns:
+        int: Previous run value
     """
     with report_path.open(encoding='utf-8') as f:
         content = json.load(f)
@@ -41,7 +53,15 @@ def extract_percentage_from_report(report_path: Path) -> int:
 def run_coverage_collection(lab_path: Path, artifacts_path: Path,
                             check_target_score: bool = True) -> int:
     """
-    Entrypoint for a single lab coverage collection
+    Entrypoint for a single lab coverage collection.
+
+    Args:
+        lab_path (Path): Path to lab
+        artifacts_path (Path): Path to artifacts
+        check_target_score (bool): Target score check
+
+    Returns:
+        int: Coverage percentage from report
     """
     print(f'Processing {lab_path} ...')
 

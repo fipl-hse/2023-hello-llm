@@ -1,6 +1,7 @@
 """
-Module with description of abstract llm pipeline.
+Module with description of abstract LLM pipeline.
 """
+
 # pylint: disable=too-few-public-methods, too-many-arguments, duplicate-code
 from abc import ABC, abstractmethod
 from typing import Any, Protocol
@@ -27,9 +28,12 @@ class HFModelLike(Protocol):
         Placeholder to claim HF models are callable.
 
         Args:
-             args (tuple): arbitrary positional arguments
-             return_dict (bool): special argument for QA models
-             kwargs (dict): arbitrary named arguments
+            args (tuple): Arbitrary positional arguments
+            return_dict (bool): Special argument for QA models
+            kwargs (dict): Arbitrary named arguments
+
+        Returns:
+            Any: Custom value
         """
 
 
@@ -38,10 +42,21 @@ class AbstractLLMPipeline(ABC):
     Abstract LLM Pipeline.
     """
 
+    #: Model
     _model: HFModelLike | None
 
     def __init__(self, model_name: str, dataset: Dataset, max_length: int,
-                 batch_size: int, device: str = 'cpu'):
+                 batch_size: int, device: str = 'cpu') -> None:
+        """
+        Initialize an instance of AbstractLLMPipeline.
+
+        Args:
+            model_name (str): The name of the pre-trained model.
+            dataset (torch.utils.data.dataset.Dataset): The dataset used.
+            max_length (int): The maximum length of generated sequence.
+            batch_size (int): The size of the batch inside DataLoader.
+            device (str): The device for inference.
+        """
         self._model_name = model_name
         self._model = None
         self._dataset = dataset
@@ -50,22 +65,31 @@ class AbstractLLMPipeline(ABC):
         self._device = device
 
     @abstractmethod
-    def infer_sample(self, sample: str) -> str:
+    def infer_sample(self, sample: tuple[str, ...]) -> str | None:
         """
         Infer model on a single sample.
 
         Args:
-            sample (str): The given sample for inference with model
+            sample (tuple[str, ...]): The given sample for inference with model
+
+        Returns:
+            str | None: A prediction
         """
 
     @abstractmethod
     def infer_dataset(self) -> DataFrame:
         """
         Infer model on a whole dataset.
+
+        Returns:
+            pandas.DataFrame: Data with predictions.
         """
 
     @abstractmethod
     def analyze_model(self) -> dict:
         """
-        Analyze model key properties.
+        Analyze model computing properties.
+
+        Returns:
+            dict: Properties of a model
         """
