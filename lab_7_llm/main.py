@@ -10,7 +10,7 @@ from typing import Iterable, Iterator, Sequence
 
 try:
     import torch
-    from torch.utils.data.dataset import Dataset
+    from torch.utils.data.dataset import Dataset  # переопределить get_item и len
 except ImportError:
     print('Library "torch" not installed. Failed to import.')
     Dataset = dict
@@ -29,6 +29,8 @@ from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
+from datasets import load_dataset
+
 
 class RawDataImporter(AbstractRawDataImporter):
     """
@@ -43,6 +45,12 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+
+        dataset = load_dataset(self._hf_name, name="1.0.0", split="validation").to_pandas()
+        self._raw_data = dataset
+
+        kazan = ['vasya', 'dasha']
+
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):

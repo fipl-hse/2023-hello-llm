@@ -1,8 +1,8 @@
 {
   "parameters": {
     "model": "",
-    "dataset": "",
+    "dataset": "cnn_dailymail",
     "metrics": []
   },
-  "target_score": 0
+  "target_score": 4
 }
