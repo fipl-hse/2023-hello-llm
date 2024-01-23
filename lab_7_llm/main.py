@@ -2,6 +2,7 @@
 Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
@@ -27,6 +28,7 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
+from datasets import load_dataset
 
 
 class RawDataImporter(AbstractRawDataImporter):
@@ -43,6 +45,13 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
 
+        dataset = load_dataset(
+            'ag_news',
+            split='test'
+        )
+        dataset_df = dataset.to_pandas()
+        self._raw_data = dataset_df
+
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
@@ -56,6 +65,9 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        num_samples = len(self._raw_data)
+        columns = self._raw_data.columns
+
 
     @report_time
     def transform(self) -> None:
