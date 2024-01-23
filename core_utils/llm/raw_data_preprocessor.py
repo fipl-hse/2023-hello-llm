@@ -1,6 +1,7 @@
 """
 Module with description of abstract raw data preprocessor.
 """
+
 # pylint: disable=duplicate-code
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -17,7 +18,6 @@ class ColumnNames(Enum):
     """
     Column names for preprocessed DataFrame.
     """
-
     SOURCE_NLI = ['premise', 'hypothesis']
     SOURCE = 'source'
     TARGET = 'target'
@@ -28,6 +28,12 @@ class ColumnNames(Enum):
     HYPOTHESIS = 'hypothesis'
 
     def __str__(self) -> Any:
+        """
+        String representation of column name.
+
+        Returns:
+            Any: Name of column name
+        """
         return self.value
 
 
@@ -35,27 +41,40 @@ class AbstractRawDataPreprocessor(ABC):
     """
     Abstract Raw Data Preprocessor.
     """
+    #: Preprocessed dataset in a table format
     _data: DataFrame | None
 
-    def __init__(self, raw_data: DataFrame):
+    def __init__(self, raw_data: DataFrame) -> None:
+        """
+        Initialize an instance of AbstractRawDataPreprocessor.
+
+        Args:
+            raw_data (pandas.DataFrame): Original dataset in a table format
+        """
         self._raw_data = raw_data
         self._data = None
 
     @abstractmethod
     def analyze(self) -> dict:
         """
-        Abstract method for dataset analysis.
+        Analyze a dataset.
+
+        Returns:
+            dict: Dataset key properties
         """
 
     @abstractmethod
     def transform(self) -> None:
         """
-        Abstract method for dataset preprocessing.
+        Apply preprocessing transformations to the raw dataset.
         """
 
     @property
     def data(self) -> DataFrame | None:
         """
-        Property for original dataset.
+        Property for preprocessed dataset.
+
+        Returns:
+            pandas.DataFrame | None: Preprocessed dataset in a table format
         """
         return self._data
