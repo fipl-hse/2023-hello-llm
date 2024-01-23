@@ -1,12 +1,15 @@
 """
 Neural machine translation module.
 """
+import json
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
 from datasets import load_dataset
+
+from config.constants import PROJECT_ROOT
 
 try:
     import torch
@@ -43,11 +46,17 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        dataset = load_dataset('d0rj/curation-corpus-ru',
-                               split='train')
-        print(f'Obtained dataset with one call: # of samples is {len(dataset)}')
+        settings = json.load(open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r'))
+        importer = RawDataImporter(settings['parameters']['dataset'])
+        importer.obtain()
 
-        return dataset
+        return importer
+
+        # dataset = load_dataset('d0rj/curation-corpus-ru',
+        #                        split='train')
+        # print(f'Obtained dataset with one call: # of samples is {len(dataset)}')
+        #
+        # return dataset
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
