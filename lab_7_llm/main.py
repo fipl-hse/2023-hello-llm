@@ -46,17 +46,12 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        settings = json.load(open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r'))
-        importer = RawDataImporter(settings['parameters']['dataset'])
-        importer.obtain()
 
-        return importer
+        dataset = load_dataset('d0rj/curation-corpus-ru',
+                               split='train')
+        print(f'Obtained dataset with one call: # of samples is {len(dataset)}')
 
-        # dataset = load_dataset('d0rj/curation-corpus-ru',
-        #                        split='train')
-        # print(f'Obtained dataset with one call: # of samples is {len(dataset)}')
-        #
-        # return dataset
+        return dataset
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):

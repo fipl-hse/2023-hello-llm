@@ -15,7 +15,7 @@ def main():
     # assert result is not None, "Demo does not work correctly"
     load_set = RawDataImporter('d0rj/curation-corpus-ru')
 
-    return load_set
+    return load_set.obtain()
 
 
 if __name__ == "__main__":
