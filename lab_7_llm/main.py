@@ -5,6 +5,7 @@ Neural machine translation module.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
+from datasets import load_dataset
 
 try:
     import torch
@@ -42,6 +43,21 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+
+        def main() -> None:
+            """
+            Entrypoint for the listing.
+            """
+
+            dataset = load_dataset(
+                'trixdade/reviews_russian',
+            )
+
+            print(dataset.data.keys())
+
+            subset = dataset.get('train')
+
+            print(f'Obtained dataset step-by-step: # of samples is {len(subset)}')
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
