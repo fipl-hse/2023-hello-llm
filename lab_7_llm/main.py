@@ -20,6 +20,12 @@ except ImportError:
     print('Library "pandas" not installed. Failed to import.')
     DataFrame = dict  # type: ignore
 
+try:
+    from datasets import load_dataset
+except ImportError:
+    print('Library "datasets" not installed. Failed to import.')
+    load_dataset = None
+
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
@@ -36,10 +42,11 @@ class RawDataImporter(AbstractRawDataImporter):
     @report_time
     def obtain(self) -> None:
         """
-        Import dataset..
-
+        Import dataset.
 
         """
+        dataset = load_dataset(path="glue", name="qnli", split="validation")
+        
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
