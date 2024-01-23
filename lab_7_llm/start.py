@@ -3,6 +3,8 @@ Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
 from core_utils.llm.time_decorator import report_time
+from main import RawDataImporter
+
 
 
 @report_time

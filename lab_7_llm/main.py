@@ -26,19 +26,18 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
+from datasets import load_dataset
 
 
 class RawDataImporter(AbstractRawDataImporter):
     """
-    Custom implementation of data importer.
+    Custom
     """
-
 
     @report_time
     def obtain(self) -> None:
-        """
-        Import dataset.
-        """
+        dataset = load_dataset('glue', name ='mnli', split ='validation_matched')
+        return dataset
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -190,3 +189,4 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric.
         """
+
