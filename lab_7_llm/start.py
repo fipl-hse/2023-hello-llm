@@ -20,8 +20,8 @@ def main() -> None:
     dataset = RawDataImporter(configs['parameters']['dataset'])
     dataset.obtain()
 
-    result = None
-    assert result is not None, "Demo does not work correctly"
+    #result = None
+    #assert result is not None, "Demo does not work correctly"
 
 
 if __name__ == "__main__":

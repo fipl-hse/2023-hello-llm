@@ -49,9 +49,6 @@ class RawDataImporter(AbstractRawDataImporter):
         dataset = load_dataset(self._hf_name, name="1.0.0", split="validation").to_pandas()
         self._raw_data = dataset
 
-        kazan = ['vasya', 'dasha']
-
-
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
