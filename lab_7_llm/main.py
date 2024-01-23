@@ -3,6 +3,8 @@ Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
+from pathlib import Path
+from typing import Iterable, Iterator, Sequence
 
 try:
     import torch
@@ -58,6 +60,18 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        return {
+            "dataset_number_of_samples": self._raw_data.shape[0],
+            "dataset_columns": self._raw_data.shape[1],
+            "dataset_duplicates": self._raw_data.duplicated().sum(),
+            "dataset_empty_rows": self._raw_data.isna().sum().sum(),
+            "dataset_sample_min_len": min(len(min(self._raw_data['article'], key=len)),
+                                          len(min(self._raw_data['highlights'], key=len)),
+                                          len(min(self._raw_data['id'], key=len))),
+            "dataset_sample_max_len": max(len(max(self._raw_data['article'], key=len)),
+                                          len(max(self._raw_data['highlights'], key=len)),
+                                          len(max(self._raw_data['id'], key=len))),
+        }
 
     @report_time
     def transform(self) -> None:

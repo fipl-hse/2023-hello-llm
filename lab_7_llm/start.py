@@ -6,7 +6,7 @@ import json
 
 from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
-from main import RawDataImporter
+from main import RawDataImporter, RawDataPreprocessor
 
 @report_time
 def main() -> None:
@@ -20,8 +20,8 @@ def main() -> None:
     dataset = RawDataImporter(configs['parameters']['dataset'])
     dataset.obtain()
 
-    #result = None
-    #assert result is not None, "Demo does not work correctly"
+    result = RawDataPreprocessor(raw_data=dataset.raw_data).analyze()
+    assert result is not None, "Demo does not work correctly"
 
 
 if __name__ == "__main__":
