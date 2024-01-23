@@ -1,5 +1,5 @@
 """
-Checking whether PR author is admin or not
+Check whether PR author is admin or not.
 """
 
 from tap import Tap
@@ -7,14 +7,14 @@ from tap import Tap
 
 class ArgumentParser(Tap):
     """
-    CLI for script
+    CLI for script.
     """
     pr_name: str
 
 
 def main() -> None:
     """
-    Main module entrypoint
+    Main module entrypoint.
     """
     args = ArgumentParser().parse_args()
 

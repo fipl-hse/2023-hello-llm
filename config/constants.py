@@ -1,5 +1,5 @@
 """
-Useful constant variables
+Useful constant variables.
 """
 
 from pathlib import Path
