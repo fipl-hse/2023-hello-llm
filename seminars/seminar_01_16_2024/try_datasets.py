@@ -22,18 +22,33 @@ def main() -> None:
     """
     # 1. Obtain dataset from HuggingFace
     dataset = load_dataset(
-        'ag_news',
-        split='test'
+        'RussianNLP/russian_super_glue',
+        name='danetqa'
+    )
+
+    # 2. Check dataset's subset
+    print(dataset.data.keys())
+
+    # 3. Get needed subset
+    subset = dataset.get('validation')
+
+    # 4. Get number of samples
+    print(f'Obtained dataset step-by-step: # of samples is {len(subset)}')
+
+    # 5. Get dataset with particular subset at once
+    dataset = load_dataset(
+        'RussianNLP/russian_super_glue',
+        name='danetqa',
+        split='validation'
     )
     print(f'Obtained dataset with one call: # of samples is {len(dataset)}')
 
-    # 4. Get number of samples
-    print(f'Obtained dataset step-by-step: # of samples is {len(dataset)}')
+    # 6. Dataset without a name
+    dataset = load_dataset('sberquad', split='validation')
+    print(f'Obtained sberquad dataset with one call: # of samples is {len(dataset)}')
 
     # 7. Cast dataset to pandas
-    dataset_df: DataFrame = dataset.to_pandas()
-
-    print(dataset_df.columns)
+    dataset_df: DataFrame = subset.to_pandas()
 
     # 8. Optionally save head of dataframe
     (
