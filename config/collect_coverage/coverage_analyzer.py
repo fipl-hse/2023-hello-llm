@@ -1,5 +1,5 @@
 """
-Runner for collecting coverage
+Runner for collecting coverage.
 """
 
 import sys
@@ -18,7 +18,14 @@ CoverageResults = Mapping[str, Optional[int]]
 def collect_coverage(all_labs_names: Iterable[Path],
                      artifacts_path: Path) -> CoverageResults:
     """
-    Entrypoint for coverage collection for every required folder
+    Entrypoint for coverage collection for every required folder.
+
+    Args:
+        all_labs_names (Iterable[Path]): Names of all labs
+        artifacts_path (Path): Path to artifacts
+
+    Returns:
+        CoverageResults: Coverage results
     """
     all_labs_results = {}
     for lab_path in all_labs_names:
@@ -40,7 +47,14 @@ def collect_coverage(all_labs_names: Iterable[Path],
 def is_decrease_present(all_labs_results: CoverageResults,
                         previous_coverage_results: dict) -> tuple[bool, dict]:
     """
-    Analysis of coverage report versus previous runs
+    Analyze coverage report versus previous runs.
+
+    Args:
+        all_labs_results (CoverageResults): Coverage results
+        previous_coverage_results (dict): Previous coverage results
+
+    Returns:
+        tuple[bool, dict]: Is decrease present or not
     """
     print('\n\n' + '------' * 3)
     print('REPORT')
@@ -66,7 +80,7 @@ def is_decrease_present(all_labs_results: CoverageResults,
 
 def main() -> None:
     """
-    Entrypoint for coverage collection
+    Entrypoint for coverage collection.
     """
     artifacts_path = PROJECT_ROOT / 'build' / 'coverage'
     artifacts_path.mkdir(parents=True, exist_ok=True)
