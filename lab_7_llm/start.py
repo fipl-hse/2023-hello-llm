@@ -18,10 +18,9 @@ def main() -> None:
     importer.obtain()
 
     preprocessor = RawDataPreprocessor(importer.raw_data)
-    dataset_analysis = preprocessor.analyze()
-    print(dataset_analysis)
+    result = preprocessor.analyze()
 
-    assert dataset_analysis is not None, "Demo does not work correctly"
+    assert result is not None, "Demo does not work correctly"
 
 
 if __name__ == "__main__":
