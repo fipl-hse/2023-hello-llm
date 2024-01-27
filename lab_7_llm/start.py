@@ -21,6 +21,8 @@ def main() -> None:
     dataset_analysis = preprocessor.analyze()
     print(dataset_analysis)
 
+    assert dataset_analysis is not None, "Demo does not work correctly"
+
 
 if __name__ == "__main__":
     main()
