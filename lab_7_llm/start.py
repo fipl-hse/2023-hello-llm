@@ -6,21 +6,21 @@ import json
 
 from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
-from main import RawDataImporter, RawDataPreprocessor
+from lab_7_llm.main import RawDataImporter, RawDataPreprocessor
+
 
 @report_time
 def main() -> None:
     """
     Run the translation pipeline.
     """
+    with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as file:
+        settings = json.load(file)
+    importer = RawDataImporter(settings['parameters']['dataset'])
+    importer.obtain()
 
-    with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as set_file:
-        configs = json.load(set_file)
-
-    dataset = RawDataImporter(configs['parameters']['dataset'])
-    dataset.obtain()
-
-    result = RawDataPreprocessor(raw_data=dataset.raw_data).analyze()
+    preprocessor = RawDataPreprocessor(importer.raw_data)
+    result = preprocessor.analyze()
     assert result is not None, "Demo does not work correctly"
 
 

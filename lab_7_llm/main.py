@@ -5,10 +5,12 @@ Neural machine translation module.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
-# reset changes
+
+from datasets import load_dataset
+
 try:
     import torch
-    from torch.utils.data.dataset import Dataset  # переопределить get_item и len
+    from torch.utils.data.dataset import Dataset
 except ImportError:
     print('Library "torch" not installed. Failed to import.')
     Dataset = dict
@@ -27,8 +29,6 @@ from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
-from datasets import load_dataset
-
 
 class RawDataImporter(AbstractRawDataImporter):
     """
@@ -43,9 +43,8 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-
-        dataset = load_dataset(self._hf_name, name="1.0.0", split="validation").to_pandas()
-        self._raw_data = dataset
+        dataset = load_dataset(self._hf_name, name="1.0.0", split="test")
+        self._raw_data = dataset.to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -60,18 +59,14 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
-        return {
-            "dataset_number_of_samples": self._raw_data.shape[0],
-            "dataset_columns": self._raw_data.shape[1],
-            "dataset_duplicates": self._raw_data.duplicated().sum(),
-            "dataset_empty_rows": self._raw_data.isna().sum().sum(),
-            "dataset_sample_min_len": min(len(min(self._raw_data['article'], key=len)),
-                                          len(min(self._raw_data['highlights'], key=len)),
-                                          len(min(self._raw_data['id'], key=len))),
-            "dataset_sample_max_len": max(len(max(self._raw_data['article'], key=len)),
-                                          len(max(self._raw_data['highlights'], key=len)),
-                                          len(max(self._raw_data['id'], key=len))),
-        }
+        analyzed = {'dataset_number_of_samples': len(self._raw_data),
+                    'dataset_columns': self._raw_data.shape[1],
+                    'dataset_duplicates': self._raw_data.duplicated().sum(),
+                    'dataset_empty_rows': self._raw_data.isna().sum().sum(),
+                    'dataset_sample_min_len': len(min(self._raw_data['article'], key=len)),
+                    'dataset_sample_max_len': len(max(self._raw_data['article'], key=len))}
+
+        return analyzed
 
     @report_time
     def transform(self) -> None:
