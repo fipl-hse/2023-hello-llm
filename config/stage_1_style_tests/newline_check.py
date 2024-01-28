@@ -1,6 +1,7 @@
 """
-Checks newline at the end
+Check newline at the end of a file.
 """
+
 import sys
 
 from config.constants import PROJECT_ROOT
@@ -8,7 +9,10 @@ from config.constants import PROJECT_ROOT
 
 def get_paths() -> list:
     """
-    Returns list of paths to non-python files
+    Get paths to non-python files.
+
+    Returns:
+        list: Paths to non-python files
     """
     paths_to_exclude = {
         'venv',
@@ -41,7 +45,13 @@ def get_paths() -> list:
 
 def check_paths(list_with_paths: list) -> list:
     """
-    Checks if the path is correct
+    Check if the path is correct.
+
+    Args:
+        list_with_paths (list): Paths to non-python files
+
+    Returns:
+        list: Appropriate paths
     """
     paths_to_exclude = [
         '1_raw.txt',
@@ -65,7 +75,13 @@ def check_paths(list_with_paths: list) -> list:
 
 def has_newline(paths: list) -> bool:
     """
-    Checks for a newline at the end
+    Check for a newline at the end.
+
+    Args:
+        paths (list): Appropriate paths
+
+    Returns:
+        bool: Has newline or not
     """
     bad_paths = []
     check_is_good = True
@@ -86,7 +102,7 @@ def has_newline(paths: list) -> bool:
 
 def main() -> None:
     """
-    Entrypoint for module
+    Entrypoint for module.
     """
     list_with_paths = get_paths()
     paths = check_paths(list_with_paths)
