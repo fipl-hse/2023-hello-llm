@@ -5,6 +5,7 @@ Neural machine translation module.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
+from datasets import load_dataset
 
 try:
     import torch
@@ -41,8 +42,9 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        self._raw_data = load_dataset(self._hf_name, name='default', split='test').to_pandas()
 
-#change
+
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     A class that analyzes and preprocesses a dataset.
@@ -55,6 +57,15 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        dataset_properties = {'Number of samples in dataset': self._raw_data.shape[0],
+                              'Number of columns in dataset': self._raw_data.shape[1],
+                              'Number of duplicates in dataset': self._raw_data.duplicated().sum(),
+                              'Number of empty rows in dataset': self._raw_data.isna().sum(),
+                              'Minimal length of the dataset sample in source column(s)':
+                                  self._raw_data['Reviews'].str.len().min(),
+                              'Maximal length of the dataset sample in source column(s)':
+                                  self._raw_data['Reviews'].str.len().max()}
+        return dataset_properties
 
     @report_time
     def transform(self) -> None:
