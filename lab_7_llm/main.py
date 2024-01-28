@@ -8,6 +8,8 @@ from typing import Iterable, Iterator, Sequence
 
 import numpy as np
 from datasets import load_dataset
+import torchinfo
+from transformers import BertForSequenceClassification
 
 try:
     import torch
@@ -160,14 +162,8 @@ class LLMPipeline(AbstractLLMPipeline):
     A class that initializes a model, analyzes its properties and infers it.
     """
 
-    def __init__(
-            self,
-            model_name: str,
-            dataset: TaskDataset,
-            max_length: int,
-            batch_size: int,
-            device: str
-    ) -> None:
+    def __init__(self, model_name: str, dataset: TaskDataset, max_length: int, batch_size: int,
+                 device: str) -> None:
         """
         Initialize an instance of LLMPipeline.
 
@@ -178,6 +174,8 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        super().__init__(model_name, dataset, max_length, batch_size, device)
+        self._model = BertForSequenceClassification.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -186,6 +184,23 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        summary = self._get_summary()
+        embeddings_length = self._model.config.max_position_embeddings
+        ids = torch.ones(1, embeddings_length, dtype=torch.long)
+        input_shape = {
+            'input_ids': ids,
+            'attention_mask': ids
+        }
+        info = {
+            'input_shape': input_shape,
+            'embedding_size': embeddings_length,
+            'output_shape': [summary.summary_list[-1].output_size],
+            'num_trainable_params': summary.trainable_params,
+            'vocab_size': self._model.config.vocab_size,
+            'size': summary.total_param_bytes,
+            'max_context_length': embeddings_length
+        }
+        return info
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -207,6 +222,22 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+
+    def _get_summary(self) -> torchinfo.model_statistics.ModelStatistics:
+        """
+        Get model summary using torchinfo
+
+        Returns:
+            torchinfo.model_statistics.ModelStatistics: model summary
+        """
+        data = {
+            'input_ids': torch.ones(
+                self._batch_size,
+                self._model.config.max_position_embeddings,
+                dtype=torch.long
+            )
+        }
+        return torchinfo.summary(self._model, input_data=data)
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
