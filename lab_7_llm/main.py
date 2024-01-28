@@ -5,7 +5,7 @@ Neural machine translation module.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
-
+# reset changes
 try:
     import torch
     from torch.utils.data.dataset import Dataset  # переопределить get_item и len
