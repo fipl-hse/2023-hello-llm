@@ -100,12 +100,12 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._raw_data = (self._raw_data
-                          .rename(columns={'label': ColumnNames['TARGET'].value})
-                          .drop_duplicates()
-                          .replace('', np.nan).dropna()
-                          .reset_index(drop=True)
-                          )
+        self._data = (self._raw_data
+                      .rename(columns={'label': ColumnNames['TARGET'].value})
+                      .drop_duplicates()
+                      .replace('', np.nan).dropna()
+                      .reset_index(drop=True)
+                      )
 
 
 class TaskDataset(Dataset):
