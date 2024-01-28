@@ -6,7 +6,7 @@ import json
 
 from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import RawDataImporter, RawDataPreprocessor
+from lab_7_llm.main import RawDataImporter, RawDataPreprocessor, TaskDataset, LLMPipeline
 
 
 @report_time
@@ -20,7 +20,14 @@ def main() -> None:
     data_loader.obtain()
 
     preprocessor = RawDataPreprocessor(data_loader.raw_data)
-    result = preprocessor.analyze()
+    data_analyzis = preprocessor.analyze()
+    preprocessor.transform()
+
+    dataset = TaskDataset(preprocessor.data.head(100))
+
+    pipeline = LLMPipeline(configs['parameters']['model'], dataset, 1, 1, 'cpu')
+
+    result = pipeline.analyze_model()
     assert result is not None, "Demo does not work correctly"
 
 
