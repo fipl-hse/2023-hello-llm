@@ -48,16 +48,7 @@ class RawDataImporter(AbstractRawDataImporter):
             """
             Entrypoint for the listing.
             """
-
-            dataset = load_dataset(
-                'trixdade/reviews_russian',
-            )
-
-            print(dataset.data.keys())
-
-            subset = dataset.get('train')
-
-            print(f'Obtained dataset step-by-step: # of samples is {len(subset)}')
+            self._raw_data = (load_dataset(self._hf_name, split='train')).to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -72,6 +63,15 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+
+        analysis = {'number_of_samples': len(self._raw_data),
+                    'columns': self._raw_data.shape[1],
+                    'duplicates': self._raw_data.duplicated().sum(),
+                    'empty_rows': self._raw_data.isna().sum().sum(),
+                    'sample_min_len': len(min(self._raw_data['article'], key=len)),
+                    'sample_max_len': len(max(self._raw_data['article'], key=len))}
+
+        return analysis
 
     @report_time
     def transform(self) -> None:
