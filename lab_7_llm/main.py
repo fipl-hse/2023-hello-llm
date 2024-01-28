@@ -48,7 +48,7 @@ class RawDataImporter(AbstractRawDataImporter):
             """
             Entrypoint for the listing.
             """
-            self._raw_data = (load_dataset(self._hf_name, split='train')).to_pandas()
+            self._raw_data = load_dataset(self._hf_name, split='train').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -68,8 +68,10 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
                     'columns': self._raw_data.shape[1],
                     'duplicates': self._raw_data.duplicated().sum(),
                     'empty_rows': self._raw_data.isna().sum().sum(),
-                    'sample_min_len': len(min(self._raw_data['article'], key=len)),
-                    'sample_max_len': len(max(self._raw_data['article'], key=len))}
+                    'review_min_len': len(min(self._raw_data['Reviews'], key=len)),
+                    'review_max_len': len(max(self._raw_data['Reviews'], key=len)),
+                    'summary_min_len': len(min(self._raw_data['Summary'], key=len)),
+                    'summary_max_len': len(max(self._raw_data['Summary'], key=len))}
 
         return analysis
 

@@ -13,7 +13,6 @@ def main() -> None:
     """
     Run the translation pipeline.
     """
-    # result = None
     with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as file:
         config = json.load(file)
     loader = RawDataImporter(config['parameters']['dataset'])
