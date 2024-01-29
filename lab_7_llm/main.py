@@ -77,9 +77,6 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        # TODO: ask about «Map target with class labels»
-        # self._raw_data = self._raw_data[self._raw_data["source"].isin(["mnli"])]
-        # self._raw_data = self._raw_data.loc[:, ["premise_ru", "hypothesis_ru", "label"]]
         self._raw_data = (self._raw_data.
                           loc[self._raw_data["source"] == "mnli"].
                           loc[:, ["premise_ru", "hypothesis_ru", "label"]].
