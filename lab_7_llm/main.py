@@ -6,6 +6,8 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 from datasets import load_dataset
+from transformers import BertForSequenceClassification
+from torchinfo import summary
 
 try:
     import torch
@@ -132,21 +134,15 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
-
+        return self.data
 
 class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
     """
 
-    def __init__(
-            self,
-            model_name: str,
-            dataset: TaskDataset,
-            max_length: int,
-            batch_size: int,
-            device: str
-    ) -> None:
+    def __init__(self, model_name: str, dataset: TaskDataset, max_length: int, batch_size: int,
+                 device: str) -> None:
         """
         Initialize an instance of LLMPipeline.
 
@@ -157,6 +153,8 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        super().__init__(model_name, dataset, max_length, batch_size, device)
+        self._model = BertForSequenceClassification(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -165,6 +163,13 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        model = BertForSequenceClassification.from_pretrained(self._model_name)
+        tensor_data = torch.ones(1, 512, dtype=torch.long)
+        input_data = {"inputs_ids": tensor_data, "token_type_ids": tensor_data, "attention_mask": tensor_data}
+        model_statistics = summary(model, input_data=input_data, verbose=False)
+        total_params, trainable_params, last_layer = (model_statistics.total_params,
+                                                      model_statistics.trainable_params,
+                                                      model_statistics.summary_list[-1].output_size)
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
