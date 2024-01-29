@@ -26,7 +26,7 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
-
+from datasets import load_dataset
 
 class RawDataImporter(AbstractRawDataImporter):
     """
@@ -41,6 +41,11 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        dataset = load_dataset(
+            'cnn_dailymail', '1.0.0',
+            split='test')
+        dataset_df = dataset.to_pandas()
+        self._raw_data = dataset
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -193,4 +198,3 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
-#comment
