@@ -1,11 +1,12 @@
 """
 Neural machine translation starter.
 """
+import json
+from pathlib import Path
+
 # pylint: disable= too-many-locals
 from core_utils.llm.time_decorator import report_time
 from lab_7_llm.main import RawDataImporter, RawDataPreprocessor
-import json
-from pathlib import Path
 
 
 @report_time
