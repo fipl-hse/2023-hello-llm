@@ -68,8 +68,10 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
                 'dataset_columns': self._raw_data.shape[1],
                 'dataset_duplicates': self._raw_data.duplicated().sum(),
                 'dataset_empty_rows': self._raw_data.isna().sum().sum(),
-                'dataset_sample_min_len': len(min(self._raw_data)),
-                'dataset_sample_max_len': len(max(self._raw_data))
+                'dataset_sample_min_len': min(len(min(self._raw_data["premise_ru"], key=len)),
+                                              len(min(self._raw_data["hypothesis_ru"], key=len))),
+                'dataset_sample_max_len': max(len(max(self._raw_data["premise_ru"], key=len)),
+                                              len(max(self._raw_data["hypothesis_ru"], key=len)))
                 }
 
     @report_time
@@ -83,9 +85,13 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
                           rename(columns={
                                 "premise_ru": "premise",
                                 "hypothesis_ru": "hypothesis",
-                                "label": "target"}, inplace=True).
+                                "label": "target"}).
                           dropna().
                           reset_index())
+
+        self._raw_data["target"].replace({"entailment": "entailment",
+                                          "contradiction": "contradiction",
+                                          "neutral": "neutral"}, inplace=True)
 
 
 class TaskDataset(Dataset):
@@ -133,6 +139,7 @@ class TaskDataset(Dataset):
         """
         return self.data
 
+
 class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
@@ -160,13 +167,20 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-        model = BertForSequenceClassification.from_pretrained(self._model_name)
         tensor_data = torch.ones(1, 512, dtype=torch.long)
-        input_data = {"inputs_ids": tensor_data, "token_type_ids": tensor_data, "attention_mask": tensor_data}
-        model_statistics = summary(model, input_data=input_data, verbose=False)
-        total_params, trainable_params, last_layer = (model_statistics.total_params,
-                                                      model_statistics.trainable_params,
-                                                      model_statistics.summary_list[-1].output_size)
+        input_data = {"inputs_ids": tensor_data,
+                      "attention_mask": tensor_data}
+        model_statistics = summary(self._model, input_data=input_data, verbose=False)
+        size, num_trainable_params, last_layer = (model_statistics.total_params,
+                                                  model_statistics.trainable_params,
+                                                  model_statistics.summary_list[-1].output_size)
+        return {"input_shape": input_data,
+                "embedding_size": self._model.config.max_position_embeddings,
+                "output_shape": last_layer,
+                "num_trainable_params": num_trainable_params,
+                "vocab_size": self._model.config.vocab_size,
+                "size": size,
+                "max_context_length": self._model.config.max_position_embeddings}
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
