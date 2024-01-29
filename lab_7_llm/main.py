@@ -34,7 +34,6 @@ class RawDataImporter(AbstractRawDataImporter):
     A class that imports the HuggingFace dataset.
     """
 
-
     @report_time
     def obtain(self) -> None:
         """
@@ -50,7 +49,6 @@ class RawDataImporter(AbstractRawDataImporter):
             """
             self._raw_data = load_dataset(self._hf_name, split='train').to_pandas()
 
-
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     A class that analyzes and preprocesses a dataset.
@@ -64,14 +62,12 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             dict: Dataset key properties
         """
 
-        analysis = {'number_of_samples': len(self._raw_data),
-                    'columns': self._raw_data.shape[1],
-                    'duplicates': self._raw_data.duplicated().sum(),
-                    'empty_rows': self._raw_data.isna().sum().sum(),
-                    'review_min_len': len(min(self._raw_data['Reviews'], key=len)),
-                    'review_max_len': len(max(self._raw_data['Reviews'], key=len)),
-                    'summary_min_len': len(min(self._raw_data['Summary'], key=len)),
-                    'summary_max_len': len(max(self._raw_data['Summary'], key=len))}
+        analysis = {'dataset_number_of_samples': len(self._raw_data),
+                    'dataset_columns': self._raw_data.shape[1],
+                    'dataset_duplicates': self._raw_data.duplicated().sum(),
+                    'dataset_empty_rows': self._raw_data.isna().sum().sum(),
+                    'dataset_sample_min_len': len(min(self._raw_data['source'], key=len)),
+                    'dataset_sample_max_len': len(max(self._raw_data['source'], key=len))}
 
         return analysis
 
