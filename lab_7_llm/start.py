@@ -3,10 +3,11 @@ Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
 import json
+from random import randint
 
 from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import RawDataImporter, RawDataPreprocessor, TaskDataset, LLMPipeline
+from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset
 
 
 @report_time
@@ -20,14 +21,23 @@ def main() -> None:
     data_loader.obtain()
 
     preprocessor = RawDataPreprocessor(data_loader.raw_data)
-    data_analyzis = preprocessor.analyze()
+    data_analysis = preprocessor.analyze()
+    print(data_analysis)
+
     preprocessor.transform()
 
     dataset = TaskDataset(preprocessor.data.head(100))
 
-    pipeline = LLMPipeline(configs['parameters']['model'], dataset, 1, 1, 'cpu')
+    pipeline = LLMPipeline(configs['parameters']['model'], dataset, 1, 120, 'cpu')
 
-    result = pipeline.analyze_model()
+    model_analysis = pipeline.analyze_model()
+    print(model_analysis)
+
+    sample = dataset[randint(0, len(dataset))]
+    sample_inference = pipeline.infer_sample(sample)
+    print(f'SAMPLE: {sample}\nPREDICTION: {sample_inference}')
+
+    result = sample_inference
     assert result is not None, "Demo does not work correctly"
 
 

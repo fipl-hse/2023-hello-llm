@@ -282,7 +282,7 @@ class LLMPipeline(AbstractLLMPipeline):
             'input_ids': ids,
             'attention_mask': ids
         }
-        return torchinfo.summary(self._model, input_data=data)
+        return torchinfo.summary(self._model, input_data=data, verbose=0)
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
