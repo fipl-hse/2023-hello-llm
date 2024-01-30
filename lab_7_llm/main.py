@@ -71,29 +71,59 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             }
         return info
 
-    def _count_samples(self):
-        """Count number of rows in a DataFrame"""
+    def _count_samples(self) -> int:
+        """
+        Count number of rows in a DataFrame
+
+        Returns:
+            int: number of rows in a DataFrame
+        """
         return len(self._raw_data)
 
-    def _count_columns(self):
-        """Count number of columns in a DataFrame"""
+    def _count_columns(self) -> int:
+        """
+        Count number of columns in a DataFrame
+
+        Returns:
+            int: number of columns in a DataFrame
+        """
         return self._raw_data.shape[1]
 
-    def _count_duplicates(self):
-        """Count number of duplicates in a DataFrame"""
+    def _count_duplicates(self) -> int:
+        """
+        Count number of duplicates in a DataFrame
+
+        Returns:
+            int: number of duplicates in a DataFrame
+        """
         return self._raw_data.duplicated().sum()
 
-    def _count_empty(self):
-        """Count number of empty rows in a DataFrame including those having empty strings"""
+    def _count_empty(self) -> int:
+        """
+        Count number of empty rows in a DataFrame including those having empty strings
+
+        Returns:
+            int: number of empty rows in a DataFrame
+        """
         return len(self._raw_data) - len(self._raw_data.replace('', np.nan).dropna())
 
-    def _count_min(self):
-        """Count length of the shortest sample"""
+    def _count_min(self) -> int:
+        """
+        Count length of the shortest sample
+
+        Returns:
+            int: length of the shortest sample
+        """
         return min(len(min(self._raw_data['premise'], key=len)),
                    len(min(self._raw_data['hypothesis'], key=len)))
 
-    def _count_max(self):
-        """Count length of the longest sample"""
+    def _count_max(self) -> int:
+        """
+        Count length of the longest sample
+
+        Returns:
+            int: length of the longest sample
+        """
         return max(len(max(self._raw_data['premise'], key=len)),
                    len(max(self._raw_data['hypothesis'], key=len)))
 
@@ -224,9 +254,12 @@ class LLMPipeline(AbstractLLMPipeline):
             pd.DataFrame: Data with predictions
         """
 
-    def _get_summary(self, ids) -> torchinfo.model_statistics.ModelStatistics:
+    def _get_summary(self, ids: torch.Tensor) -> torchinfo.model_statistics.ModelStatistics:
         """
         Get model summary using torchinfo
+
+        Args:
+            ids (torch.Tensor): input data imitation
 
         Returns:
             torchinfo.model_statistics.ModelStatistics: model summary
