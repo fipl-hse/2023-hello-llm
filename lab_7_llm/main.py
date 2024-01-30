@@ -59,11 +59,10 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         dataset_properties = {'dataset_columns': self._raw_data.shape[1],
                               'dataset_duplicates': self._raw_data.duplicated().sum(),
-                              'dataset_empty_rows': self._raw_data.isna().sum(),
+                              'dataset_empty_rows': self._raw_data.isna().sum().sum(),
                               'dataset_number_of_samples': self._raw_data.shape[0],
-                              'dataset_sample_max_len': self._raw_data['Reviews'].str.len().min(),
-                              'dataset_sample_min_len': self._raw_data['Reviews'].str.len().max()}
-        print(dataset_properties)
+                              'dataset_sample_max_len': self._raw_data['Reviews'].str.len().max(),
+                              'dataset_sample_min_len': self._raw_data['Reviews'].str.len().min()}
         return dataset_properties
 
     @report_time
