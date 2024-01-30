@@ -9,7 +9,7 @@ from typing import Iterable, Iterator, Sequence
 import numpy as np
 from datasets import load_dataset
 import torchinfo
-from transformers import BertForSequenceClassification
+from transformers import AutoTokenizer, BertForSequenceClassification
 
 try:
     import torch
@@ -192,8 +192,14 @@ class LLMPipeline(AbstractLLMPipeline):
     A class that initializes a model, analyzes its properties and infers it.
     """
 
-    def __init__(self, model_name: str, dataset: TaskDataset, max_length: int, batch_size: int,
-                 device: str) -> None:
+    def __init__(
+            self,
+            model_name: str,
+            dataset: TaskDataset,
+            max_length: int,
+            batch_size: int,
+            device: str
+    ) -> None:
         """
         Initialize an instance of LLMPipeline.
 
@@ -244,6 +250,14 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        if self._model is None:
+            return None
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        tokens = tokenizer(sample[0], sample[1], return_tensors='pt')
+        output = self._model(**tokens)
+        prediction = torch.argmax(output.logits).item()
+        labels = self._model.config.id2label
+        return labels[prediction]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
