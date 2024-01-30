@@ -1,3 +1,10 @@
-datasets~=2.16.1
-pandas~=2.2.0rc0
-transformers~=4.35.2
+--extra-index-url https://download.pytorch.org/whl/cpu
+datasets==2.16.1
+fastapi==0.109.0
+pandas==2.2.0rc0
+pydantic==2.5.3
+pytest==7.4.4
+torch==2.1.1+cu121
+torchinfo==1.8.0
+transformers==4.35.2
+tqdm==4.66.1

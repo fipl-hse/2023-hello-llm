@@ -3,7 +3,7 @@ Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import RawDataImporter, RawDataPreprocessor, TaskDataset
+from lab_7_llm.main import RawDataImporter, RawDataPreprocessor, TaskDataset, LLMPipeline
 from config.constants import PROJECT_ROOT
 import json
 
@@ -19,8 +19,11 @@ def main() -> None:
     preprocessed_ds = RawDataPreprocessor(ds.raw_data)
     preprocessed_ds.analyze()
     preprocessed_ds.transform()
-    result = TaskDataset(preprocessed_ds.data)
-
+    task_ds = TaskDataset(preprocessed_ds.data.head(100))
+    result = LLMPipeline(model_name=settings["parameters"]["model"], dataset=task_ds,
+                         max_length=512, batch_size=1, device='cpu')
+    result.analyze_model()
+    print(result.infer_sample(task_ds.__getitem__(0)))
     assert result is not None, "Demo does not work correctly"
 
 

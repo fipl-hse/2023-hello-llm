@@ -3,14 +3,16 @@ Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
-from pathlib import Path
-from typing import Iterable, Iterator, Sequence
 from datasets import load_dataset
-from transformers import pipeline
+from pathlib import Path
+from torchinfo import summary
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from typing import Iterable, Iterator, Sequence
 
 try:
     import torch
     from torch.utils.data.dataset import Dataset
+
 except ImportError:
     print('Library "torch" not installed. Failed to import.')
     Dataset = dict
@@ -126,7 +128,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data.iloc[index].premise, self._data.iloc[index].hypothesis
+        return (self._data.iloc[index].premise + '|' + self._data.iloc[index].hypothesis)
 
     @property
     def data(self) -> DataFrame:
@@ -162,6 +164,10 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        super().__init__(model_name, dataset, max_length, batch_size, device)
+        self._model = AutoModelForSequenceClassification.from_pretrained(
+            model_name)
+        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -170,6 +176,21 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        tensor_data = torch.ones(1, self._model.config.max_position_embeddings, dtype=torch.long)
+        input_data = {'attention_mask': tensor_data,
+                      "input_ids": tensor_data}
+        analytics = summary(self._model, input_data=input_data, verbose=False)
+
+        return {
+            "embedding_size": self._model.config.max_position_embeddings,
+            "input_shape": {'attention_mask': list(input_data['attention_mask'].shape),
+                            'input_ids': list(input_data['input_ids'].shape)},
+            "max_context_length": self._model.config.max_position_embeddings,
+            "num_trainable_params": analytics.trainable_params,
+            "output_shape": analytics.summary_list[-1].output_size,
+            "size": analytics.total_params,
+            "vocab_size": self._model.config.vocab_size
+        }
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -182,6 +203,13 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        print(sample)
+        tokens = self._tokenizer(sample, return_tensors="pt")
+        output = self._model(**tokens)
+        predictions = torch.argmax(output.logits).item()
+        labels = self._model.config.id2label
+
+        return str(self._model.config.label2id[labels[predictions]])
 
     @report_time
     def infer_dataset(self) -> DataFrame:
