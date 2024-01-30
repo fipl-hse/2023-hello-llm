@@ -1,223 +1,211 @@
 {
-  "Helsinki-NLP/opus-mt-en-fr": {
-    "enimai/MuST-C-fr": {
-      "bleu": 0.44680
-    }
-  },
-  "Helsinki-NLP/opus-mt-ru-en": {
-    "shreevigneshs/iwslt-2023-en-ru-train-val-split-0.2": {
-      "bleu": 0.25689
-    }
-  },
-  "Helsinki-NLP/opus-mt-ru-es": {
-    "nuvocare/Ted2020_en_es_fr_de_it_ca_pl_ru_nl": {
-      "bleu": 0.23904
-    }
-  },
-  "t5-small": {
-    "RocioUrquijo/en_de": {
-      "bleu": 0.24444
-    }
-  },
-  "VMware/electra-small-mrqa": {
-    "lionelchg/dolly_closed_qa": {
-      "squad": 21.11445
+    "Helsinki-NLP/opus-mt-en-fr": {
+        "enimai/MuST-C-fr": {
+            "bleu": 0.45351
+        }
     },
-    "HuggingFaceH4/no_robots": {
-      "squad": 5.66417
+    "Helsinki-NLP/opus-mt-ru-en": {
+        "shreevigneshs/iwslt-2023-en-ru-train-val-split-0.2": {
+            "bleu": 0.25689
+        }
     },
-    "starmpcc/Asclepius-Synthetic-Clinical-Notes": {
-      "squad": 3.76924
-    }
-  },
-  "timpal0l/mdeberta-v3-base-squad2": {
-    "lionelchg/dolly_closed_qa": {
-      "squad": 16.23129
+    "Helsinki-NLP/opus-mt-ru-es": {
+        "nuvocare/Ted2020_en_es_fr_de_it_ca_pl_ru_nl": {
+            "bleu": 0.23904
+        }
     },
-    "HuggingFaceH4/no_robots": {
-      "squad": 12.03219
+    "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli": {
+        "mnli": {
+            "accuracy": 0.9
+        }
     },
-    "starmpcc/Asclepius-Synthetic-Clinical-Notes": {
-      "squad": 3.49928
-    }
-  },
-  "cointegrated/rubert-tiny-toxicity": {
-    "OxAISH-AL-LLM/wiki_toxic": {
-      "f1": 0.80000
-    }
-  },
-  "cointegrated/rubert-tiny2-cedr-emotion-detection": {
-    "seara/ru_go_emotions": {
-      "f1": 0.14925
-    }
-  },
-  "papluca/xlm-roberta-base-language-detection": {
-    "papluca/language-identification": {
-      "f1": 1.0
-    }
-  },
-  "fabriceyhc/bert-base-uncased-ag_news": {
-    "ag_news": {
-      "f1": 0.96
-    }
-  },
-  "XSY/albert-base-v2-imdb-calssification": {
-    "imdb": {
-      "f1": 0.74
-    }
-  },
-  "aiknowyou/it-emotion-analyzer": {
-    "dair-ai/emotion": {
-      "f1": 0.31
-    }
-  },
-  "cointegrated/rubert-base-cased-nli-threeway": {
-    "xnli": {
-      "accuracy": 0.31
+    "UrukHan/t5-russian-summarization": {
+        "CarlBrendt/Summ_Dialog_News": {
+            "bleu": 0.00482,
+            "rouge": 0.08133
+        },
+        "IlyaGusev/gazeta": {
+            "bleu": 0.00134,
+            "rouge": 0.09582
+        },
+        "d0rj/curation-corpus-ru": {
+            "bleu": 3.79491e-06,
+            "rouge": 0.12565
+        }
     },
-    "cointegrated/nli-rus-translated-v2021": {
-      "accuracy": 0.78
+    "VMware/electra-small-mrqa": {
+        "HuggingFaceH4/no_robots": {
+            "squad": 8.00973
+        },
+        "lionelchg/dolly_closed_qa": {
+            "squad": 19.98425
+        },
+        "starmpcc/Asclepius-Synthetic-Clinical-Notes": {
+            "squad": 3.60667
+        }
+    },
+    "XSY/albert-base-v2-imdb-calssification": {
+        "imdb": {
+            "f1": 0.74
+        }
+    },
+    "aiknowyou/it-emotion-analyzer": {
+        "dair-ai/emotion": {
+            "f1": 0.31
+        }
+    },
+    "cointegrated/rubert-base-cased-nli-threeway": {
+        "cointegrated/nli-rus-translated-v2021": {
+            "accuracy": 0.78
+        },
+        "xnli": {
+            "accuracy": 0.31
+        }
+    },
+    "cointegrated/rubert-tiny-bilingual-nli": {
+        "terra": {
+            "accuracy": 0.43
+        }
+    },
+    "cointegrated/rubert-tiny-toxicity": {
+        "OxAISH-AL-LLM/wiki_toxic": {
+            "f1": 0.8
+        }
+    },
+    "cointegrated/rubert-tiny2-cedr-emotion-detection": {
+        "seara/ru_go_emotions": {
+            "f1": 0.16
+        }
+    },
+    "cross-encoder/qnli-distilroberta-base": {
+        "qnli": {
+            "accuracy": 0.91
+        }
+    },
+    "dmitry-vorobiev/rubert_ria_headlines": {
+        "CarlBrendt/Summ_Dialog_News": {
+            "bleu": 0.00126,
+            "rouge": 0.04966
+        },
+        "IlyaGusev/gazeta": {
+            "bleu": 0.00038,
+            "rouge": 0.09219
+        },
+        "d0rj/curation-corpus-ru": {
+            "bleu": 1.98888e-07,
+            "rouge": 0.09521
+        },
+        "trixdade/reviews_russian": {
+            "bleu": 1.87213e-05,
+            "rouge": 0.0
+        }
+    },
+    "fabriceyhc/bert-base-uncased-ag_news": {
+        "ag_news": {
+            "f1": 0.96
+        }
+    },
+    "mrm8488/bert-mini2bert-mini-finetuned-cnn_daily_mail-summarization": {
+        "ccdv/govreport-summarization": {
+            "bleu": 3.23536e-06,
+            "rouge": 0.07016
+        },
+        "ccdv/pubmed-summarization": {
+            "bleu": 0.00607,
+            "rouge": 0.12685
+        },
+        "cnn_dailymail": {
+            "bleu": 0.05655,
+            "rouge": 0.22158
+        }
+    },
+    "mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization": {
+        "ccdv/govreport-summarization": {
+            "bleu": 3.75494e-06,
+            "rouge": 0.0692
+        },
+        "ccdv/pubmed-summarization": {
+            "bleu": 0.00567,
+            "rouge": 0.12992
+        },
+        "cnn_dailymail": {
+            "bleu": 0.05981,
+            "rouge": 0.22063
+        }
+    },
+    "nandakishormpai/t5-small-machine-articles-tag-generation": {
+        "ccdv/govreport-summarization": {
+            "bleu": 6.30481e-11,
+            "rouge": 0.02879
+        },
+        "ccdv/pubmed-summarization": {
+            "bleu": 0.00047,
+            "rouge": 0.07849
+        },
+        "cnn_dailymail": {
+            "bleu": 0.06624,
+            "rouge": 0.17864
+        }
+    },
+    "papluca/xlm-roberta-base-language-detection": {
+        "papluca/language-identification": {
+            "f1": 1.0
+        }
+    },
+    "stevhliu/my_awesome_billsum_model": {
+        "CarlBrendt/Summ_Dialog_News": {
+            "bleu": 0.00351,
+            "rouge": 0.07822
+        },
+        "d0rj/curation-corpus-ru": {
+            "bleu": 0.00072,
+            "rouge": 0.12954
+        },
+        "trixdade/reviews_russian": {
+            "bleu": 0.0,
+            "rouge": 0.01052
+        }
+    },
+    "t5-small": {
+        "RocioUrquijo/en_de": {
+            "bleu": 0.24444
+        }
+    },
+    "test_Helsinki-NLP/opus-mt-en-fr": {
+        "enimai/MuST-C-fr": {
+            "bleu": 0.4468
+        }
+    },
+    "test_VMware/electra-small-mrqa": {
+        "starmpcc/Asclepius-Synthetic-Clinical-Notes": {
+            "squad": 5.00464
+        }
+    },
+    "test_aiknowyou/it-emotion-analyzer": {
+        "dair-ai/emotion": {
+            "f1": 0.1
+        }
+    },
+    "test_cointegrated/rubert-base-cased-nli-threeway": {
+        "cointegrated/nli-rus-translated-v2021": {
+            "accuracy": 0.8
+        }
+    },
+    "test_mrm8488/bert-mini2bert-mini-finetuned-cnn_daily_mail-summarization": {
+        "cnn_dailymail": {
+            "bleu": 0.04108,
+            "rouge": 0.23686
+        }
+    },
+    "timpal0l/mdeberta-v3-base-squad2": {
+        "HuggingFaceH4/no_robots": {
+            "squad": 12.68021
+        },
+        "lionelchg/dolly_closed_qa": {
+            "squad": 20.4248
+        },
+        "starmpcc/Asclepius-Synthetic-Clinical-Notes": {
+            "squad": 5.1984
+        }
     }
-  },
-  "cointegrated/rubert-tiny-bilingual-nli": {
-    "terra": {
-      "accuracy": 0.43
-    }
-  },
-  "cross-encoder/qnli-distilroberta-base": {
-    "qnli": {
-      "accuracy": 0.91
-    }
-  },
-  "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli": {
-    "mnli": {
-      "accuracy": 0.9
-    }
-  },
-  "mrm8488/bert-mini2bert-mini-finetuned-cnn_daily_mail-summarization": {
-    "ccdv/govreport-summarization": {
-      "bleu": 3.23536e-06,
-      "rouge": 0.07016
-    },
-    "cnn_dailymail": {
-      "bleu": 0.05655,
-      "rouge": 0.22158
-    },
-    "tomasg25/scientific_lay_summarisation": {
-      "bleu": 0.00645,
-      "rouge": 0.14366
-    },
-    "ccdv/pubmed-summarization": {
-      "bleu": 0.00607,
-      "rouge": 0.12685
-    }
-  },
-  "nandakishormpai/t5-small-machine-articles-tag-generation": {
-    "ccdv/govreport-summarization": {
-      "bleu": 6.30481e-11,
-      "rouge": 0.02879
-    },
-    "cnn_dailymail": {
-      "bleu": 0.06624,
-      "rouge": 0.17864
-    },
-    "tomasg25/scientific_lay_summarisation": {
-      "bleu": 0.00014,
-      "rouge": 0.08101
-    },
-    "ccdv/pubmed-summarization": {
-      "bleu": 0.00047,
-      "rouge": 0.07849
-    }
-  },
-  "mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization": {
-    "ccdv/govreport-summarization": {
-      "bleu": 3.75494e-06,
-      "rouge": 0.06920
-    },
-    "cnn_dailymail": {
-      "bleu": 0.05981,
-      "rouge": 0.22063
-    },
-    "tomasg25/scientific_lay_summarisation": {
-      "bleu": 0.00765,
-      "rouge": 0.15075
-    },
-    "ccdv/pubmed-summarization": {
-      "bleu": 0.00567,
-      "rouge": 0.12992
-    }
-  },
-  "stevhliu/my_awesome_billsum_model": {
-    "d0rj/curation-corpus-ru": {
-      "bleu": 0.00072,
-      "rouge": 0.12954
-    },
-    "CarlBrendt/Summ_Dialog_News": {
-      "bleu": 0.00351,
-      "rouge": 0.07822
-    },
-    "trixdade/reviews_russian": {
-      "bleu": 0.0,
-      "rouge": 0.01052
-    }
-  },
-  "UrukHan/t5-russian-summarization": {
-    "IlyaGusev/gazeta": {
-      "bleu": 0.00134,
-      "rouge": 0.09582
-    },
-    "d0rj/curation-corpus-ru": {
-      "bleu": 3.79491e-06,
-      "rouge": 0.12565
-    },
-    "CarlBrendt/Summ_Dialog_News": {
-      "bleu": 0.00482,
-      "rouge": 0.08133
-    }
-  },
-  "dmitry-vorobiev/rubert_ria_headlines": {
-    "IlyaGusev/gazeta": {
-      "bleu": 0.00038,
-      "rouge": 0.09219
-    },
-    "d0rj/curation-corpus-ru": {
-      "bleu": 1.98888e-07,
-      "rouge": 0.09521
-    },
-    "CarlBrendt/Summ_Dialog_News": {
-      "bleu": 0.00126,
-      "rouge": 0.04966
-    },
-    "trixdade/reviews_russian": {
-      "bleu": 1.87213e-05,
-      "rouge": 0.0
-    }
-  },
-  "test_mrm8488/bert-mini2bert-mini-finetuned-cnn_daily_mail-summarization": {
-    "cnn_dailymail": {
-      "bleu": 0.04108,
-      "rouge": 0.23664
-    }
-  },
-  "test_Helsinki-NLP/opus-mt-en-fr": {
-    "enimai/MuST-C-fr": {
-      "bleu": 0.44680
-    }
-  },
-  "test_cointegrated/rubert-base-cased-nli-threeway": {
-    "cointegrated/nli-rus-translated-v2021": {
-      "accuracy": 0.78
-    }
-  },
-  "test_VMware/electra-small-mrqa": {
-    "starmpcc/Asclepius-Synthetic-Clinical-Notes": {
-      "squad": 5.00464
-    }
-  },
-  "test_aiknowyou/it-emotion-analyzer": {
-    "dair-ai/emotion": {
-      "f1": 0.1
-    }
-  }
 }
