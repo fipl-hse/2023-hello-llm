@@ -35,8 +35,10 @@ matrix:
       docstrings: true
       comments: false
   sources:
-#  - 'lab*/**/*.py'
-#  - 'lab*/*.py'
+  - 'lab*/**/*.py'
+  - 'lab*/*.py'
+  - 'reference_lab*/*.py'
+  - 'reference_lab*/**/*.py'
   - 'config/**/*.py'
   - 'config/*.py'
   default_encoding: utf-8
