@@ -184,21 +184,22 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-        summary = self._get_summary()
         embeddings_length = self._model.config.max_position_embeddings
-        ids = torch.ones(1, embeddings_length, dtype=torch.long)
+        ids = torch.ones(self._batch_size, embeddings_length, dtype=torch.long)
+        model_summary = self._get_summary(ids)
         input_shape = {
-            'input_ids': ids,
-            'attention_mask': ids
+            'input_ids': [ids.shape[0], ids.shape[1]],
+            'attention_mask': [ids.shape[0], ids.shape[1]]
         }
+
         info = {
             'input_shape': input_shape,
             'embedding_size': embeddings_length,
-            'output_shape': [summary.summary_list[-1].output_size],
-            'num_trainable_params': summary.trainable_params,
+            'output_shape': model_summary.summary_list[-1].output_size,
+            'num_trainable_params': model_summary.trainable_params,
             'vocab_size': self._model.config.vocab_size,
-            'size': summary.total_param_bytes,
-            'max_context_length': embeddings_length
+            'size': model_summary.total_param_bytes,
+            'max_context_length': 'idk where to get it'
         }
         return info
 
@@ -223,7 +224,7 @@ class LLMPipeline(AbstractLLMPipeline):
             pd.DataFrame: Data with predictions
         """
 
-    def _get_summary(self) -> torchinfo.model_statistics.ModelStatistics:
+    def _get_summary(self, ids) -> torchinfo.model_statistics.ModelStatistics:
         """
         Get model summary using torchinfo
 
@@ -231,11 +232,8 @@ class LLMPipeline(AbstractLLMPipeline):
             torchinfo.model_statistics.ModelStatistics: model summary
         """
         data = {
-            'input_ids': torch.ones(
-                self._batch_size,
-                self._model.config.max_position_embeddings,
-                dtype=torch.long
-            )
+            'input_ids': ids,
+            'attention_mask': ids
         }
         return torchinfo.summary(self._model, input_data=data)
 
