@@ -183,14 +183,6 @@
         "dataset_sample_max_len": 717,
         "dataset_sample_min_len": 12
     },
-    "tomasg25/scientific_lay_summarisation": {
-        "dataset_columns": 6,
-        "dataset_duplicates": 0,
-        "dataset_empty_rows": 0,
-        "dataset_number_of_samples": 1376,
-        "dataset_sample_max_len": 103098,
-        "dataset_sample_min_len": 7909
-    },
     "trixdade/reviews_russian": {
         "dataset_columns": 2,
         "dataset_duplicates": 0,
