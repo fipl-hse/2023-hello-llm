@@ -3,10 +3,9 @@ HuggingFace evaluate listing.
 """
 # pylint: disable=duplicate-code
 
-import torch
-from evaluate import load
 
 try:
+    from torch import argmax
     from torch.utils.data import DataLoader, Dataset
 except ImportError:
     print('Library "torch" not installed. Failed to import.')
@@ -30,8 +29,13 @@ try:
 except ImportError:
     print('Library "transformers" not installed. Failed to import.')
 
+try:
+    from evaluate import load
+except ImportError:
+    print('Library "evaluate" not installed. Failed to import.')
 
-class TaskDataset(Dataset):
+
+class TaskDataset(Dataset):  # type: ignore
     """
     Dataset with translation data.
     """
@@ -93,7 +97,7 @@ def main() -> None:
     for batch_data in dataset_loader:
         ids = tokenizer(batch_data, padding=True, truncation=True, return_tensors='pt')
         output = model(**ids).logits
-        predictions.extend(torch.argmax(output, dim=1).tolist())
+        predictions.extend(list(argmax(output, dim=1)))
 
     # 5. Print predictions
     print('Predictions:', predictions)

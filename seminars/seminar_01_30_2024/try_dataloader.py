@@ -23,7 +23,7 @@ except ImportError:
     load_dataset = None  # type: ignore
 
 
-class TaskDataset(Dataset):
+class TaskDataset(Dataset):  # type: ignore
     """
     Dataset with translation data.
     """
