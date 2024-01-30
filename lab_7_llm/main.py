@@ -8,7 +8,7 @@ from typing import Iterable, Sequence
 
 from datasets import load_dataset
 from torchinfo import summary
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 try:
     import torch
