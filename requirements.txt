@@ -2,7 +2,7 @@ datasets==2.16.1
 pandas==2.1.4
 pydantic==2.5.3
 pytest==7.4.4
-torchinfo==1.8.0
 torch==2.1.2
+torchinfo==1.8.0
 tqdm==4.66.1
 transformers==4.37.1
