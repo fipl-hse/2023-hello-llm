@@ -6,6 +6,7 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 from datasets import load_dataset
+from transformers import pipeline
 
 try:
     import torch
@@ -34,9 +35,6 @@ class RawDataImporter(AbstractRawDataImporter):
     A class that imports the HuggingFace dataset.
     """
 
-    def __init__(self, _hf_name):
-        super().__init__(_hf_name)
-
     @report_time
     def obtain(self) -> None:
         """
@@ -45,8 +43,8 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-
-        raw_dataset = load_dataset("RussianNLP/russian_super_glue", self._hf_name,
+        raw_dataset = load_dataset("RussianNLP/russian_super_glue",
+                                   name=self._hf_name,
                                    split='validation')
         self._raw_data = raw_dataset.to_pandas()
 
@@ -69,8 +67,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         analyze_dict = {
             "dataset_number_of_samples": self._raw_data.shape[0],
             "dataset_columns": self._raw_data.shape[1],
-            "dataset_duplicates": self._raw_data.duplicated(keep='first').sum(),
-            "dataset_empty_rows": self._raw_data.isna().sum().sum(),
+            "dataset_duplicates": len(self._raw_data[self._raw_data.duplicated()]),
+            "dataset_empty_rows": len(self._raw_data[self._raw_data.isna().any(axis=1)]),
             "dataset_sample_min_len": min(self._raw_data['premise'].str.len().min(),
                                           self._raw_data['hypothesis'].str.len().min()),
             "dataset_sample_max_len": max(self._raw_data['premise'].str.len().max(),
@@ -83,6 +81,16 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        self._data = self._raw_data.rename(columns={
+            "label": "target"
+        }
+        )
+        self._data = self._raw_data.drop_duplicates(subset=['premise',
+                                                            'hypothesis'],
+                                                    keep='last')
+        self._data = (self._raw_data.dropna()
+                      .reset_index(drop=True)
+                      .drop(['idx'], axis=1))
 
 
 class TaskDataset(Dataset):
@@ -97,6 +105,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+        self._data = data
 
     def __len__(self) -> int:
         """
@@ -105,6 +114,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+        return self._data.shape[0]
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -116,6 +126,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
+        return self._data.iloc[index].premise, self._data.iloc[index].hypothesis
 
     @property
     def data(self) -> DataFrame:
@@ -125,6 +136,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
+        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
