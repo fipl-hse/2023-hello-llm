@@ -82,7 +82,8 @@ disable_error_code = [
 
 [[tool.mypy.overrides]]
 module = [
-    'config.get_datasets_analytics'
+    'config.get_datasets_analytics',
+    'config.get_references',
 ]
 disable_error_code = [
     'import-not-found'
