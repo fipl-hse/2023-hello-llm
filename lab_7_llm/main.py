@@ -42,7 +42,7 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = load_dataset(self._hf_name, name='default', split='test').to_pandas()
+        self._raw_data = load_dataset(self._hf_name, name='default', split='train').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -57,14 +57,13 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
-        dataset_properties = {'Number of samples in dataset': self._raw_data.shape[0],
-                              'Number of columns in dataset': self._raw_data.shape[1],
-                              'Number of duplicates in dataset': self._raw_data.duplicated().sum(),
-                              'Number of empty rows in dataset': self._raw_data.isna().sum(),
-                              'Minimal length of the dataset sample in source column(s)':
-                                  self._raw_data['Reviews'].str.len().min(),
-                              'Maximal length of the dataset sample in source column(s)':
-                                  self._raw_data['Reviews'].str.len().max()}
+        dataset_properties = {'dataset_columns': self._raw_data.shape[1],
+                              'dataset_duplicates': self._raw_data.duplicated().sum(),
+                              'dataset_empty_rows': self._raw_data.isna().sum(),
+                              'dataset_number_of_samples': self._raw_data.shape[0],
+                              'dataset_sample_max_len': self._raw_data['Reviews'].str.len().min(),
+                              'dataset_sample_min_len': self._raw_data['Reviews'].str.len().max()}
+        print(dataset_properties)
         return dataset_properties
 
     @report_time
