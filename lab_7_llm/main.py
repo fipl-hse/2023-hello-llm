@@ -163,7 +163,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         config = self._model.config
         embeddings_length = config.max_position_embeddings
-        ids = torch.ones(self._batch_size, embeddings_length, dtype=torch.long)
+        ids = torch.ones(1, embeddings_length, dtype=torch.long)
         input_data = {
             'input_ids': ids,
             'decoder_input_ids': ids
@@ -175,7 +175,7 @@ class LLMPipeline(AbstractLLMPipeline):
             verbose=0
         )
         return {
-            'input_shape': [self._batch_size, config.max_length],
+            'input_shape': [1, config.max_length],
             'embedding_size': embeddings_length,
             'output_shape': model_stats.summary_list[-1].output_size,
             'num_trainable_params': model_stats.trainable_params,
