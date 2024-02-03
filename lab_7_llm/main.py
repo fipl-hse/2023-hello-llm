@@ -3,6 +3,7 @@ Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
+from datasets import load_dataset
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
@@ -41,13 +42,18 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        self._raw_data = load_dataset("OxAISH-AL-LLM/wiki_toxic",
+                                      name=self._hf_name,
+                                      split='balanced_train').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     A class that analyzes and preprocesses a dataset.
     """
-
+    def __init__(self, _raw_data):
+        super().__init__(_raw_data)
+        
     def analyze(self) -> dict:
         """
         Analyze a dataset.
@@ -55,6 +61,19 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        dataset_info = {
+            "dataset_number_of_samples": self._raw_data.shape[0],
+            "dataset_columns": self._raw_data.shape[1],
+            "dataset_duplicates": self._raw_data.duplicated().sum(),
+            "dataset_empty_rows": self._raw_data.isna().any(axis=1).sum(),
+        }
+
+        no_empty_rows_ds = self._raw_data.dropna(subset=["comment_text"])
+
+        dataset_info["dataset_sample_min_len"] = len(min(no_empty_rows_ds["comment_text"], key=len))
+        dataset_info["dataset_sample_max_len"] = len(max(no_empty_rows_ds["comment_text"], key=len))
+
+        return dataset_info
 
     @report_time
     def transform(self) -> None:
