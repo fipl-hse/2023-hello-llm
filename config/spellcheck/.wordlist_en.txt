@@ -111,6 +111,7 @@ curation
 dailymail
 dair
 data
+dataclass
 dataframe
 dataloader
 dataset
@@ -137,6 +138,7 @@ dmitry
 doc
 docstring
 docstrings
+doctest
 done
 download
 drive
@@ -235,6 +237,7 @@ he
 head
 hello
 helsinki-nlp
+helsinkinlpmodel
 hey
 how
 https
@@ -247,6 +250,7 @@ ilyagusev
 imdb
 important
 in
+inferenceparams
 init
 instantiation
 int
@@ -295,6 +299,7 @@ mac
 macos
 made
 main
+mainparams
 math
 max
 mdeberta
@@ -303,6 +308,7 @@ merge
 message
 meth
 metric
+michellejieli
 missing
 mle
 mnli
@@ -334,6 +340,7 @@ nlp
 nmt
 none
 normal
+norobots
 nose
 notation
 note
@@ -364,6 +371,7 @@ params
 pass
 pat
 path
+pathlib
 people
 perfectly
 permission
@@ -409,6 +417,7 @@ put
 py
 pycharm
 pycharmprojects
+pydantic
 pydocstyle
 pydoctest
 pylint
@@ -493,6 +502,7 @@ taskdataset
 taskevaluator
 tba
 tbd
+templateresponse
 templating
 text
 textprocessor
@@ -518,6 +528,7 @@ tokenizer
 tokenizers
 tokenizing
 tokens
+tol
 tomasg
 toml
 tools
@@ -567,6 +578,7 @@ whl
 width
 wikiomnia
 windows
+wite
 with
 wo
 word
