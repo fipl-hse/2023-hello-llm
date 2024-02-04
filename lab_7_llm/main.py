@@ -168,7 +168,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-        tensor_data = torch.ones(1, 512, dtype=torch.long)
+        tensor_data = torch.ones(1, self._model.config.max_position_embeddings, dtype=torch.long)
         input_data = {"input_ids": tensor_data,
                       "attention_mask": tensor_data}
         model_statistics = summary(self._model, input_data=input_data, verbose=False)
