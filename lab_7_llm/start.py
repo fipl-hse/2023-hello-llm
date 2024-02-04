@@ -23,9 +23,11 @@ def main() -> None:
     preprocessed_ds.transform()
     task_ds = TaskDataset(preprocessed_ds.data.head(100))
     result = LLMPipeline(model_name=settings["parameters"]["model"], dataset=task_ds,
-                         max_length=512, batch_size=1, device='cpu')
+                         max_length=120, batch_size=1, device='cpu')
     result.analyze_model()
     print(result.infer_sample(task_ds.__getitem__(0)))
+    # result.infer_dataset()
+
     assert result is not None, "Demo does not work correctly"
 
 
