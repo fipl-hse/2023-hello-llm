@@ -8,7 +8,7 @@ from typing import Iterable, Sequence
 
 from datasets import load_dataset
 from torchinfo import summary
-from transformers import BertForSequenceClassification
+from transformers import AutoTokenizer, BertForSequenceClassification
 
 try:
     import torch
@@ -80,19 +80,19 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._raw_data = (self._raw_data.
-                          loc[self._raw_data["source"] == "mnli"].
-                          loc[:, ["premise_ru", "hypothesis_ru", "label"]].
-                          rename(columns={
+        self._data = (self._raw_data.
+                      loc[self._raw_data["source"] == "mnli"].
+                      loc[:, ["premise_ru", "hypothesis_ru", "label"]].
+                      rename(columns={
                                 "premise_ru": "premise",
                                 "hypothesis_ru": "hypothesis",
                                 "label": "target"}).
-                          dropna().
-                          reset_index())
+                      dropna().
+                      reset_index())
 
-        self._raw_data["target"].replace({"entailment": "entailment",
-                                          "contradiction": "contradiction",
-                                          "neutral": "neutral"}, inplace=True)
+        self._data["target"].replace({"entailment": "entailment",
+                                      "contradiction": "contradiction",
+                                      "neutral": "neutral"}, inplace=True)
 
 
 class TaskDataset(Dataset):
@@ -107,7 +107,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
-        super().__init__(data)
+        self._data = data
 
     def __len__(self) -> int:
         """
@@ -116,7 +116,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
-        return len(self.data)
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -128,7 +128,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self.data.iloc[index]
+        return "|".join((self._data.iloc[index]["premise"], self._data.iloc[index]["hypothesis"])),
 
     @property
     def data(self) -> DataFrame:
@@ -138,7 +138,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
-        return self.data
+        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
@@ -159,7 +159,7 @@ class LLMPipeline(AbstractLLMPipeline):
             device (str): The device for inference
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
-        self._model = BertForSequenceClassification(self._model_name)
+        self._model = BertForSequenceClassification.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -169,7 +169,7 @@ class LLMPipeline(AbstractLLMPipeline):
             dict: Properties of a model
         """
         tensor_data = torch.ones(1, 512, dtype=torch.long)
-        input_data = {"inputs_ids": tensor_data,
+        input_data = {"input_ids": tensor_data,
                       "attention_mask": tensor_data}
         model_statistics = summary(self._model, input_data=input_data, verbose=False)
         size, num_trainable_params, last_layer = (model_statistics.total_params,
@@ -194,6 +194,12 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        tokens = tokenizer(sample[0].split("|")[0], sample[0].split("|")[1], return_tensors='pt')
+        output = self._model(**tokens)
+        predictions = torch.argmax(output.logits).item()
+        labels = self._model.config.id2label
+        return str(predictions)
 
     @report_time
     def infer_dataset(self) -> DataFrame:
