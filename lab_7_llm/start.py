@@ -24,7 +24,7 @@ def main() -> None:
     preprocessed_ds = RawDataPreprocessor(ds_obtained.raw_data)
     preprocessed_ds.analyze()
     preprocessed_ds.transform()
-    task_ds = TaskDataset(preprocessed_ds.data.head(100))
+    task_ds = TaskDataset(preprocessed_ds.data().head(100))
     llm_infer = LLMPipeline(model_name=settings["parameters"]["model"], dataset=task_ds,
                             max_length=120, batch_size=64, device='cpu')
     llm_infer.analyze_model()
