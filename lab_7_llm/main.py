@@ -43,12 +43,7 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        dataset = load_dataset("HuggingFaceH4/no_robots", split='train_sft')
-        print(len(dataset))
-        pd_dts = dataset.to_pandas()
-        pd_dts = pd_dts.drop(['prompt_id', 'category'], axis=1)
-        pd_dts = pd_dts.rename(columns={'prompt': 'questions'}, inplace=False)
-        print(pd_dts.head())
+        self._raw_data = load_dataset("HuggingFaceH4/no_robots", split='train_sft').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -69,6 +64,10 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
+
+        self._raw_data = self._raw_data[(self._raw_data.category == 'Closed QA')]
+        self._raw_data = self._raw_data.drop(['prompt_id', 'category'], axis=1)
+        self._raw_data = self._raw_data.rename(columns={'prompt': 'questions'}, inplace=False)
 
 
 class TaskDataset(Dataset):
@@ -205,3 +204,13 @@ class TaskEvaluator(AbstractTaskEvaluator):
 
 importer = RawDataImporter('')
 importer.obtain()
+
+# Load model directly
+from transformers import AutoTokenizer, AutoModelForQuestionAnswering
+
+tokenizer = AutoTokenizer.from_pretrained("timpal0l/mdeberta-v3-base-squad2")
+model = AutoModelForQuestionAnswering.from_pretrained("timpal0l/mdeberta-v3-base-squad2")
+question = "Where do I live?"
+context = "My name is Tim and I live in Sweden."
+tokens = tokenizer(question, context, return_tensors='pt')
+print(tokens)
