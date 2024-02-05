@@ -1,4 +1,40 @@
 {
+    "EleutherAI/gpt-neo-125m": {
+        "jtatman/databricks-dolly-8k-qa-open-close": {
+            "bleu": 0.02151,
+            "rouge": 0.10597
+        },
+        "lionelchg/dolly_open_qa": {
+            "bleu": 0.01601,
+            "rouge": 0.09841
+        },
+        "tatsu-lab/alpaca": {
+            "bleu": 0.01733,
+            "rouge": 0.10234
+        },
+        "truthful_qa": {
+            "bleu": 0.00913,
+            "rouge": 0.05221
+        }
+    },
+    "EleutherAI/pythia-160m-deduped": {
+        "jtatman/databricks-dolly-8k-qa-open-close": {
+            "bleu": 0.02282,
+            "rouge": 0.10471
+        },
+        "lionelchg/dolly_open_qa": {
+            "bleu": 0.01259,
+            "rouge": 0.08761
+        },
+        "tatsu-lab/alpaca": {
+            "bleu": 0.01679,
+            "rouge": 0.10385
+        },
+        "truthful_qa": {
+            "bleu": 0.00667,
+            "rouge": 0.04617
+        }
+    },
     "Helsinki-NLP/opus-mt-en-fr": {
         "enimai/MuST-C-fr": {
             "bleu": 0.45351
@@ -12,6 +48,24 @@
     "Helsinki-NLP/opus-mt-ru-es": {
         "nuvocare/Ted2020_en_es_fr_de_it_ca_pl_ru_nl": {
             "bleu": 0.23904
+        }
+    },
+    "JackFram/llama-68m": {
+        "jtatman/databricks-dolly-8k-qa-open-close": {
+            "bleu": 0.01666,
+            "rouge": 0.08852
+        },
+        "lionelchg/dolly_open_qa": {
+            "bleu": 0.01337,
+            "rouge": 0.09282
+        },
+        "tatsu-lab/alpaca": {
+            "bleu": 0.01168,
+            "rouge": 0.08808
+        },
+        "truthful_qa": {
+            "bleu": 0.00634,
+            "rouge": 0.05378
         }
     },
     "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli": {
@@ -29,7 +83,7 @@
             "rouge": 0.09582
         },
         "d0rj/curation-corpus-ru": {
-            "bleu": 3.79491e-06,
+            "bleu": 0.0,
             "rouge": 0.12565
         }
     },
@@ -92,11 +146,11 @@
             "rouge": 0.09219
         },
         "d0rj/curation-corpus-ru": {
-            "bleu": 1.98888e-07,
+            "bleu": 0.0,
             "rouge": 0.09521
         },
         "trixdade/reviews_russian": {
-            "bleu": 1.87213e-05,
+            "bleu": 1e-05,
             "rouge": 0.0
         }
     },
@@ -107,7 +161,7 @@
     },
     "mrm8488/bert-mini2bert-mini-finetuned-cnn_daily_mail-summarization": {
         "ccdv/govreport-summarization": {
-            "bleu": 3.23536e-06,
+            "bleu": 0.0,
             "rouge": 0.07016
         },
         "ccdv/pubmed-summarization": {
@@ -121,7 +175,7 @@
     },
     "mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization": {
         "ccdv/govreport-summarization": {
-            "bleu": 3.75494e-06,
+            "bleu": 0.0,
             "rouge": 0.0692
         },
         "ccdv/pubmed-summarization": {
@@ -135,7 +189,7 @@
     },
     "nandakishormpai/t5-small-machine-articles-tag-generation": {
         "ccdv/govreport-summarization": {
-            "bleu": 6.30481e-11,
+            "bleu": 0.0,
             "rouge": 0.02879
         },
         "ccdv/pubmed-summarization": {
@@ -197,6 +251,12 @@
             "rouge": 0.23686
         }
     },
+    "test_JackFram/llama-68m": {
+        "tatsu-lab/alpaca": {
+            "bleu": 0.0,
+            "rouge": 0.08789
+        }
+    },
     "timpal0l/mdeberta-v3-base-squad2": {
         "HuggingFaceH4/no_robots": {
             "squad": 12.68021
@@ -206,6 +266,36 @@
         },
         "starmpcc/Asclepius-Synthetic-Clinical-Notes": {
             "squad": 5.1984
+        },
+        "sberquad": {
+            "squad": 87.31313131313132
+        },
+        "RussianNLP/wikiomnia": {
+            "squad": 39.666666666666664
+        }
+    },
+    "blanchefort/rubert-base-cased-sentiment-rusentiment": {
+        "blinoff/kinopoisk": {
+            "f1": 0.64
+        },
+        "blinoff/healthcare_facilities_reviews": {
+            "f1": 0.71
+        }
+    },
+    "tatiana-merz/turkic-cyrillic-classifier": {
+        "tatiana-merz/cyrillic_turkic_langs": {
+            "f1": 0.22
+        }
+    },
+    "s-nlp/russian_toxicity_classifier": {
+        "s-nlp/ru_paradetox_toxicity": {
+            "f1": 0.73
+        },
+        "s-nlp/ru_non_detoxified": {
+            "f1": 0.77
+        },
+        "d0rj/rudetoxifier_data": {
+            "f1": 1.0
         }
     }
 }

@@ -9,6 +9,7 @@ markers = [
     "reference_lab_summarization: tests for summarization task",
     "reference_lab_nli: tests for nli task",
     "reference_lab_generation: tests for generation task",
+    "reference_lab_open_qa: tests for open generative Q&A task",
     "lab_7_llm: tests for lab 7",
 ]
 norecursedirs = [

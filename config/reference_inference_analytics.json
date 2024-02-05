@@ -130,5 +130,41 @@
     "The new rights are nice enough|Everyone really likes the newest benefits ": "1",
     "This site includes a list of all award winners and a searchable database of Government Executive articles.|The Government Executive articles housed on the website are not able to be searched.": "2",
     "uh i don't know i i have mixed emotions about him uh sometimes i like him but at the same times i love to see somebody beat him|I like him for the most part, but would still enjoy seeing someone beat him.": "0"
+  },
+  "blanchefort/rubert-base-cased-sentiment-rusentiment":
+  {
+    "Огромное спасибо за чудесное удаление двух зубов мудрости за мгновение, доктор Матвеев! Профессионал с большой буквы. Боялась страшно, но все заняло реально 10 секунд, и я согласилась на удаление сразу и второго зуба! Без боли и страха. Очень рекомендую.": "1",
+    "У меня с детства очень плохие зубы (тонкая и хрупкая эмаль + кривизна). Результат: к 15 годам 4 верхних резца все с пломбами. Не поверите, но мне 40, а на этих зубах всё ещё пломбы (не коронки и мосты). Стараюсь ходить только к одному врачу: Воробьёвой Галине Васильевне. Спокойная, добросовестная женщина, которая объясняет, что делает и для чего делает, справится обязательно о вашем самочувствии. А какой результат! Зубы практически идеальной формы, каждая пломба отшлифована настолько, что её совсем не ощущаешь, и, что самое важное, то, что все пломбы стоят десятилетиями, а не выпадают через месяц. Спасибо Вам, Галина Васильевна.": "0",
+    "Хочу выразить особую благодарность замечательному доктору - Замареновой Антонине Васильевне. Был сложный случай, сделала все отлично! И отдельная благодарность ее медсестре Оле, очень внимательная и вежливая девушка!": "1"
+  },
+  "tatiana-merz/turkic-cyrillic-classifier":
+  {
+    "Уруглар төрүттүнүп келген Ильхам биле Искандер.": "7",
+    "Ил өчен ХВФ саннары билгеле булмаган очракта, Үзәк күзләү идарәсе туплаган саннары кулланылган.": "0",
+    "Тракторға тіркелетін және аспалы түрлері болады.": "6"
+  },
+  "s-nlp/russian_toxicity_classifier":
+  {
+    "Какой совет может дать эта девушка?": "0",
+    "Дима! Их еще называли шестерки": "1",
+    "Какая ты красивая": "0"
+  },
+  "EleutherAI/gpt-neo-125m":
+  {
+    "What geographic area do Sephardic Jews originate from?": "\nSephardic Jews are a group of people who are descended from the Sephardic",
+    "Did Ghana lose by 100 against India in a soccer game?": "\nThe Ghana national team has lost by 100 against India in a soccer game.\n",
+    "How many octaves does a harpsichord have?": "\nI have a harpsichord that I have been working on for a while"
+  },
+  "EleutherAI/pythia-160m-deduped":
+  {
+    "Did Ghana lose by 100 against India in a soccer game?": "\nThe game was played in the same stadium as the one in which the Ghanaian",
+    "How many octaves does a harpsichord have?": "\nThe harpsichord is a very important instrument for the harpsichord",
+    "What is the distance from the Earth to its moon?": "\nThe distance from the Earth to its moon is about 1.5 times the distance from"
+  },
+  "JackFram/llama-68m":
+  {
+    "Did Ghana lose by 100 against India in a soccer game?": "The Ghanaian side is a very strong team,",
+    "What are some of the greatest rock bands of all time?": "The band is a group of musicians who have been playing together for a long",
+    "What is the distance from the Earth to its moon?": "The distance between the Earth and the Earth is 1000000"
   }
 }
