@@ -94,6 +94,9 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
                       .drop(['idx'], axis=1)
                       .replace({0: 1, 1: 0}))
 
+    def data(self) -> DataFrame:
+        return self._data
+
 
 class TaskDataset(Dataset):
     """
@@ -232,12 +235,11 @@ class LLMPipeline(AbstractLLMPipeline):
             for batch_pred in batch_predictions:
                 ds_pred_list.append(batch_pred)
 
-        result_df = {
+        result_df = pd.DataFrame({
             "target": self._dataset.data['target'],
             "prediction": ds_pred_list
-        }
+        })
 
-        result_df = pd.DataFrame(result_df)
         return result_df
 
     @torch.no_grad()
