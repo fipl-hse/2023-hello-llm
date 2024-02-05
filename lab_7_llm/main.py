@@ -8,6 +8,7 @@ from typing import Iterable, Sequence
 
 import pandas as pd
 from datasets import load_dataset
+from evaluate import load
 from torchinfo import summary
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
@@ -86,16 +87,15 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._data = self._raw_data.rename(columns={
+        self._data = (self._raw_data.rename(columns={
             "label": "target"
         }
         )
-        self._data = self._raw_data.drop_duplicates(subset=['premise',
-                                                            'hypothesis'],
-                                                    keep='last')
-        self._data = (self._raw_data.dropna()
+                      .drop_duplicates(subset=['premise', 'hypothesis'], keep='last')
+                      .dropna()
                       .reset_index(drop=True)
-                      .drop(['idx'], axis=1))
+                      .drop(['idx'], axis=1)
+                      .replace({0: 1, 1: 0}))
 
 
 class TaskDataset(Dataset):
@@ -210,7 +210,9 @@ class LLMPipeline(AbstractLLMPipeline):
         if len(sample) < 2:
             sample = sample[0].split('|')
             sample = [(sample[0],), (sample[1],)]
+
         prediction = self._infer_batch(sample)
+
         return str(prediction[0])
 
     @report_time
@@ -221,33 +223,24 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+
         dloader = DataLoader(dataset=self._dataset, batch_size=10)
 
-        ds_premise = []
-        ds_hypothesis = []
         ds_pred_list = []
 
         for batch in dloader:
 
             batch_pred = self._infer_batch(batch)
 
-            for t in batch[0]:
-                ds_premise.append(t)
-
-            for t in batch[1]:
-                ds_hypothesis.append(t)
-
             for t in batch_pred:
                 ds_pred_list.append(t)
 
         result_df = {
-            "premise": ds_premise,
-            "hypothesis": ds_hypothesis,
+            "target": self._dataset.data['target'],
             "prediction": ds_pred_list
         }
 
         result_df = pd.DataFrame(result_df)
-        print(result_df)
         return result_df
 
     @torch.no_grad()
@@ -263,7 +256,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         batch_pred_list = []
 
-        if len(sample_batch[0]) > 2:
+        if isinstance(sample_batch, list) and len(sample_batch[0]) > 2:
             for sequence in sample_batch[0]:
                 hypothesis_index = sample_batch[0].index(sequence)
 
@@ -304,6 +297,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        self._data_path = data_path
+        self._metrics = str(metrics[0])
 
     @report_time
     def run(self) -> dict | None:
@@ -313,3 +308,9 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        df_to_evaluate = pd.read_csv(self._data_path)
+        metric = load(self._metrics)
+        metrics_evaluation = metric.compute(references=df_to_evaluate['target'].tolist(),
+                                            predictions=df_to_evaluate['prediction'].tolist()
+                                            )
+        return metrics_evaluation
