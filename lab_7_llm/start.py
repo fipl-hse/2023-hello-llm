@@ -17,18 +17,18 @@ def main() -> None:
     """
     Run the translation pipeline.
     """
-    settings_path = open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', "r")
-    settings = json.load(settings_path)
-    ds = RawDataImporter(settings["parameters"]["dataset"])
-    ds.obtain()
-    preprocessed_ds = RawDataPreprocessor(ds.raw_data)
+    with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', "r", encoding='utf-8') as settings_path:
+        settings = json.load(settings_path)
+    ds_obtained = RawDataImporter(settings["parameters"]["dataset"])
+    ds_obtained.obtain()
+    preprocessed_ds = RawDataPreprocessor(ds_obtained.raw_data)
     preprocessed_ds.analyze()
     preprocessed_ds.transform()
     task_ds = TaskDataset(preprocessed_ds.data.head(100))
     llm_infer = LLMPipeline(model_name=settings["parameters"]["model"], dataset=task_ds,
                             max_length=120, batch_size=64, device='cpu')
     llm_infer.analyze_model()
-    llm_infer.infer_sample(task_ds.__getitem__(0))
+    llm_infer.infer_sample(task_ds[0])
     if not os.path.exists('./dist'):
         os.mkdir('./dist')
     llm_infer.infer_dataset().to_csv('./dist/predictions.csv', index=False)

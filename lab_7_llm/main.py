@@ -60,9 +60,6 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
     A class that analyzes and preprocesses a dataset.
     """
 
-    def __init__(self, _raw_data):
-        super().__init__(_raw_data)
-
     def analyze(self) -> dict:
         """
         Analyze a dataset.
@@ -230,10 +227,10 @@ class LLMPipeline(AbstractLLMPipeline):
 
         for batch in dloader:
 
-            batch_pred = self._infer_batch(batch)
+            batch_predictions = self._infer_batch(batch)
 
-            for t in batch_pred:
-                ds_pred_list.append(t)
+            for batch_pred in batch_predictions:
+                ds_pred_list.append(batch_pred)
 
         result_df = {
             "target": self._dataset.data['target'],
