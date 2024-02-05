@@ -5,10 +5,10 @@ Neural machine translation module.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
-from datasets import load_dataset
 
+from datasets import load_dataset
 from torchinfo import summary
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 try:
     import torch
