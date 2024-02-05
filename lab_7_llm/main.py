@@ -284,7 +284,10 @@ class LLMPipeline(AbstractLLMPipeline):
             )
             output = self._model(**tokens).logits
             predictions.extend(list(torch.argmax(output, dim=1)))
-        return pd.concat([self._dataset.data['target'], pd.Series(predictions, name='predictions')], axis=1)
+        return pd.concat(
+            [self._dataset.data['target'], pd.Series(predictions, name='predictions')],
+            axis=1
+        )
 
     def _get_summary(self, ids: torch.Tensor) -> torchinfo.model_statistics.ModelStatistics:
         """
