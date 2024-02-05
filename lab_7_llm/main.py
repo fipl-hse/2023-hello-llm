@@ -252,14 +252,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        if self._model is None:
-            return None
-        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-        tokens = tokenizer(sample[0], sample[1], return_tensors='pt')
-        output = self._model(**tokens)
-        prediction = torch.argmax(output.logits).item()
-        labels = self._model.config.id2label
-        return labels[prediction]
+        return None if self._model is None else self._infer_batch((sample,))[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -270,20 +263,9 @@ class LLMPipeline(AbstractLLMPipeline):
             pd.DataFrame: Data with predictions
         """
         predictions = []
-
         loader = DataLoader(self._dataset, batch_size=self._batch_size)
-        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-
         for batch in loader:
-            tokens = tokenizer(
-                batch[0],
-                batch[1],
-                padding=True,
-                truncation=True,
-                return_tensors='pt'
-            )
-            output = self._model(**tokens).logits
-            predictions.extend(list(torch.argmax(output, dim=1)))
+            predictions.extend(self._infer_batch(batch))
         return pd.concat(
             [self._dataset.data['target'], pd.Series(predictions, name='predictions')],
             axis=1
@@ -316,6 +298,25 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        if len(sample_batch) == 1:
+            tokens = tokenizer(
+                sample_batch[0][0],
+                sample_batch[0][1],
+                padding=True,
+                truncation=True,
+                return_tensors='pt'
+            )
+        else:
+            tokens = tokenizer(
+                sample_batch[0],
+                sample_batch[1],
+                padding=True,
+                truncation=True,
+                return_tensors='pt'
+            )
+        output = self._model(**tokens).logits
+        return [str(prediction.item()) for prediction in list(torch.argmax(output, dim=1))]
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
