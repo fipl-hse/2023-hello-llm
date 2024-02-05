@@ -20,6 +20,9 @@ def main() -> None:
 
     preprocessor = RawDataPreprocessor(loader.raw_data)
     result = preprocessor.analyze()
+    print(result)
+
+    preprocessor.transform()
 
     assert result is not None, "Demo does not work correctly"
 

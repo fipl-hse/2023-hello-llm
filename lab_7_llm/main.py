@@ -33,7 +33,6 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
-
     @report_time
     def obtain(self) -> None:
         """
@@ -42,12 +41,7 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-
-        def main() -> None:
-            """
-            Entrypoint for the listing.
-            """
-            self._raw_data = load_dataset(self._hf_name, split='train').to_pandas()
+        self._raw_data = load_dataset(self._hf_name, split='train').to_pandas()
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
@@ -66,8 +60,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
                     'dataset_columns': self._raw_data.shape[1],
                     'dataset_duplicates': self._raw_data.duplicated().sum(),
                     'dataset_empty_rows': self._raw_data.isna().sum().sum(),
-                    'dataset_sample_min_len': len(min(self._raw_data['source'], key=len)),
-                    'dataset_sample_max_len': len(max(self._raw_data['source'], key=len))}
+                    'dataset_sample_min_len': len(min(self._raw_data['Reviews'], key=len)),
+                    'dataset_sample_max_len': len(max(self._raw_data['Reviews'], key=len))}
 
         return analysis
 
@@ -76,7 +70,9 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-
+        self._data = (self._raw_data
+                      .rename(columns={'Reviews': 'source', 'Summary': 'target'})
+                      .reset_index(drop=True))
 
 class TaskDataset(Dataset):
     """
@@ -90,6 +86,8 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+        # super().__init__()
+        # self._data = data
 
     def __len__(self) -> int:
         """
