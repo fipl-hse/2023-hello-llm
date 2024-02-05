@@ -11,10 +11,13 @@ FastAPI listing.
 """
 import random
 
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+try:
+    from fastapi import FastAPI, Request
+    from fastapi.responses import HTMLResponse
+    from fastapi.staticfiles import StaticFiles
+    from fastapi.templating import Jinja2Templates
+except ImportError:
+    print('Library "fastapi" not installed. Failed to import.')
 
 # 2. Initialize FastAPI instance
 app = FastAPI()

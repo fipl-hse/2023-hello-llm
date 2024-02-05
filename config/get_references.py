@@ -1,7 +1,7 @@
 """
 Collect and store model analytics.
 """
-# pylint: disable=import-error, too-many-branches, no-else-return, inconsistent-return-statements, too-many-locals, too-many-statements
+# pylint: disable=import-error, too-many-branches, no-else-return, inconsistent-return-statements, too-many-locals, too-many-statements, wrong-import-order
 from pathlib import Path
 from typing import Any
 
@@ -47,8 +47,7 @@ from reference_lab_nli.main import (DatasetTypes, GlueDataImporter,  # isort:ski
                                     XnliDataImporter)
 from reference_lab_nmt.helpers import (EnDeRawDataPreprocessor, RuEnRawDataImporter,  # isort:skip
                                        RuEnRawDataPreprocessor, RuEsRawDataPreprocessor)
-from reference_lab_nmt.main import (AbstractRawDataPreprocessor, LLMPipeline,  # isort:skip
-                                    TaskDataset, TaskEvaluator)
+from reference_lab_nmt.main import LLMPipeline, TaskDataset, TaskEvaluator  # isort:skip
 from reference_lab_open_qa.main import (AlpacaRawDataPreprocessor,  # isort:skip
                                         DatabricksRawDataPreprocessor,
                                         DollyOpenQARawDataImporter, DollyOpenQARawDataPreprocessor,
@@ -101,7 +100,6 @@ def nmt_inference(main_params: MainParams,
     Returns:
         Any: The calculated metric
     """
-    importer: AbstractRawDataImporter
     if main_params.dataset == 'shreevigneshs/iwslt-2023-en-ru-train-val-split-0.2':
         importer = RuEnRawDataImporter(main_params.dataset)
     else:
@@ -110,7 +108,6 @@ def nmt_inference(main_params: MainParams,
     if importer.raw_data is None:
         raise ValueError('Unable to process data which is None!')
 
-    preprocessor: AbstractRawDataPreprocessor
     if main_params.dataset == 'shreevigneshs/iwslt-2023-en-ru-train-val-split-0.2':
         preprocessor = RuEnRawDataPreprocessor(importer.raw_data)
     elif main_params.dataset == 'nuvocare/Ted2020_en_es_fr_de_it_ca_pl_ru_nl':
@@ -165,7 +162,6 @@ def generation_inference(main_params: MainParams,
     if importer.raw_data is None:
         raise ValueError('Unable to process data which is None!')
 
-    preprocessor: AbstractRawDataPreprocessor
     if main_params.dataset == 'lionelchg/dolly_closed_qa':
         preprocessor = DollyClosedRawDataPreprocessor(importer.raw_data)
     elif main_params.dataset == 'starmpcc/Asclepius-Synthetic-Clinical-Notes':
@@ -242,22 +238,16 @@ def classification_inference(main_params: MainParams,
     if importer.raw_data is None:
         raise ValueError('Unable to process data which is None!')
 
-    preprocessor: AbstractRawDataPreprocessor
     if main_params.dataset == 'OxAISH-AL-LLM/wiki_toxic':
-        preprocessor = WikiToxicRawDataPreprocessor(
-            importer.raw_data)
+        preprocessor = WikiToxicRawDataPreprocessor(importer.raw_data)
     elif main_params.dataset == 'go_emotions':
-        preprocessor = GoEmotionsRawDataPreprocessor(
-            importer.raw_data)
+        preprocessor = GoEmotionsRawDataPreprocessor(importer.raw_data)
     elif main_params.dataset == 'seara/ru_go_emotions':
-        preprocessor = RuGoEmotionsRawDataPreprocessor(
-            importer.raw_data)
+        preprocessor = RuGoEmotionsRawDataPreprocessor(importer.raw_data)
     elif main_params.dataset == 'imdb':
-        preprocessor = ImdbDataPreprocessor(
-            importer.raw_data)
+        preprocessor = ImdbDataPreprocessor(importer.raw_data)
     elif main_params.dataset == 'dair-ai/emotion':
-        preprocessor = DairAiEmotionPreprocessor(
-            importer.raw_data)
+        preprocessor = DairAiEmotionPreprocessor(importer.raw_data)
     elif main_params.dataset == 'ag_news':
         preprocessor = AgNewsPreprocessor(importer.raw_data)
     elif main_params.dataset == 'blinoff/kinopoisk':
@@ -313,7 +303,6 @@ def nli_inference(main_params: MainParams,
     """
     dataset_type = DatasetTypes(main_params.dataset)
 
-    importer: AbstractRawDataImporter
     if dataset_type == DatasetTypes.XNLI:
         importer = XnliDataImporter(main_params.dataset)
         importer.obtain()
@@ -332,7 +321,6 @@ def nli_inference(main_params: MainParams,
     if importer.raw_data is None:
         raise ValueError('Unable to process data which is None!')
 
-    preprocessor: RawDataPreprocessor
     if dataset_type not in (DatasetTypes.NLI_RUS, DatasetTypes.QNLI):
         preprocessor = NliDataPreprocessor(importer.raw_data)
     if dataset_type == DatasetTypes.NLI_RUS:
@@ -376,7 +364,6 @@ def summarization_inference(main_params: MainParams,
         Any: The calculated metric
     """
     # START OF LEVEL 4
-    importer: AbstractRawDataImporter
     if main_params.dataset == 'tomasg25/scientific_lay_summarisation':
         importer = ScientificLiteratureRawDataImporter(main_params.dataset)
     elif main_params.dataset == 'cnn_dailymail':
@@ -391,7 +378,6 @@ def summarization_inference(main_params: MainParams,
     if importer.raw_data is None:
         raise ValueError('Unable to process data which is None!')
 
-    preprocessor: AbstractRawDataPreprocessor
     if main_params.dataset == 'ccdv/pubmed-summarization':
         preprocessor = PubMedRawDataPreprocessor(importer.raw_data)
     elif main_params.dataset == 'tomasg25/scientific_lay_summarisation':
@@ -447,7 +433,6 @@ def open_generative_qa_inference(main_params: MainParams,
     Returns:
         Any: The calculated metric
     """
-    importer: AbstractRawDataImporter
     if main_params.dataset == 'truthful_qa':
         importer = TruthfulQARawDataImporter(main_params.dataset)
     elif main_params.dataset == 'lionelchg/dolly_open_qa':
@@ -458,7 +443,6 @@ def open_generative_qa_inference(main_params: MainParams,
     if importer.raw_data is None:
         raise ValueError('Unable to process data which is None!')
 
-    preprocessor: AbstractRawDataPreprocessor
     if main_params.dataset == 'truthful_qa':
         preprocessor = TruthfulQARawDataPreprocessor(importer.raw_data)
     elif main_params.dataset == 'jtatman/databricks-dolly-8k-qa-open-close':
