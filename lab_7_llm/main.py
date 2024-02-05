@@ -7,8 +7,10 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 import numpy as np
+import pandas as pd
 import torchinfo
 from datasets import load_dataset
+from torch.utils.data import DataLoader
 from transformers import AutoTokenizer, BertForSequenceClassification
 
 try:
@@ -267,6 +269,22 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        predictions = []
+
+        loader = DataLoader(self._dataset, batch_size=self._batch_size)
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+
+        for batch in loader:
+            tokens = tokenizer(
+                batch[0],
+                batch[1],
+                padding=True,
+                truncation=True,
+                return_tensors='pt'
+            )
+            output = self._model(**tokens).logits
+            predictions.extend(list(torch.argmax(output, dim=1)))
+        return pd.concat([self._dataset.data['target'], pd.Series(predictions, name='predictions')], axis=1)
 
     def _get_summary(self, ids: torch.Tensor) -> torchinfo.model_statistics.ModelStatistics:
         """

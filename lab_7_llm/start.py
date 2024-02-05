@@ -28,7 +28,7 @@ def main() -> None:
 
     dataset = TaskDataset(preprocessor.data.head(100))
 
-    pipeline = LLMPipeline(configs['parameters']['model'], dataset, 1, 120, 'cpu')
+    pipeline = LLMPipeline(configs['parameters']['model'], dataset, 120, 2, 'cpu')
 
     model_analysis = pipeline.analyze_model()
     print(model_analysis)
@@ -38,6 +38,7 @@ def main() -> None:
     print(f'SAMPLE: {sample}\nPREDICTION: {sample_inference}')
 
     result = sample_inference
+    print(pipeline.infer_dataset())
     assert result is not None, "Demo does not work correctly"
 
 
