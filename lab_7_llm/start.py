@@ -3,7 +3,7 @@ Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import RawDataImporter, RawDataPreprocessor
+from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset
 import json
 from config.constants import PROJECT_ROOT
 
@@ -13,13 +13,26 @@ def main() -> None:
     """
     Run the translation pipeline.
     """
+
     with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as settings:
         settings = json.load(settings)
     importer = RawDataImporter(settings['parameters']['dataset'])
     importer.obtain()
 
     preprocessor = RawDataPreprocessor(importer.raw_data)
-    result = preprocessor.analyze()
+    preprocessor.analyze()
+    preprocessor.transform()
+
+    dataset = TaskDataset(preprocessor.data.head(100))
+
+    pipeline = LLMPipeline(settings['parameters']['model'], dataset,
+                           max_length=512, batch_size=1, device='cpu')
+
+    model_analysis = pipeline.analyze_model()
+    print(model_analysis)
+
+    sample = dataset.__getitem__(0)
+    result = pipeline.infer_sample(sample)
 
     assert result is not None, "Demo does not work correctly"
 
