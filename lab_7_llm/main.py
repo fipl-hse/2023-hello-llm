@@ -94,6 +94,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
                       .drop(['idx'], axis=1)
                       .replace({0: 1, 1: 0}))
 
+    @property
     def data(self) -> DataFrame:
         return self._data
 
