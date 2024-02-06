@@ -207,8 +207,8 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         if len(sample) < 2:
             sample = sample[0].split('|')
-            sample = [(sample[0],), (sample[1],)]
-
+        sample = [(sample[0],), (sample[1],)]
+        print(sample)
         prediction = self._infer_batch(sample)
 
         return str(prediction[0])
@@ -253,27 +253,18 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         batch_pred_list = []
 
-        if isinstance(sample_batch, list) and len(sample_batch[0]) > 2:
-            for sequence in sample_batch[0]:
-                hypothesis_index = sample_batch[0].index(sequence)
-                sequence_tokens = self._tokenizer(sample_batch[0][hypothesis_index],
-                                                  sample_batch[1][hypothesis_index],
-                                                  return_tensors="pt",
-                                                  padding=True,
-                                                  truncation=True
-                                                  )
-                sequence_prediction = torch.argmax(self._model(**sequence_tokens).logits, dim=1)
-
-                for pred in sequence_prediction.tolist():
-                    batch_pred_list.append(str(pred))
-        else:
-            sequence_tokens = self._tokenizer(sample_batch[0], sample_batch[1],
+        for sequence in sample_batch[0]:
+            hypothesis_index = sample_batch[0].index(sequence)
+            sequence_tokens = self._tokenizer(sample_batch[0][hypothesis_index],
+                                              sample_batch[1][hypothesis_index],
                                               return_tensors="pt",
                                               padding=True,
                                               truncation=True
                                               )
-            sequence_prediction = int(torch.argmax(self._model(**sequence_tokens).logits).item())
-            batch_pred_list.append(str(sequence_prediction))
+            sequence_prediction = torch.argmax(self._model(**sequence_tokens).logits, dim=1)
+
+            for pred in sequence_prediction.tolist():
+                batch_pred_list.append(str(pred))
 
         return batch_pred_list
 
