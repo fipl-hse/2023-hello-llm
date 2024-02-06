@@ -12,17 +12,15 @@ def main() -> None:
     """
     Run the translation pipeline.
     """
-    dataset = RawDataImporter('self._hf_data')
-    dataset.obtain()
-    with open('settings.json') as settings_file:
-        with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as file:
-            settings = json.load(file)
-        importer = RawDataImporter(settings['parameters']['dataset'])
-        importer.obtain()
+    with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as file:
+        settings = json.load(file)
+    data_importer = RawDataImporter(settings['parameters']['dataset'])
+    data_importer.obtain()
 
-        preprocessor = RawDataPreprocessor(importer.raw_data)
-        result = preprocessor.analyze()
-        assert result is not None, "Demo does not work correctly"
+    preprocessor = RawDataPreprocessor(data_importer.raw_data)
+    result = preprocessor.analyze()
+
+    assert result is not None, "Demo does not work correctly"
 
 
 if __name__ == "__main__":
