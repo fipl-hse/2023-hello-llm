@@ -12,12 +12,14 @@ admins
 advanced
 aiknowyou
 algorithm
+analytics
 and
 andreikashchikhin
 andrey
 anli
 answers
 apidoc
+apis
 apple
 are
 arg
@@ -28,6 +30,8 @@ assess
 assets
 assignees
 ast
+attr
+autoformat
 autoformatting
 autongramlanguagemodel
 available
@@ -49,6 +53,7 @@ before
 bigram
 bigrams
 bilingual
+billsum
 bleu
 bool
 bpe
@@ -71,6 +76,7 @@ cedr
 changing-code
 choice
 class
+classdef
 classify
 cli
 clone
@@ -96,6 +102,7 @@ conversion
 corncob
 corpus
 count
+coverageresults
 create
 creating-pat
 csv
@@ -104,6 +111,7 @@ curation
 dailymail
 dair
 data
+dataclass
 dataframe
 dataloader
 dataset
@@ -118,6 +126,7 @@ demo
 detect
 detections
 deutsch
+dev
 developer
 development
 dictionary
@@ -125,9 +134,11 @@ distance
 distilbe
 distilbert
 distilroberta
+dmitry
 doc
 docstring
 docstrings
+doctest
 done
 download
 drive
@@ -176,6 +187,7 @@ fill
 filler
 finally
 find
+finetuned
 float
 for
 forgiveness
@@ -225,6 +237,7 @@ he
 head
 hello
 helsinki-nlp
+helsinkinlpmodel
 hey
 how
 https
@@ -237,17 +250,21 @@ ilyagusev
 imdb
 important
 in
+inferenceparams
 init
+instantiation
 int
 interpreter
 is
 it
 iter
+iterable
 itertools
 iwslt
 javascript
 jinja
 join
+js
 json
 juice
 kashchikhin
@@ -255,6 +272,7 @@ knn
 kwargs
 lab
 laboratory
+labsettings
 lang
 language
 lbyl
@@ -281,6 +299,7 @@ mac
 macos
 made
 main
+mainparams
 math
 max
 mdeberta
@@ -289,14 +308,17 @@ merge
 message
 meth
 metric
+michellejieli
 missing
 mle
 mnli
 model
 models
+modelstatistics
 module
 moritzlaurer
 mps
+mrm
 mro
 mrqa
 mse
@@ -304,6 +326,7 @@ much
 mypy
 n-gram
 name
+nandakishormpai
 natural
 new
 next
@@ -317,6 +340,7 @@ nlp
 nmt
 none
 normal
+norobots
 nose
 notation
 note
@@ -343,9 +367,11 @@ pairs
 papluca
 param
 parametersmodel
+params
 pass
 pat
 path
+pathlib
 people
 perfectly
 permission
@@ -358,6 +384,7 @@ postprocess
 potter
 powerful
 pr
+pre
 precision
 precisions
 prepare
@@ -390,6 +417,9 @@ put
 py
 pycharm
 pycharmprojects
+pydantic
+pydocstyle
+pydoctest
 pylint
 pyproject
 pytest
@@ -404,6 +434,9 @@ raw
 rawdataimporter
 rawdatapreprocessor
 ref
+referenceanalysisscores
+referenceanalysisscorestype
+referencescores
 repo
 report
 repository
@@ -411,6 +444,7 @@ request
 requests
 result
 return
+ria
 rj
 rociourquijo
 rougel
@@ -435,6 +469,7 @@ sequence
 sequences
 set
 settings
+sft
 she
 shreevigneshs
 sign
@@ -444,9 +479,12 @@ snowman
 spellchecker
 split
 squared
+src
 starmpcc
 start
 starting-guide-label
+stevhliu
+stmt
 storage
 str
 string
@@ -464,6 +502,7 @@ taskdataset
 taskevaluator
 tba
 tbd
+templateresponse
 templating
 text
 textprocessor
@@ -486,8 +525,10 @@ tokenization
 tokenize
 tokenized
 tokenizer
+tokenizers
 tokenizing
 tokens
+tol
 tomasg
 toml
 tools
@@ -495,6 +536,7 @@ top
 top-p
 toppgenerator
 topprulestudent
+torchinfo
 train
 transfer
 translation
@@ -514,6 +556,7 @@ university
 unk
 unknown
 up
+urukhan
 usage
 util
 utils
@@ -527,12 +570,15 @@ very
 vmware
 vocab
 vocabulary
+vorobiev
 was
 were
 whitejaeger
+whl
 width
 wikiomnia
 windows
+wite
 with
 wo
 word

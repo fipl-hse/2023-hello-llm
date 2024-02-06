@@ -1,218 +1,202 @@
 {
-  "OxAISH-AL-LLM/wiki_toxic": {
-      "dataset_number_of_samples": 31915,
-      "dataset_columns": 3,
-      "dataset_duplicates": 0,
-      "dataset_empty_rows": 0,
-      "dataset_sample_min_len": 1,
-      "dataset_sample_max_len": 5000
-  },
-  "shreevigneshs/iwslt-2023-en-ru-train-val-split-0.2": {
-    "dataset_number_of_samples": 600,
-    "dataset_columns": 4,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 14,
-    "dataset_sample_max_len": 292
-  },
-  "nuvocare/Ted2020_en_es_fr_de_it_ca_pl_ru_nl": {
-    "dataset_number_of_samples": 7213,
-    "dataset_columns": 8,
-    "dataset_duplicates": 25,
-    "dataset_empty_rows": 3338,
-    "dataset_sample_min_len": 1,
-    "dataset_sample_max_len": 776
-  },
-  "RocioUrquijo/en_de": {
-    "dataset_number_of_samples": 700,
-    "dataset_columns": 2,
-    "dataset_duplicates": 1,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 4,
-    "dataset_sample_max_len": 729
-  },
-  "enimai/MuST-C-fr": {
-    "dataset_number_of_samples": 2632,
-    "dataset_columns": 2,
-    "dataset_duplicates": 78,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 5,
-    "dataset_sample_max_len": 776
-  },
-  "cointegrated/nli-rus-translated-v2021": {
-    "dataset_number_of_samples": 19647,
-    "dataset_columns": 10,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 2,
-    "dataset_sample_max_len": 1109
-  },
-  "xnli": {
-    "dataset_number_of_samples": 2490,
-    "dataset_columns": 3,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 8,
-    "dataset_sample_max_len": 310
-  },
-  "qnli": {
-    "dataset_number_of_samples": 5463,
-    "dataset_columns": 4,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 4,
-    "dataset_sample_max_len": 1136
-  },
-  "mnli": {
-    "dataset_number_of_samples": 9815,
-    "dataset_columns": 4,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 4,
-    "dataset_sample_max_len": 967
-  },
-  "terra": {
-    "dataset_number_of_samples": 307,
-    "dataset_columns": 4,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 12,
-    "dataset_sample_max_len": 717
-  },
-  "go_emotions": {
-    "dataset_number_of_samples": 5427,
-    "dataset_columns": 3,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 4,
-    "dataset_sample_max_len": 184
-  },
-  "papluca/language-identification": {
-    "dataset_number_of_samples": 10000,
-    "dataset_columns": 2,
-    "dataset_duplicates": 1010,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 2,
-    "dataset_sample_max_len": 3657
-  },
-  "ag_news": {
-    "dataset_number_of_samples": 7600,
-    "dataset_columns": 2,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 1,
-    "dataset_sample_max_len": 892
-  },
-  "imdb": {
-    "dataset_number_of_samples": 100,
-    "dataset_columns": 2,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 1,
-    "dataset_sample_max_len": 4415
-  },
-  "seara/ru_go_emotions": {
-    "dataset_number_of_samples": 5426,
-    "dataset_columns": 4,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 4,
-    "dataset_sample_max_len": 224
-  },
-  "dair-ai/emotion": {
-    "dataset_number_of_samples": 2000,
-    "dataset_columns": 2,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 1,
-    "dataset_sample_max_len": 295
-  },
-  "HuggingFaceH4/no_robots": {
-    "dataset_number_of_samples": 9500,
-    "dataset_columns": 4,
-    "dataset_duplicates": 1,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 4,
-    "dataset_sample_max_len": 9541
-  },
-  "lionelchg/dolly_closed_qa": {
-    "dataset_number_of_samples": 89,
-    "dataset_columns": 5,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 6,
-    "dataset_sample_max_len": 9373
-  },
-  "starmpcc/Asclepius-Synthetic-Clinical-Notes": {
-    "dataset_number_of_samples": 158114,
-    "dataset_columns": 5,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 1,
-    "dataset_sample_max_len": 5830
-  },
-  "cnn_dailymail": {
-    "dataset_number_of_samples": 11490,
-    "dataset_columns": 3,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 40,
-    "dataset_sample_max_len": 11991
-  },
-  "ccdv/pubmed-summarization": {
-    "dataset_number_of_samples": 6658,
-    "dataset_columns": 2,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 18,
-    "dataset_sample_max_len": 335993
-  },
-  "tomasg25/scientific_lay_summarisation": {
-    "dataset_number_of_samples": 1376,
-    "dataset_columns": 6,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 4,
-    "dataset_sample_max_len": 103098
-  },
-  "ccdv/govreport-summarization": {
-    "dataset_number_of_samples": 973,
-    "dataset_columns": 2,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 500,
-    "dataset_sample_max_len": 193646
-  },
-  "IlyaGusev/gazeta": {
-    "dataset_number_of_samples": 6793,
-    "dataset_columns": 5,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 1,
-    "dataset_sample_max_len": 9841
-  },
-  "CarlBrendt/Summ_Dialog_News": {
-    "dataset_number_of_samples": 7609,
-    "dataset_columns": 2,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 14,
-    "dataset_sample_max_len": 9661
-  },
-  "trixdade/reviews_russian": {
-    "dataset_number_of_samples": 95,
-    "dataset_columns": 2,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 0,
-    "dataset_sample_min_len": 132,
-    "dataset_sample_max_len": 4276
-  },
-  "d0rj/curation-corpus-ru": {
-    "dataset_number_of_samples": 30454,
-    "dataset_columns": 5,
-    "dataset_duplicates": 0,
-    "dataset_empty_rows": 1420,
-    "dataset_sample_min_len": 4,
-    "dataset_sample_max_len": 100000
-  }
+    "CarlBrendt/Summ_Dialog_News": {
+        "dataset_columns": 2,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 7609,
+        "dataset_sample_max_len": 9661,
+        "dataset_sample_min_len": 51
+    },
+    "HuggingFaceH4/no_robots": {
+        "dataset_columns": 4,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 1,
+        "dataset_number_of_samples": 9500,
+        "dataset_sample_max_len": 14005,
+        "dataset_sample_min_len": 13
+    },
+    "IlyaGusev/gazeta": {
+        "dataset_columns": 5,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 6793,
+        "dataset_sample_max_len": 9841,
+        "dataset_sample_min_len": 1485
+    },
+    "OxAISH-AL-LLM/wiki_toxic": {
+        "dataset_columns": 3,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 31915,
+        "dataset_sample_max_len": 5000,
+        "dataset_sample_min_len": 12
+    },
+    "RocioUrquijo/en_de": {
+        "dataset_columns": 2,
+        "dataset_duplicates": 1,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 700,
+        "dataset_sample_max_len": 692,
+        "dataset_sample_min_len": 4
+    },
+    "ag_news": {
+        "dataset_columns": 2,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 7600,
+        "dataset_sample_max_len": 892,
+        "dataset_sample_min_len": 100
+    },
+    "ccdv/govreport-summarization": {
+        "dataset_columns": 2,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 973,
+        "dataset_sample_max_len": 193646,
+        "dataset_sample_min_len": 2650
+    },
+    "ccdv/pubmed-summarization": {
+        "dataset_columns": 2,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 6658,
+        "dataset_sample_max_len": 335993,
+        "dataset_sample_min_len": 126
+    },
+    "cnn_dailymail": {
+        "dataset_columns": 3,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 11490,
+        "dataset_sample_max_len": 11991,
+        "dataset_sample_min_len": 293
+    },
+    "cointegrated/nli-rus-translated-v2021": {
+        "dataset_columns": 10,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 19647,
+        "dataset_sample_max_len": 1109,
+        "dataset_sample_min_len": 2
+    },
+    "d0rj/curation-corpus-ru": {
+        "dataset_columns": 5,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 1420,
+        "dataset_number_of_samples": 30454,
+        "dataset_sample_max_len": 100000,
+        "dataset_sample_min_len": 6
+    },
+    "dair-ai/emotion": {
+        "dataset_columns": 2,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 2000,
+        "dataset_sample_max_len": 295,
+        "dataset_sample_min_len": 11
+    },
+    "enimai/MuST-C-fr": {
+        "dataset_columns": 2,
+        "dataset_duplicates": 78,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 2632,
+        "dataset_sample_max_len": 713,
+        "dataset_sample_min_len": 7
+    },
+    "imdb": {
+        "dataset_columns": 2,
+        "dataset_duplicates": 199,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 25000,
+        "dataset_sample_max_len": 12988,
+        "dataset_sample_min_len": 32
+    },
+    "lionelchg/dolly_closed_qa": {
+        "dataset_columns": 5,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 89,
+        "dataset_sample_max_len": 8851,
+        "dataset_sample_min_len": 15
+    },
+    "mnli": {
+        "dataset_columns": 4,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 9815,
+        "dataset_sample_max_len": 967,
+        "dataset_sample_min_len": 4
+    },
+    "nuvocare/Ted2020_en_es_fr_de_it_ca_pl_ru_nl": {
+        "dataset_columns": 8,
+        "dataset_duplicates": 25,
+        "dataset_empty_rows": 3338,
+        "dataset_number_of_samples": 7213,
+        "dataset_sample_max_len": 649,
+        "dataset_sample_min_len": 4
+    },
+    "papluca/language-identification": {
+        "dataset_columns": 2,
+        "dataset_duplicates": 1010,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 10000,
+        "dataset_sample_max_len": 3657,
+        "dataset_sample_min_len": 7
+    },
+    "qnli": {
+        "dataset_columns": 4,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 5463,
+        "dataset_sample_max_len": 1136,
+        "dataset_sample_min_len": 4
+    },
+    "seara/ru_go_emotions": {
+        "dataset_columns": 4,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 5426,
+        "dataset_sample_max_len": 224,
+        "dataset_sample_min_len": 4
+    },
+    "shreevigneshs/iwslt-2023-en-ru-train-val-split-0.2": {
+        "dataset_columns": 4,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 600,
+        "dataset_sample_max_len": 265,
+        "dataset_sample_min_len": 14
+    },
+    "starmpcc/Asclepius-Synthetic-Clinical-Notes": {
+        "dataset_columns": 5,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 158114,
+        "dataset_sample_max_len": 5830,
+        "dataset_sample_min_len": 25
+    },
+    "terra": {
+        "dataset_columns": 4,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 307,
+        "dataset_sample_max_len": 717,
+        "dataset_sample_min_len": 12
+    },
+    "trixdade/reviews_russian": {
+        "dataset_columns": 2,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 95,
+        "dataset_sample_max_len": 4276,
+        "dataset_sample_min_len": 155
+    },
+    "xnli": {
+        "dataset_columns": 3,
+        "dataset_duplicates": 0,
+        "dataset_empty_rows": 0,
+        "dataset_number_of_samples": 2490,
+        "dataset_sample_max_len": 310,
+        "dataset_sample_min_len": 8
+    }
 }
