@@ -6,15 +6,14 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
-import torch
 import pandas as pd
 from datasets import load_dataset
 from evaluate import load
-from torch import argmax, long, ones
 from torchinfo import summary
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 try:
+    import torch
     from torch.utils.data import DataLoader
     from torch.utils.data.dataset import Dataset
 
@@ -179,7 +178,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-        tensor_data = ones(1, self._model.config.max_position_embeddings, dtype=long)
+        tensor_data = torch.ones(1, self._model.config.max_position_embeddings, dtype=torch.long)
         input_data = {'attention_mask': tensor_data,
                       "input_ids": tensor_data}
         analytics = summary(self._model, input_data=input_data, verbose=False)
@@ -261,7 +260,7 @@ class LLMPipeline(AbstractLLMPipeline):
                                               padding=True,
                                               truncation=True
                                               )
-            sequence_prediction = argmax(self._model(**sequence_tokens).logits, dim=1)
+            sequence_prediction = torch.argmax(self._model(**sequence_tokens).logits, dim=1)
 
             for pred in sequence_prediction.tolist():
                 batch_pred_list.append(str(pred))
