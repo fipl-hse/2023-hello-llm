@@ -19,7 +19,7 @@ try:
 
 except ImportError:
     print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
+    # Dataset = dict
     torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
 
 try:
@@ -53,10 +53,6 @@ class RawDataImporter(AbstractRawDataImporter):
                                    name=self._hf_name,
                                    split='validation')
         self._raw_data = raw_dataset.to_pandas()
-
-    @property
-    def raw_data(self) -> DataFrame:
-        return self._raw_data
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
