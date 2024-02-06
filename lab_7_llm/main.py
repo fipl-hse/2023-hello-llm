@@ -54,6 +54,10 @@ class RawDataImporter(AbstractRawDataImporter):
                                    split='validation')
         self._raw_data = raw_dataset.to_pandas()
 
+    @property
+    def raw_data(self) -> DataFrame:
+        return self._raw_data
+
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
@@ -272,7 +276,7 @@ class LLMPipeline(AbstractLLMPipeline):
                                               padding=True,
                                               truncation=True
                                               )
-            sequence_prediction = torch.argmax(self._model(**sequence_tokens).logits).item()
+            sequence_prediction = int(torch.argmax(self._model(**sequence_tokens).logits).item())
             batch_pred_list.append(str(sequence_prediction))
 
         return batch_pred_list
