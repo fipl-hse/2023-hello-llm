@@ -35,6 +35,7 @@ def main() -> None:
     llm_infer.infer_dataset().to_csv('./dist/predictions.csv', index=False)
     result = TaskEvaluator(data_path=Path('./dist/predictions.csv'),
                            metrics=Metrics)
+
     result.run()
 
     assert result is not None, "Demo does not work correctly"

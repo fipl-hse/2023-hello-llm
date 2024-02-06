@@ -266,8 +266,7 @@ class LLMPipeline(AbstractLLMPipeline):
                                                   padding=True,
                                                   truncation=True
                                                   )
-                sequence_output = self._model(**sequence_tokens)
-                sequence_prediction = torch.argmax(sequence_output.logits, dim=1)
+                sequence_prediction = torch.argmax(self._model(**sequence_tokens).logits, dim=1)
 
                 for pred in sequence_prediction.tolist():
                     batch_pred_list.append(str(pred))
@@ -277,8 +276,7 @@ class LLMPipeline(AbstractLLMPipeline):
                                               padding=True,
                                               truncation=True
                                               )
-            sequence_output = self._model(**sequence_tokens)
-            sequence_prediction = torch.argmax(sequence_output.logits).item()
+            sequence_prediction = torch.argmax(self._model(**sequence_tokens).logits).item()
             batch_pred_list.append(str(sequence_prediction))
 
         return batch_pred_list
@@ -315,4 +313,4 @@ class TaskEvaluator(AbstractTaskEvaluator):
         metrics_evaluation = metric.compute(references=df_to_evaluate['target'].tolist(),
                                             predictions=df_to_evaluate['prediction'].tolist()
                                             )
-        return metrics_evaluation
+        return dict(metrics_evaluation)
