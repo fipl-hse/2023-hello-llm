@@ -94,10 +94,6 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
                       .drop(['idx'], axis=1)
                       .replace({0: 1, 1: 0}))
 
-    @property
-    def data(self) -> DataFrame:
-        return self._data
-
 
 class TaskDataset(Dataset):
     """
@@ -296,9 +292,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
             metrics (Iterable[Metrics]): List of metrics to check
         """
         self._data_path = data_path
-        for metric in metrics:
-            if metric.value == 'accuracy':
-                self._metrics = metric.value
+        self._metrics = [metric.value for metric in metrics if metric.value == 'accuracy'][0]
 
     @report_time
     def run(self) -> dict | None:
