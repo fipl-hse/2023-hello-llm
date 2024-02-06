@@ -207,9 +207,8 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         if len(sample) < 2:
             sample = sample[0].split('|')
-        sample = [(sample[0],), (sample[1],)]
-        print(sample)
-        prediction = self._infer_batch(sample)
+        sample_seq = [(sample[0],), (sample[1],)]
+        prediction = self._infer_batch(sample_seq)
 
         return str(prediction[0])
 
