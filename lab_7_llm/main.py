@@ -4,16 +4,25 @@ Neural machine translation module.
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
+from typing import Iterable, Sequence
 from datasets import load_dataset
+
+
+try:
+    from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+except ImportError:
+    print('Library "transformers" not installed. Failed to import.')
+
 
 try:
     import torch
     from torch.utils.data.dataset import Dataset
+    from torchinfo import summary
 except ImportError:
     print('Library "torch" not installed. Failed to import.')
     Dataset = dict
     torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
+    summary = None
 
 try:
     from pandas import DataFrame
@@ -21,10 +30,11 @@ except ImportError:
     print('Library "pandas" not installed. Failed to import.')
     DataFrame = dict  # type: ignore
 
+
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -70,6 +80,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        self._data = self._raw_data.rename(columns={'Reviews': ColumnNames.SOURCE.value,
+                                                    'Summary': ColumnNames.TARGET.value}).reset_index(drop=True)
 
 
 class TaskDataset(Dataset):
@@ -84,6 +96,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+        self._data = data
 
     def __len__(self) -> int:
         """
@@ -92,6 +105,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -104,6 +118,8 @@ class TaskDataset(Dataset):
             tuple[str, ...]: The item to be received
         """
 
+        return self._data['source'].iloc[index]
+
     @property
     def data(self) -> DataFrame:
         """
@@ -112,6 +128,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
+        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
@@ -137,6 +154,8 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        super().__init__(model_name, dataset, max_length, batch_size, device)
+        self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -145,6 +164,16 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        summary_result = self._get_summary()
+        model_properties = {'input_shape': summary_result.summary_list[0].output_size[:2],
+                            'embedding_size': self._model.config.decoder.max_position_embeddings,
+                            'output_shape': summary_result.summary_list[-1].output_size,
+                            'num_trainable_params': summary_result.trainable_params,
+                            'vocab_size': self._model.config.decoder.vocab_size,
+                            'size': summary_result.total_param_bytes,
+                            'max_context_length': self._model.config.decoder.max_length}
+        # print(model_properties)
+        return model_properties
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -157,6 +186,12 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        tokens = tokenizer(sample, padding=True, truncation=True, return_tensors='pt')
+        output = self._model.generate(**tokens)
+        decoded = tokenizer.batch_decode(output, skip_special_tokens=True)
+
+        return decoded
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -178,6 +213,13 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+
+    def _get_summary(self):
+        torch_data = torch.ones(self._batch_size, self._model.config.decoder.max_position_embeddings, dtype=torch.long)
+        torch_dict = {'input_ids': torch_data, 'attention_mask': torch_data, 'decoder_input_ids': torch_data}
+        summary_result = summary(self._model, input_data=torch_dict, verbose=0)
+
+        return summary_result
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
