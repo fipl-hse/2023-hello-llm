@@ -2,9 +2,11 @@
 Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
+import json
+
+from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
 from main import RawDataImporter, RawDataPreprocessor
-import json
 
 @report_time
 def main() -> None:
@@ -14,12 +16,14 @@ def main() -> None:
     dataset = RawDataImporter('self._hf_data')
     dataset.obtain()
     with open('settings.json') as settings_file:
-        settings = json.load(settings_file)
+        with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as file:
+            settings = json.load(file)
+        importer = RawDataImporter(settings['parameters']['dataset'])
+        importer.obtain()
 
-    importer = RawDataImporter(settings["parameters"]["dataset"])
-    importer.obtain()
-    preprocessor = RawDataPreprocessor(importer.raw_data)
-    result = preprocessor.analyze()
+        preprocessor = RawDataPreprocessor(importer.raw_data)
+        result = preprocessor.analyze()
+        assert result is not None, "Demo does not work correctly"
 
 
 if __name__ == "__main__":
