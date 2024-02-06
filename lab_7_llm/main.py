@@ -26,7 +26,7 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
-from datasets import load_dataset
+
 
 class RawDataImporter(AbstractRawDataImporter):
     """
@@ -74,14 +74,6 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._data = (
-            self._raw_data
-            .drop(labels="id", axis=1)
-            .rename(columns={"article": "source", "highlights": "target"})
-            .dropna().drop_duplicates()
-            .reset_index(drop=True)
-        )
-        self._data["source"] = self._data["source"].str.replace(r"\(CNN\)", "", regex=True)
 
 
 class TaskDataset(Dataset):
