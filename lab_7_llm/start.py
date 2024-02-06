@@ -5,8 +5,9 @@ import json
 import os
 from pathlib import Path
 
-from config.constants import PROJECT_ROOT
 # pylint: disable= too-many-locals
+from config.constants import PROJECT_ROOT
+from core_utils.llm.task_evaluator import Metrics
 from core_utils.llm.time_decorator import report_time
 from lab_7_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor,
                             TaskDataset, TaskEvaluator)
@@ -33,7 +34,7 @@ def main() -> None:
         os.mkdir('./dist')
     llm_infer.infer_dataset().to_csv('./dist/predictions.csv', index=False)
     result = TaskEvaluator(data_path=Path('./dist/predictions.csv'),
-                           metrics=settings['parameters']['metrics'])
+                           metrics=Metrics)
     result.run()
 
     assert result is not None, "Demo does not work correctly"

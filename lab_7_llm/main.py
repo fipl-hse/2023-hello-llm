@@ -173,6 +173,7 @@ class LLMPipeline(AbstractLLMPipeline):
             model_name)
         self._tokenizer = AutoTokenizer.from_pretrained(model_name)
         self._dataset = dataset
+        self._batch_size = batch_size
 
     def analyze_model(self) -> dict:
         """
@@ -225,7 +226,7 @@ class LLMPipeline(AbstractLLMPipeline):
             pd.DataFrame: Data with predictions
         """
 
-        dloader = DataLoader(dataset=self._dataset, batch_size=10)
+        dloader = DataLoader(dataset=self._dataset, batch_size=self._batch_size)
 
         ds_pred_list = []
 
@@ -259,7 +260,6 @@ class LLMPipeline(AbstractLLMPipeline):
         if isinstance(sample_batch, list) and len(sample_batch[0]) > 2:
             for sequence in sample_batch[0]:
                 hypothesis_index = sample_batch[0].index(sequence)
-
                 sequence_tokens = self._tokenizer(sample_batch[0][hypothesis_index],
                                                   sample_batch[1][hypothesis_index],
                                                   return_tensors="pt",
@@ -298,7 +298,9 @@ class TaskEvaluator(AbstractTaskEvaluator):
             metrics (Iterable[Metrics]): List of metrics to check
         """
         self._data_path = data_path
-        self._metrics = str(metrics[0])
+        for metric in metrics:
+            if metric.value == 'accuracy':
+                self._metrics = metric.value
 
     @report_time
     def run(self) -> dict | None:
