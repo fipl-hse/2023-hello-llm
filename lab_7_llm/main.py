@@ -41,11 +41,11 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        dataset = load_dataset(
-            'cnn_dailymail', '1.0.0',
-            split='test')
-        dataset_df = dataset.to_pandas()
-        self._raw_data = dataset
+        self._raw_data = load_dataset(
+            path="cnn_dailymail",
+            name="1.0.0",
+            split="test"
+        ).to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -60,12 +60,28 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        return {
+            "dataset_number_of_samples": self._raw_data.shape[0],
+            "dataset_columns": self._raw_data.shape[1],
+            "dataset_duplicates": self._raw_data.duplicated().sum(),
+            "dataset_empty_rows": self._raw_data.isna().sum().sum(),
+            "dataset_sample_min_len": len(min(self._raw_data['article'], key=len)),
+            "dataset_sample_max_len": len(max(self._raw_data['article'], key=len))
+        }
 
     @report_time
     def transform(self) -> None:
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        self._data = (
+            self._raw_data
+            .drop(labels="id", axis=1)
+            .rename(columns={"article": "source", "highlights": "target"})
+            .dropna().drop_duplicates()
+            .reset_index(drop=True)
+        )
+        self._data["source"] = self._data["source"].str.replace(r"\(CNN\)", "", regex=True)
 
 
 class TaskDataset(Dataset):
