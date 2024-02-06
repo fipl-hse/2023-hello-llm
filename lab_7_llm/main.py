@@ -6,7 +6,9 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
+import pandas as pd
 from datasets import load_dataset
+from torch.utils.data import DataLoader
 from torchinfo import summary
 from transformers import AutoTokenizer, BertForSequenceClassification
 
@@ -48,7 +50,7 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = (load_dataset('cointegrated/nli-rus-translated-v2021', split='dev')
+        self._raw_data = (load_dataset(self._hf_name, split='dev')
                           .filter(lambda dataset: dataset['source'] == 'mnli')
                           .to_pandas())
 
@@ -90,9 +92,9 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
                       dropna().
                       reset_index())
 
-        self._data["target"].replace({"entailment": "entailment",
-                                      "contradiction": "contradiction",
-                                      "neutral": "neutral"}, inplace=True)
+        self._data["target"].replace({"contradiction": 1,
+                                      "entailment": 0,
+                                      "neutral": 2}, inplace=True)
 
 
 class TaskDataset(Dataset):
@@ -128,7 +130,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return "|".join((self._data.iloc[index]["premise"], self._data.iloc[index]["hypothesis"])),
+        return self._data.iloc[index]["premise"], self._data.iloc[index]["hypothesis"]
 
     @property
     def data(self) -> DataFrame:
@@ -194,12 +196,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-        tokens = tokenizer(sample[0].split("|")[0], sample[0].split("|")[1], return_tensors='pt')
-        output = self._model(**tokens)
-        predictions = torch.argmax(output.logits).item()
-        labels = self._model.config.id2label
-        return str(predictions)
+        return self._infer_batch((sample,))[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -209,6 +206,14 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        loader = DataLoader(self._dataset, batch_size=self._batch_size)
+        prediction = []
+        for batch in loader:
+            prediction.extend(self._infer_batch(batch))
+
+        prediction = pd.Series(prediction, name="predictions")
+
+        return pd.concat([self._dataset.data["target"], prediction], axis=1)
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -221,6 +226,22 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+
+        if isinstance(sample_batch, tuple):
+            sample_batch = sample_batch[0]
+
+        tokens = tokenizer(sample_batch[0],
+                           sample_batch[1],
+                           padding=True,
+                           truncation=True,
+                           return_tensors='pt')
+
+        output = self._model(**tokens)
+        predictions = torch.argmax(output.logits, dim=1)
+
+        predictions = [str(prediction.item()) for prediction in predictions]
+        return predictions
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
