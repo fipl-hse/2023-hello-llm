@@ -28,7 +28,7 @@ def main() -> None:
     pipeline = LLMPipeline(settings['parameters']['model'], dataset, 120, 1, 'cpu')
     print(pipeline.analyze_model())
     result = pipeline.infer_sample(dataset[0])
-    print(f'INPUT TEXT: {dataset[0][0]}\nTRANSLATION: {result}')
+    print(f'INPUT TEXT: {dataset[0]}\nTRANSLATION: {result}')
     assert result is not None, "Demo does not work correctly"
 
 

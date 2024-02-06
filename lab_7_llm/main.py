@@ -114,7 +114,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data.iloc[index][ColumnNames.SOURCE], self._data.iloc[index][ColumnNames.TARGET]
+        return self._data.iloc[index][ColumnNames.SOURCE]
 
     @property
     def data(self) -> DataFrame:
@@ -198,7 +198,7 @@ class LLMPipeline(AbstractLLMPipeline):
         if not self._model:
             return None
 
-        inputs = self._tokenizer(sample[0], return_tensors='pt').input_ids
+        inputs = self._tokenizer(sample, return_tensors='pt').input_ids
         outputs = self._model.generate(inputs)
         return self._tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
 
