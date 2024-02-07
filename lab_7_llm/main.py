@@ -41,6 +41,10 @@ class RawDataImporter(AbstractRawDataImporter):
                                    split='validation')
         self._raw_data = raw_dataset.to_pandas()
 
+    @property
+    def raw_data(self) -> DataFrame:
+        return self._raw_data
+
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
@@ -193,8 +197,10 @@ class LLMPipeline(AbstractLLMPipeline):
             str | None: A prediction
         """
         if len(sample) < 2:
-            sample = sample[0].split('|')
-        sample_seq = [(sample[0],), (sample[1],)]
+            sample_to_list = sample[0].split('|')
+            sample_seq = [(sample_to_list[0],), (sample_to_list[1],)]
+        else:
+            sample_seq = [(sample[0],), (sample[1],)]
         prediction = self._infer_batch(sample_seq)
 
         return str(prediction[0])
