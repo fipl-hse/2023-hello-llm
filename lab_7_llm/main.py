@@ -270,7 +270,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
             metrics (Iterable[Metrics]): List of metrics to check
         """
         self._data_path = data_path
-        self._metrics = [metric.value for metric in metrics if metric.value == 'accuracy'][0]
+        self._metrics = metrics
 
     @report_time
     def run(self) -> dict | None:
@@ -281,7 +281,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             dict | None: A dictionary containing information about the calculated metric
         """
         df_to_evaluate = pd.read_csv(self._data_path)
-        metric = load(self._metrics)
+        acc_metric = [metric.value for metric in self._metrics if metric.value == 'accuracy'][0]
+        metric = load(acc_metric)
         metrics_evaluation = metric.compute(references=df_to_evaluate['target'].tolist(),
                                             predictions=df_to_evaluate['prediction'].tolist()
                                             )
