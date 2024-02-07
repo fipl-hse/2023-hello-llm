@@ -28,10 +28,11 @@ def main() -> None:
     task_ds = TaskDataset(preprocessed_ds.data.head(100))
     llm_infer = LLMPipeline(model_name=settings["parameters"]["model"], dataset=task_ds,
                             max_length=120, batch_size=64, device='cpu')
-    llm_infer.analyze_model()
+    print(llm_infer.analyze_model())
     llm_infer.infer_sample(task_ds[0])
     if not os.path.exists('./dist'):
         os.mkdir('./dist')
+        print('DIST CREATED')
     llm_infer.infer_dataset().to_csv('./dist/predictions.csv', index=False)
     result = TaskEvaluator(data_path=Path('./dist/predictions.csv'),
                            metrics=Metrics)

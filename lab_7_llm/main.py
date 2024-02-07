@@ -177,15 +177,14 @@ class LLMPipeline(AbstractLLMPipeline):
         input_data = {'attention_mask': tensor_data,
                       "input_ids": tensor_data}
         analytics = summary(self._model, input_data=input_data, verbose=False)
-
         return {
             "embedding_size": self._model.config.max_position_embeddings,
-            "input_shape": {'attention_mask': list(input_data['attention_mask'].shape),
-                            'input_ids': list(input_data['input_ids'].shape)},
+            "input_shape": {'attention_mask': list(analytics.input_size['attention_mask']),
+                            'input_ids': list(analytics.input_size['input_ids'])},
             "max_context_length": self._model.config.max_position_embeddings,
             "num_trainable_params": analytics.trainable_params,
-            "output_shape": analytics.summary_list[-1].output_size,
-            "size": analytics.total_params,
+            "output_shape": analytics.summary_list[1].output_size,
+            "size": analytics.total_param_bytes,
             "vocab_size": self._model.config.vocab_size
         }
 
