@@ -54,7 +54,9 @@ bigram
 bigrams
 bilingual
 billsum
+blanchefort
 bleu
+blinoff
 bool
 bpe
 breakpoint
@@ -111,6 +113,7 @@ curation
 dailymail
 dair
 data
+databricks
 dataclass
 dataframe
 dataloader
@@ -121,6 +124,7 @@ de
 deberta
 decode
 decoded
+deduped
 def
 demo
 detect
@@ -148,6 +152,7 @@ eafp
 easier
 edit
 edition
+eleutherai
 elif
 else
 en
@@ -261,19 +266,23 @@ iter
 iterable
 itertools
 iwslt
+jackfram
 javascript
 jinja
 join
 js
 json
+jtatman
 juice
 kashchikhin
+kinopoisk
 knn
 kwargs
 lab
 laboratory
 labsettings
 lang
+langs
 language
 lbyl
 leap
@@ -305,6 +314,7 @@ max
 mdeberta
 mean
 merge
+merz
 message
 meth
 metric
@@ -365,6 +375,7 @@ oxaish
 package
 pairs
 papluca
+paradetox
 param
 parametersmodel
 params
@@ -423,6 +434,7 @@ pydoctest
 pylint
 pyproject
 pytest
+pythia
 python
 qnli
 qualitychecker
@@ -451,12 +463,15 @@ rougel
 rst
 ru
 rubert
+rudetoxifier
 rugpt
 run
 running-tests-label
 rus
+rusentiment
 russiannlp
 say
+sberquad
 score
 seara
 search
@@ -500,6 +515,8 @@ take
 target
 taskdataset
 taskevaluator
+tatiana
+tatsu
 tba
 tbd
 templateresponse

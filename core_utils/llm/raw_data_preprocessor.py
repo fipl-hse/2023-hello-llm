@@ -18,7 +18,6 @@ class ColumnNames(Enum):
     """
     Column names for preprocessed DataFrame.
     """
-    SOURCE_NLI = ['premise', 'hypothesis']
     SOURCE = 'source'
     TARGET = 'target'
     PREDICTION = 'predictions'
