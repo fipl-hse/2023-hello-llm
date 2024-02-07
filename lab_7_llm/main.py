@@ -247,9 +247,10 @@ class LLMPipeline(AbstractLLMPipeline):
                                               padding=True,
                                               truncation=True
                                               )
-            sequence_prediction = torch.argmax(self._model(**sequence_tokens).logits, dim=1)
+            sequence_prediction = (torch.argmax(self._model(**sequence_tokens).logits, dim=1)
+                                   .tolist())
 
-            for pred in sequence_prediction.tolist():
+            for pred in sequence_prediction:
                 batch_pred_list.append(str(pred))
 
         return batch_pred_list
