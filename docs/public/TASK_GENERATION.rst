@@ -15,10 +15,19 @@ Models
 | `VMware/electra-small-mrqa                                       | EN   | CLOSED QA |
 | <https://huggingface.co/VMware/electra-small-mrqa>`__            |      |           |
 +------------------------------------------------------------------+------+-----------+
+| `EleutherAI/pythia-160m-deduped                                  | EN   |  OPEN QA  |
+| <https://huggingface.co/EleutherAI/pythia-160m-deduped>`__       |      |           |
++------------------------------------------------------------------+------+-----------+
+| `JackFram/llama-68m                                              | EN   |  OPEN QA  |
+| <https://huggingface.co/JackFram/llama-68m>`__                   |      |           |
++------------------------------------------------------------------+------+-----------+
+| `EleutherAI/gpt-neo-125m                                         | EN   |  OPEN QA  |
+| <https://huggingface.co/EleutherAI/gpt-neo-125m>`__              |      |           |
++------------------------------------------------------------------+------+-----------+
 
 
-Datasets
---------
+Datasets CLOSED QA
+------------------
 
 1. `starmpcc/Asclepius-Synthetic-Clinical-Notes <https://huggingface.co/datasets/starmpcc/Asclepius-Synthetic-Clinical-Notes?row=61>`__
 
@@ -56,12 +65,36 @@ Datasets
       5. Reset indexes.
       6. Process column ``messages`` with raw text into two columns ``context`` and ``answer``.
 
+4. `sberquad <https://huggingface.co/datasets/sberquad>`__
+
+   1. **Lang**: RU
+   2. **Rows**: 5040
+   3. **Preprocess**:
+
+      1. Select ``validation`` split.
+      2. Choose columns ``question``, ``context``, ``answers``.
+      3. Rename column ``answers`` to ``target``.
+      4. Process column ``target`` with raw text to leave just an answer in this column.
+
+5. `RussianNLP/wikiomnia <https://huggingface.co/datasets/RussianNLP/wikiomnia>`__
+
+   1. **Lang**: RU
+   2. **Rows**: 173000
+   3. **Preprocess**:
+
+      1. Select ``train`` split and ```wikiomnia_ruGPT3_filtered`` subset.
+      2. Drop NaN.
+      3. Drop duplicates
+      4. Reset indexes.
+      5. Choose columns ``question``, ``summary``, ``answer``.
+      6. Rename columns ``summary`` to ``context`` and ``answer`` to ``target``.
+
 Inferring batch
 ---------------
 
 Process of implementing method
 :py:meth:`lab_7_llm.main.LLMPipeline._infer_batch`
-for question-answering task has its specifics:
+for closed question-answering task has its specifics:
 
    1. You need to transpose the ``sample_batch`` before you pass it to the tokenizer,
       so that it is a sequence of tuples
@@ -72,8 +105,8 @@ for question-answering task has its specifics:
       to the answer have to be decoded and passed on.
    4. To get the ids, iterate through ``input_ids`` field of the tokenized batch.
 
-Metrics
--------
+Metrics CLOSED QA
+-----------------
 
 -  squad
 
@@ -81,3 +114,53 @@ Metrics
           into a special structure. This structure you can find in
           `this repository <https://github.com/huggingface/datasets>`__
           in the ``metrics`` directory.
+
+Datasets OPEN QA
+----------------
+
+1. `truthful_qa <https://huggingface.co/datasets/truthful_qa>`__
+
+   1. **Lang**: EN
+   2. **Rows**: 817
+   3. **Preprocess**:
+
+      1. Drop columns ``type``, ``category``, ``correct_answers``,
+         ``incorrect_answers``, ``source``.
+      2. Rename column ``best_answer`` to ``target``.
+
+2. `jtatman/databricks-dolly-8k-qa-open-close <https://huggingface.co/datasets/jtatman/databricks-dolly-8k-qa-open-close>`__
+
+   1. **Lang**: EN
+   2. **Rows**: 7706
+   3. **Preprocess**:
+
+      1. Filter dataset rows by ``category`` == ``open_qa``.
+      2. Drop columns ``context``, ``category``, ``__index_level_0__``.
+      3. Rename column ``instruction`` to ``question``.
+      4. Rename column ``response`` to ``target``.
+
+3. `tatsu-lab/alpaca <https://huggingface.co/datasets/tatsu-lab/alpaca>`__
+
+   1. **Lang**: EN
+   2. **Rows**: 52002
+   3. **Preprocess**:
+
+      1. Drop columns ``input``, ``text``.
+      2. Rename column ``instruction`` to ``question``.
+      3. Rename column ``output`` to ``target``.
+
+4. `lionelchg/dolly_open_qa <https://huggingface.co/datasets/lionelchg/dolly_open_qa>`__
+
+   1. **Lang**: EN
+   2. **Rows**: 188
+   3. **Preprocess**:
+
+      1. Drop columns ``context``, ``category``, ``text``.
+      2. Rename column ``instruction`` to ``question``.
+      3. Rename column ``response`` to ``target``.
+
+Metrics OPEN QA
+---------------
+
+-  BLEU
+-  ROUGE
