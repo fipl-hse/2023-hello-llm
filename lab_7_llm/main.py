@@ -2,31 +2,18 @@
 Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
-from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
 import pandas as pd
+import torch
 from datasets import load_dataset
 from evaluate import load
+from pandas import DataFrame
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
-
-try:
-    import torch
-    from torch.utils.data import DataLoader
-    from torch.utils.data.dataset import Dataset
-
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    # Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
