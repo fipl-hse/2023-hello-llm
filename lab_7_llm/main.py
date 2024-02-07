@@ -40,6 +40,8 @@ class RawDataImporter(AbstractRawDataImporter):
                                    name=self._hf_name,
                                    split='validation')
         self._raw_data = raw_dataset.to_pandas()
+        if isinstance(self._raw_data, DataFrame):
+            return None
 
     @property
     def raw_data(self) -> DataFrame:
