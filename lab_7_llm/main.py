@@ -39,12 +39,11 @@ class RawDataImporter(AbstractRawDataImporter):
         raw_dataset = load_dataset("RussianNLP/russian_super_glue",
                                    name=self._hf_name,
                                    split='validation')
-        self._raw_data = raw_dataset.to_pandas()
+        self._raw_data = pd.DataFrame(raw_dataset)
 
     @property
     def raw_data(self) -> DataFrame:
-        if isinstance(self._raw_data, DataFrame):
-            return self._raw_data
+        return self._raw_data
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):

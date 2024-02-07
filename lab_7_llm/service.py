@@ -2,11 +2,7 @@
 Web service for model inference.
 """
 # pylint: disable=undefined-variable
-try:
-    from fastapi import FastAPI
-except ImportError:
-    print('Library "fastapi" not installed. Failed to import.')
-    FastAPI = None
+from fastapi import FastAPI
 
 from lab_7_llm.main import LLMPipeline
 
