@@ -27,6 +27,15 @@ Models
 | `aiknowyou/it-emotion-analyzer <https://hugging                     | RU   |
 | face.co/aiknowyou/it-emotion-analyzer>`__                           |      |
 +---------------------------------------------------------------------+------+
+| `blanchefort/rubert-base-cased-sentiment-rusentiment <https://hugg  | RU   |
+| ingface.co/blanchefort/rubert-base-cased-sentiment-rusentiment>`__  |      |
++---------------------------------------------------------------------+------+
+| `tatiana-merz/turkic-cyrillic-classifier <https://hugging           | RU   |
+| face.co/tatiana-merz/turkic-cyrillic-classifier>`__                 |      |
++---------------------------------------------------------------------+------+
+| `s-nlp/russian_toxicity_classifier <https://hugging                 | RU   |
+| face.co/s-nlp/russian_toxicity_classifier>`__                       |      |
++---------------------------------------------------------------------+------+
 
 Datasets
 --------
@@ -98,6 +107,75 @@ Datasets
       2. Rename column ``label`` to ``target``.
       3. Rename column ``text`` to ``source``.
       4. Reset indexes.
+
+7. `blinoff/kinopoisk <https://huggingface.co/datasets/blinoff/kinopoisk>`__
+
+   1. **Lang**: RU
+   2. **Rows**: 36591
+   3. **Preprocess**:
+
+      1. Leave only ``content`` and ``grade3`` columns.
+      2. Rename column ``grade3`` to ``target``.
+      3. Rename column ``content`` to ``source``.
+      4. Delete empty rows in dataset.
+      5. Map ``target`` with class labels.
+      6. Reset indexes.
+
+8. `blinoff/healthcare_facilities_reviews <https://huggingface.co/datasets/blinoff/healthcare_facilities_reviews>`__
+
+   1. **Lang**: RU
+   2. **Rows**: 70597
+   3. **Preprocess**:
+
+      1. Leave only ``content`` and ``sentiment`` columns.
+      2. Rename column ``sentiment`` to ``target``.
+      3. Rename column ``content`` to ``source``.
+      4. Map ``target`` with class labels.
+
+9. `tatiana-merz/cyrillic_turkic_langs <https://huggingface.co/datasets/tatiana-merz/cyrillic_turkic_langs>`__
+
+   1. **Lang**: RU
+   2. **Rows**: 9000
+   3. **Preprocess**:
+
+      1. Rename column ``label`` to ``target``.
+      2. Rename column ``text`` to ``source``.
+      3. Map ``target`` with class labels.
+
+10. `s-nlp/ru_paradetox_toxicity <https://huggingface.co/datasets/s-nlp/ru_paradetox_toxicity>`__
+
+   1. **Lang**: RU
+   2. **Rows**: 6350
+   3. **Preprocess**:
+
+      1. Rename column ``toxic`` to ``target``.
+      2. Rename column ``neutral`` to ``source``.
+      3. Delete duplicates in dataset.
+      4. Map ``target`` with class labels.
+      5. Reset indexes.
+
+11. `d0rj/rudetoxifier_data <https://huggingface.co/datasets/d0rj/rudetoxifier_data>`__
+
+   1. **Lang**: RU
+   2. **Rows**: 163187
+   3. **Preprocess**:
+
+      1. Rename column ``toxic`` to ``target``.
+      2. Rename column ``text`` to ``source``.
+
+12. `s-nlp/ru_non_detoxified <https://huggingface.co/datasets/s-nlp/ru_non_detoxified>`__
+
+   1. **Lang**: RU
+   2. **Rows**: 20900
+   3. **Preprocess**:
+
+      1. Rename column ``reasons`` to ``target``.
+      2. Rename column ``toxic_comment`` to ``source``.
+      3. Rename ``{"toxic_content":true}`` label to ``1``
+         and ``{"not_toxic":true}`` label to ``0``.
+      4. Remove irrelevant rows in dataset.
+      5. Delete duplicates in dataset.
+      6. Reset indexes.
 
 Metrics
 -------
