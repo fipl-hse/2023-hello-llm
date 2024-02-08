@@ -4,14 +4,16 @@ Neural machine translation module.
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
+from typing import Iterable, Sequence
 
 from datasets import load_dataset
+from evaluate import load
 from torchinfo import summary
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 try:
     import torch
+    from torch.utils.data import DataLoader
     from torch.utils.data.dataset import Dataset
 except ImportError:
     print('Library "torch" not installed. Failed to import.')
@@ -19,7 +21,7 @@ except ImportError:
     torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
 
 try:
-    from pandas import DataFrame
+    from pandas import concat, DataFrame, read_csv, Series
 except ImportError:
     print('Library "pandas" not installed. Failed to import.')
     DataFrame = dict  # type: ignore
@@ -198,9 +200,7 @@ class LLMPipeline(AbstractLLMPipeline):
         if not self._model:
             return None
 
-        inputs = self._tokenizer(sample, return_tensors='pt').input_ids
-        outputs = self._model.generate(inputs)
-        return self._tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
+        return self._infer_batch((sample,))[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -210,6 +210,19 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        dataset_loader = DataLoader(self._dataset, self._batch_size)
+
+        predictions = []
+        for batch_data in dataset_loader:
+            predictions.extend(self._infer_batch(batch_data))
+
+        return concat(
+            [
+                self._dataset.data[ColumnNames.TARGET],
+                Series(predictions, name=ColumnNames.PREDICTION)
+            ],
+            axis=1
+        )
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -222,6 +235,13 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+        inputs = self._tokenizer(
+            sample_batch,
+            padding=True,
+            truncation=True,
+            return_tensors='pt').input_ids
+        outputs = self._model.generate(inputs)
+        return self._tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -237,6 +257,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        self._metrics = [load(metric) for metric in metrics]
+        self._predictions = read_csv(data_path)
 
     @report_time
     def run(self) -> dict | None:
@@ -246,3 +268,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        return {metric.name: metric.compute(
+            references=self._predictions[ColumnNames.TARGET.value],
+            predictions=self._predictions[ColumnNames.PREDICTION.value])[metric.name]
+            for metric in self._metrics}
