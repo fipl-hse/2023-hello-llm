@@ -42,6 +42,10 @@ class RawDataImporter(AbstractRawDataImporter):
                           .filter(lambda dataset: dataset['source'] == 'mnli')
                           .to_pandas())
 
+    @property
+    def raw_data(self) -> DataFrame:
+        return self._raw_data
+
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
@@ -215,9 +219,8 @@ class LLMPipeline(AbstractLLMPipeline):
         for batch in loader:
             prediction.extend(self._infer_batch(batch))
 
-        prediction = pd.Series(prediction, name="predictions")
-
-        return pd.concat([self._dataset.data["target"], prediction], axis=1)
+        return pd.concat([self._dataset.data["target"], pd.Series(prediction, name="predictions")],
+                         axis=1)
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -242,9 +245,8 @@ class LLMPipeline(AbstractLLMPipeline):
                            return_tensors='pt')
 
         output = self._model(**tokens)
-        predictions = torch.argmax(output.logits, dim=1)
+        predictions = [str(prediction.item()) for prediction in torch.argmax(output.logits, dim=1)]
 
-        predictions = [str(prediction.item()) for prediction in predictions]
         return predictions
 
 
