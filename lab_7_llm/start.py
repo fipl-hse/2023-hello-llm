@@ -30,10 +30,10 @@ def main() -> None:
                             max_length=120, batch_size=64, device='cpu')
     llm_infer.analyze_model()
     llm_infer.infer_sample(task_ds[0])
-    if not os.path.exists('{}\\dist'.format(PROJECT_ROOT)):
-        os.mkdir('{}\\dist'.format(PROJECT_ROOT))
-    llm_infer.infer_dataset().to_csv('{}\\dist\\predictions.csv'.format(PROJECT_ROOT), index=False)
-    result = TaskEvaluator(data_path=Path('{}\\dist\\predictions.csv'.format(PROJECT_ROOT)),
+    if not os.path.exists(f'{PROJECT_ROOT}\\dist\\predictions.csv'):
+        os.mkdir(f'{PROJECT_ROOT}\\dist\\predictions.csv')
+    llm_infer.infer_dataset().to_csv(f'{PROJECT_ROOT}\\dist\\predictions.csv', index=False)
+    result = TaskEvaluator(data_path=Path(f'{PROJECT_ROOT}\\dist\\predictions.csv'),
                            metrics=Metrics)
 
     result.run()
