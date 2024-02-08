@@ -1,7 +1,7 @@
 """
 Collect and store model analytics.
 """
-# pylint: disable=import-error, too-many-branches, no-else-return, inconsistent-return-statements, wrong-import-order
+# pylint: disable=import-error, too-many-branches, no-else-return, inconsistent-return-statements, too-many-locals, too-many-statements, wrong-import-order
 from pathlib import Path
 from typing import Any
 
@@ -10,22 +10,35 @@ from pydantic.dataclasses import dataclass
 from config.get_model_analytics import get_references, save_reference
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
+from lab_7_llm.main import RawDataImporter, RawDataPreprocessor
 
 from reference_lab_classification.main import (AgNewsDataImporter, AgNewsPreprocessor,  # isort:skip
-                                               ClassificationLLMPipeline, DairAiEmotionDataImporter,
-                                               DairAiEmotionPreprocessor, GoEmotionsDataImporter,
-                                               GoEmotionsRawDataPreprocessor, ImdbDataImporter,
-                                               ImdbDataPreprocessor,
+                                               ClassificationLLMPipeline,
+                                               CyrillicTurkicDataImporter,
+                                               CyrillicTurkicPreprocessor,
+                                               DairAiEmotionDataImporter, DairAiEmotionPreprocessor,
+                                               GoEmotionsDataImporter,
+                                               GoEmotionsRawDataPreprocessor,
+                                               HealthcareDataImporter, HealthcarePreprocessor,
+                                               ImdbDataImporter, ImdbDataPreprocessor,
+                                               KinopoiskDataImporter, KinopoiskPreprocessor,
                                                LanguageIdentificationDataImporter,
                                                LanguageIdentificationPreprocessor,
+                                               RuDetoxifierDataImporter, RuDetoxifierPreprocessor,
                                                RuGoEmotionsRawDataPreprocessor, RuGoRawDataImporter,
-                                               WikiToxicDataImporter, WikiToxicRawDataPreprocessor)
+                                               RuNonDetoxifiedDataImporter,
+                                               RuNonDetoxifiedPreprocessor, RuParadetoxDataImporter,
+                                               RuParadetoxPreprocessor, WikiToxicDataImporter,
+                                               WikiToxicRawDataPreprocessor)
 from reference_lab_generation.main import (ClinicalNotesRawDataImporter,  # isort:skip
                                            ClinicalNotesRawDataPreprocessor,
                                            DollyClosedRawDataImporter,
                                            DollyClosedRawDataPreprocessor, GenerationLLMPipeline,
                                            GenerationTaskDataset, GenerationTaskEvaluator,
-                                           NoRobotsRawDataImporter, NoRobotsRawDataPreprocessor)
+                                           NoRobotsRawDataImporter, NoRobotsRawDataPreprocessor,
+                                           SberquadRawDataImporter, WikiOmniaRawDataImporter,
+                                           SberquadRawDataPreprocessor,
+                                           WikiOmniaRawDataPreprocessor)
 from reference_lab_nli.main import (DatasetTypes, GlueDataImporter,  # isort:skip
                                     NliDataPreprocessor,
                                     NLILLMPipeline, NliRusDataImporter,
@@ -34,9 +47,12 @@ from reference_lab_nli.main import (DatasetTypes, GlueDataImporter,  # isort:ski
                                     XnliDataImporter)
 from reference_lab_nmt.helpers import (EnDeRawDataPreprocessor, RuEnRawDataImporter,  # isort:skip
                                        RuEnRawDataPreprocessor, RuEsRawDataPreprocessor)
-from reference_lab_nmt.main import (LLMPipeline,  # isort:skip
-                                    RawDataImporter,
-                                    RawDataPreprocessor, TaskDataset, TaskEvaluator)
+from reference_lab_nmt.main import LLMPipeline, TaskDataset, TaskEvaluator  # isort:skip
+from reference_lab_open_qa.main import (AlpacaRawDataPreprocessor,  # isort:skip
+                                        DatabricksRawDataPreprocessor,
+                                        DollyOpenQARawDataImporter, DollyOpenQARawDataPreprocessor,
+                                        OpenQALLMPipeline, OpenQATaskDataset, QARawDataImporter,
+                                        TruthfulQARawDataImporter, TruthfulQARawDataPreprocessor)
 from reference_lab_summarization.main import (DailymailRawDataImporter,  # isort:skip
                                               DailymailRawDataPreprocessor,
                                               GovReportRawDataPreprocessor,
@@ -82,7 +98,7 @@ def nmt_inference(main_params: MainParams,
         inference_params (InferenceParams): Parameters from inference
 
     Returns:
-        Any: Metric value
+        Any: The calculated metric
     """
     if main_params.dataset == 'shreevigneshs/iwslt-2023-en-ru-train-val-split-0.2':
         importer = RuEnRawDataImporter(main_params.dataset)
@@ -128,7 +144,7 @@ def generation_inference(main_params: MainParams,
         inference_params (InferenceParams): Parameters from inference
 
     Returns:
-        Any: Metric value
+        Any: The calculated metric
     """
     # START OF LEVEL 4
     importer: AbstractRawDataImporter
@@ -136,6 +152,10 @@ def generation_inference(main_params: MainParams,
         importer = DollyClosedRawDataImporter(main_params.dataset)
     elif main_params.dataset == 'starmpcc/Asclepius-Synthetic-Clinical-Notes':
         importer = ClinicalNotesRawDataImporter(main_params.dataset)
+    elif main_params.dataset == 'sberquad':
+        importer = SberquadRawDataImporter(main_params.dataset)
+    elif main_params.dataset == 'RussianNLP/wikiomnia':
+        importer = WikiOmniaRawDataImporter(main_params.dataset)
     else:
         importer = NoRobotsRawDataImporter(main_params.dataset)
     importer.obtain()
@@ -146,6 +166,10 @@ def generation_inference(main_params: MainParams,
         preprocessor = DollyClosedRawDataPreprocessor(importer.raw_data)
     elif main_params.dataset == 'starmpcc/Asclepius-Synthetic-Clinical-Notes':
         preprocessor = ClinicalNotesRawDataPreprocessor(importer.raw_data)
+    elif main_params.dataset == 'RussianNLP/wikiomnia':
+        preprocessor = WikiOmniaRawDataPreprocessor(importer.raw_data)
+    elif main_params.dataset == 'sberquad':
+        preprocessor = SberquadRawDataPreprocessor(importer.raw_data)
     else:
         preprocessor = NoRobotsRawDataPreprocessor(importer.raw_data)
     preprocessor.transform()
@@ -180,7 +204,7 @@ def classification_inference(main_params: MainParams,
         inference_params (InferenceParams): Parameters from inference
 
     Returns:
-        Any: Metric value
+        Any: The calculated metric
     """
     importer: AbstractRawDataImporter
     if main_params.dataset == 'seara/ru_go_emotions':
@@ -196,6 +220,18 @@ def classification_inference(main_params: MainParams,
             main_params.dataset)
     elif main_params.dataset == 'OxAISH-AL-LLM/wiki_toxic':
         importer = WikiToxicDataImporter(main_params.dataset)
+    elif main_params.dataset == 'blinoff/kinopoisk':
+        importer = KinopoiskDataImporter(main_params.dataset)
+    elif main_params.dataset == 'blinoff/healthcare_facilities_reviews':
+        importer = HealthcareDataImporter(main_params.dataset)
+    elif main_params.dataset == 'tatiana-merz/cyrillic_turkic_langs':
+        importer = CyrillicTurkicDataImporter(main_params.dataset)
+    elif main_params.dataset == 's-nlp/ru_paradetox_toxicity':
+        importer = RuParadetoxDataImporter(main_params.dataset)
+    elif main_params.dataset == 's-nlp/ru_non_detoxified':
+        importer = RuNonDetoxifiedDataImporter(main_params.dataset)
+    elif main_params.dataset == 'd0rj/rudetoxifier_data':
+        importer = RuDetoxifierDataImporter(main_params.dataset)
     else:
         importer = GoEmotionsDataImporter(main_params.dataset)
     importer.obtain()
@@ -203,22 +239,29 @@ def classification_inference(main_params: MainParams,
         raise ValueError('Unable to process data which is None!')
 
     if main_params.dataset == 'OxAISH-AL-LLM/wiki_toxic':
-        preprocessor = WikiToxicRawDataPreprocessor(
-            importer.raw_data)
+        preprocessor = WikiToxicRawDataPreprocessor(importer.raw_data)
     elif main_params.dataset == 'go_emotions':
-        preprocessor = GoEmotionsRawDataPreprocessor(
-            importer.raw_data)
+        preprocessor = GoEmotionsRawDataPreprocessor(importer.raw_data)
     elif main_params.dataset == 'seara/ru_go_emotions':
-        preprocessor = RuGoEmotionsRawDataPreprocessor(
-            importer.raw_data)
+        preprocessor = RuGoEmotionsRawDataPreprocessor(importer.raw_data)
     elif main_params.dataset == 'imdb':
-        preprocessor = ImdbDataPreprocessor(
-            importer.raw_data)
+        preprocessor = ImdbDataPreprocessor(importer.raw_data)
     elif main_params.dataset == 'dair-ai/emotion':
-        preprocessor = DairAiEmotionPreprocessor(
-            importer.raw_data)
+        preprocessor = DairAiEmotionPreprocessor(importer.raw_data)
     elif main_params.dataset == 'ag_news':
         preprocessor = AgNewsPreprocessor(importer.raw_data)
+    elif main_params.dataset == 'blinoff/kinopoisk':
+        preprocessor = KinopoiskPreprocessor(importer.raw_data)
+    elif main_params.dataset == 'blinoff/healthcare_facilities_reviews':
+        preprocessor = HealthcarePreprocessor(importer.raw_data)
+    elif main_params.dataset == 'tatiana-merz/cyrillic_turkic_langs':
+        preprocessor = CyrillicTurkicPreprocessor(importer.raw_data)
+    elif main_params.dataset == 's-nlp/ru_paradetox_toxicity':
+        preprocessor = RuParadetoxPreprocessor(importer.raw_data)
+    elif main_params.dataset == 's-nlp/ru_non_detoxified':
+        preprocessor = RuNonDetoxifiedPreprocessor(importer.raw_data)
+    elif main_params.dataset == 'd0rj/rudetoxifier_data':
+        preprocessor = RuDetoxifierPreprocessor(importer.raw_data)
     else:
         preprocessor = LanguageIdentificationPreprocessor(
             importer.raw_data)
@@ -256,11 +299,10 @@ def nli_inference(main_params: MainParams,
         inference_params (InferenceParams): Parameters from inference
 
     Returns:
-        Any: Metric value
+        Any: The calculated metric
     """
     dataset_type = DatasetTypes(main_params.dataset)
 
-    importer: AbstractRawDataImporter
     if dataset_type == DatasetTypes.XNLI:
         importer = XnliDataImporter(main_params.dataset)
         importer.obtain()
@@ -319,10 +361,9 @@ def summarization_inference(main_params: MainParams,
         inference_params (InferenceParams): Parameters from inference
 
     Returns:
-        Any: Metric value
+        Any: The calculated metric
     """
     # START OF LEVEL 4
-    importer: AbstractRawDataImporter
     if main_params.dataset == 'tomasg25/scientific_lay_summarisation':
         importer = ScientificLiteratureRawDataImporter(main_params.dataset)
     elif main_params.dataset == 'cnn_dailymail':
@@ -380,6 +421,54 @@ def summarization_inference(main_params: MainParams,
     # END OF LEVEL 8
 
 
+def open_generative_qa_inference(main_params: MainParams,
+                       inference_params: InferenceParams) -> Any:
+    """
+    Gets inference for open generative questions & answering task.
+
+    Args:
+        main_params (MainParams): Parameters from main
+        inference_params (InferenceParams): Parameters from inference
+
+    Returns:
+        Any: The calculated metric
+    """
+    if main_params.dataset == 'truthful_qa':
+        importer = TruthfulQARawDataImporter(main_params.dataset)
+    elif main_params.dataset == 'lionelchg/dolly_open_qa':
+        importer = DollyOpenQARawDataImporter(main_params.dataset)
+    else:
+        importer = QARawDataImporter(main_params.dataset)
+    importer.obtain()
+    if importer.raw_data is None:
+        raise ValueError('Unable to process data which is None!')
+
+    if main_params.dataset == 'truthful_qa':
+        preprocessor = TruthfulQARawDataPreprocessor(importer.raw_data)
+    elif main_params.dataset == 'jtatman/databricks-dolly-8k-qa-open-close':
+        preprocessor = DatabricksRawDataPreprocessor(importer.raw_data)
+    elif main_params.dataset == 'tatsu-lab/alpaca':
+        preprocessor = AlpacaRawDataPreprocessor(importer.raw_data)
+    else:
+        preprocessor = DollyOpenQARawDataPreprocessor(importer.raw_data)
+
+    preprocessor.transform()
+    dataset = OpenQATaskDataset(preprocessor.data.head(inference_params.num_samples))
+    pipeline = OpenQALLMPipeline(main_params.model,
+                                 dataset,
+                                 inference_params.max_length,
+                                 inference_params.batch_size,
+                                 inference_params.device)
+
+    predictions_df = pipeline.infer_dataset()
+    predictions_df.to_csv(inference_params.predictions_path, index=False, encoding='utf-8')
+
+    evaluator = TaskEvaluator(data_path=inference_params.predictions_path,
+                              metrics=main_params.metrics)
+    result = evaluator.run()
+    return result
+
+
 def get_task(model: str, main_params: MainParams, inference_params: InferenceParams) -> Any:
     """
     Gets task.
@@ -410,7 +499,10 @@ def get_task(model: str, main_params: MainParams, inference_params: InferencePar
         'papluca/xlm-roberta-base-language-detection',
         'fabriceyhc/bert-base-uncased-ag_news',
         'XSY/albert-base-v2-imdb-calssification',
-        'aiknowyou/it-emotion-analyzer'
+        'aiknowyou/it-emotion-analyzer',
+        'blanchefort/rubert-base-cased-sentiment-rusentiment',
+        'tatiana-merz/turkic-cyrillic-classifier',
+        's-nlp/russian_toxicity_classifier'
     ]
 
     nli_model = [
@@ -429,6 +521,12 @@ def get_task(model: str, main_params: MainParams, inference_params: InferencePar
         'dmitry-vorobiev/rubert_ria_headlines'
     ]
 
+    open_generative_qa_model = [
+        'EleutherAI/pythia-160m-deduped',
+        'JackFram/llama-68m',
+        'EleutherAI/gpt-neo-125m'
+    ]
+
     if model in nmt_model:
         return nmt_inference(main_params, inference_params)
     elif model in generation_model:
@@ -439,6 +537,8 @@ def get_task(model: str, main_params: MainParams, inference_params: InferencePar
         return nli_inference(main_params, inference_params)
     elif model in summarization_model:
         return summarization_inference(main_params, inference_params)
+    elif model in open_generative_qa_model:
+        return open_generative_qa_inference(main_params, inference_params)
 
 
 def main() -> None:
@@ -472,8 +572,8 @@ def main() -> None:
                 print(model, dataset, metric)
                 main_params = MainParams(model, dataset, [Metrics(metric)])
                 inference_func = get_task(model, main_params, inference_params)
-                metric = f'{inference_func[metric]:.5f}'
-                result[model][dataset][metric] = metric
+                truncated_metric = int(inference_func[metric] * 10 ** 5) / 10 ** 5
+                result[model][dataset][metric] = truncated_metric
 
     save_reference(dest, result)
 
