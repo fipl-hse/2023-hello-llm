@@ -1,7 +1,7 @@
 """
 Neural machine translation module.
 """
-# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, no-member
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
@@ -17,7 +17,6 @@ try:
     from torch.utils.data.dataset import Dataset
 except ImportError:
     print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
     torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
 
 try:
@@ -170,6 +169,10 @@ class LLMPipeline(AbstractLLMPipeline):
             'input_ids': ids,
             'decoder_input_ids': ids
         }
+
+        if not self._model:
+            return None
+
         model_stats = summary(
             self._model,
             input_data=input_data,
@@ -241,7 +244,7 @@ class LLMPipeline(AbstractLLMPipeline):
             truncation=True,
             return_tensors='pt').input_ids
         outputs = self._model.generate(inputs)
-        return self._tokenizer.batch_decode(outputs, skip_special_tokens=True)
+        return list(self._tokenizer.batch_decode(outputs, skip_special_tokens=True))
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -257,8 +260,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
-        self._metrics = [load(metric) for metric in metrics]
-        self._predictions = read_csv(data_path)
+        super().__init__(metrics)
+        self._data_path = data_path
 
     @report_time
     def run(self) -> dict | None:
@@ -268,7 +271,9 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        metrics = [load(metric) for metric in self._metrics]
+        predictions = read_csv(self._data_path)
         return {metric.name: metric.compute(
-            references=self._predictions[ColumnNames.TARGET.value],
-            predictions=self._predictions[ColumnNames.PREDICTION.value])[metric.name]
-            for metric in self._metrics}
+            references=predictions[ColumnNames.TARGET.value],
+            predictions=predictions[ColumnNames.PREDICTION.value])[metric.name]
+            for metric in metrics}
