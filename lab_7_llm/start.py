@@ -39,7 +39,7 @@ def main() -> None:
     print(pipe.infer_sample(task_dataset[0]))
     predictions = pipe.infer_dataset()
 
-    path = (PROJECT_ROOT / 'lab_7_llm' / 'dist')
+    path = PROJECT_ROOT / 'lab_7_llm' / 'dist'
 
     if not path.exists():
         path.mkdir()

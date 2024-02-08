@@ -4,30 +4,18 @@ Neural machine translation module.
 # pylint: disable=too-few-public-methods,
 # undefined-variable, too-many-arguments,
 # super-init-not-called
-from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
 import pandas as pd
+import torch
 from datasets import load_dataset
 from evaluate import load
+from pandas import DataFrame
 from torch.utils.data import DataLoader
+from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import AutoTokenizer, BertForSequenceClassification
-
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -41,9 +29,6 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
-
-    def __init__(self, hf_name: str | None):
-        super().__init__(hf_name)
 
     @report_time
     def obtain(self) -> None:
@@ -151,8 +136,13 @@ class LLMPipeline(AbstractLLMPipeline):
     A class that initializes a model, analyzes its properties and infers it.
     """
 
-    def __init__(self, model_name: str, dataset: TaskDataset, max_length: int, batch_size: int,
-                 device: str) -> None:
+    def __init__(self,
+                 model_name: str,
+                 dataset: TaskDataset,
+                 max_length: int,
+                 batch_size: int,
+                 device: str
+                 ) -> None:
         """
         Initialize an instance of LLMPipeline.
 
@@ -163,7 +153,11 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
-        super().__init__(model_name, dataset, max_length, batch_size, device)
+        super().__init__(model_name,
+                         dataset,
+                         max_length,
+                         batch_size,
+                         device)
         self._model = BertForSequenceClassification.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
@@ -184,7 +178,8 @@ class LLMPipeline(AbstractLLMPipeline):
         size, num_trainable_params, last_layer = (model_statistics.total_params,
                                                   model_statistics.trainable_params,
                                                   model_statistics.summary_list[-1].output_size)
-        return {"input_shape": input_data,
+        return {"input_shape": {"input_ids": [tensor_data.shape[0], tensor_data.shape[1]],
+                                "attention_mask": [tensor_data.shape[0], tensor_data.shape[1]]},
                 "embedding_size": self._model.config.max_position_embeddings,
                 "output_shape": last_layer,
                 "num_trainable_params": num_trainable_params,
@@ -283,3 +278,4 @@ class TaskEvaluator(AbstractTaskEvaluator):
                 accuracy_metric = load(metric.value).compute(references=data['target'],
                                                              predictions=data['predictions'])
                 return accuracy_metric
+        return None
