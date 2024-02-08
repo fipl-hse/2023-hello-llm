@@ -39,6 +39,16 @@ class RawDataImporter(AbstractRawDataImporter):
         """
         self._raw_data = load_dataset(self._hf_name, 'ru', split='validation').to_pandas()
 
+    @property
+    def raw_data(self) -> DataFrame:
+        """
+        Property for original dataset in a table format.
+
+        Returns:
+            pandas.DataFrame: A dataset in a table format
+        """
+        return self._raw_data
+
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
