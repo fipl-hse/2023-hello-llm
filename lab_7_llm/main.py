@@ -28,6 +28,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
+    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -134,6 +135,7 @@ class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
     """
+    _model: torch.nn.Module
 
     def __init__(self,
                  model_name: str,
@@ -276,5 +278,5 @@ class TaskEvaluator(AbstractTaskEvaluator):
             if metric.value == "accuracy":
                 accuracy_metric = load(metric.value).compute(references=data['target'],
                                                              predictions=data['predictions'])
-                return accuracy_metric
+                return dict(accuracy_metric)
         return None
