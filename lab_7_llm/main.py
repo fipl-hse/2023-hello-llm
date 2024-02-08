@@ -278,6 +278,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        super().__init__(metrics)
         self._data_path = data_path
         self._metrics = metrics
 
@@ -295,4 +296,4 @@ class TaskEvaluator(AbstractTaskEvaluator):
         metrics_evaluation = metric.compute(references=df_to_evaluate['target'].tolist(),
                                             predictions=df_to_evaluate['prediction'].tolist()
                                             )
-        return dict(metrics_evaluation)
+        return metrics_evaluation
