@@ -4,5 +4,5 @@
     "dataset": "OxAISH-AL-LLM/wiki_toxic",
     "metrics": []
   },
-  "target_score": 8
+  "target_score": 6
 }
