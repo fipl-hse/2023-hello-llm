@@ -5,8 +5,13 @@ import json
 
 # pylint: disable= too-many-locals
 from config.constants import PROJECT_ROOT
+from core_utils.llm.metrics import Metrics
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset
+from lab_7_llm.main import (LLMPipeline,
+                            RawDataImporter,
+                            RawDataPreprocessor,
+                            TaskDataset,
+                            TaskEvaluator)
 
 
 @report_time
@@ -32,7 +37,17 @@ def main() -> None:
 
     print(pipe.analyze_model())
     print(pipe.infer_sample(task_dataset[0]))
-    result = pipe.infer_dataset()
+    predictions = pipe.infer_dataset()
+
+    path = (PROJECT_ROOT / 'lab_7_llm' / 'dist')
+
+    if not path.exists():
+        path.mkdir()
+
+    predictions.to_csv(path / 'predictions.csv')
+
+    result = TaskEvaluator(path / 'predictions.csv', Metrics).run()
+
     print(result)
 
     assert result is not None, "Demo does not work correctly"

@@ -4,5 +4,5 @@
     "dataset": "cointegrated/nli-rus-translated-v2021",
     "metrics": ["accuracy"]
   },
-  "target_score": 6
+  "target_score": 8
 }

@@ -1,13 +1,16 @@
 """
 Neural machine translation module.
 """
-# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+# pylint: disable=too-few-public-methods,
+# undefined-variable, too-many-arguments,
+# super-init-not-called
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
 import pandas as pd
 from datasets import load_dataset
+from evaluate import load
 from torch.utils.data import DataLoader
 from torchinfo import summary
 from transformers import AutoTokenizer, BertForSequenceClassification
@@ -170,10 +173,14 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-        tensor_data = torch.ones(1, self._model.config.max_position_embeddings, dtype=torch.long)
+        tensor_data = torch.ones(1,
+                                 self._model.config.max_position_embeddings,
+                                 dtype=torch.long)
         input_data = {"input_ids": tensor_data,
                       "attention_mask": tensor_data}
-        model_statistics = summary(self._model, input_data=input_data, verbose=False)
+        model_statistics = summary(self._model,
+                                   input_data=input_data,
+                                   verbose=False)
         size, num_trainable_params, last_layer = (model_statistics.total_params,
                                                   model_statistics.trainable_params,
                                                   model_statistics.summary_list[-1].output_size)
@@ -208,6 +215,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         loader = DataLoader(self._dataset, batch_size=self._batch_size)
         prediction = []
+
         for batch in loader:
             prediction.extend(self._infer_batch(batch))
 
@@ -257,6 +265,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        super().__init__(metrics)
+        self._data_path = data_path
 
     @report_time
     def run(self) -> dict | None:
@@ -266,3 +276,10 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        data = pd.read_csv(self._data_path).drop(columns=['Unnamed: 0'])
+
+        for metric in self._metrics:
+            if metric.value == "accuracy":
+                accuracy_metric = load(metric.value).compute(references=data['target'],
+                                                             predictions=data['predictions'])
+                return accuracy_metric
