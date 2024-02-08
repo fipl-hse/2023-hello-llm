@@ -31,7 +31,7 @@ def main() -> None:
     llm_infer.analyze_model()
     llm_infer.infer_sample(task_ds[0])
     if not os.path.exists(f'{PROJECT_ROOT}/dist/predictions.csv'):
-        os.mkdir(f'{PROJECT_ROOT}/dist/predictions.csv')
+        os.mkdir(f'{PROJECT_ROOT}/dist')
     llm_infer.infer_dataset().to_csv(f'{PROJECT_ROOT}/dist/predictions.csv', index=False)
     result = TaskEvaluator(data_path=Path(f'{PROJECT_ROOT}/dist/predictions.csv'),
                            metrics=Metrics)
