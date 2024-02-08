@@ -180,7 +180,7 @@ class LLMPipeline(AbstractLLMPipeline):
         model_statistics = summary(self._model,
                                    input_data=input_data,
                                    verbose=False)
-        size, num_trainable_params, last_layer = (model_statistics.total_params,
+        size, num_trainable_params, last_layer = (model_statistics.total_param_bytes,
                                                   model_statistics.trainable_params,
                                                   model_statistics.summary_list[-1].output_size)
         return {"input_shape": {"input_ids": [tensor_data.shape[0], tensor_data.shape[1]],
@@ -190,7 +190,7 @@ class LLMPipeline(AbstractLLMPipeline):
                 "num_trainable_params": num_trainable_params,
                 "vocab_size": self._model.config.vocab_size,
                 "size": size,
-                "max_context_length": self._model.config.max_position_embeddings}
+                "max_context_length": self._model.config.max_length}
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -219,8 +219,8 @@ class LLMPipeline(AbstractLLMPipeline):
         for batch in loader:
             prediction.extend(self._infer_batch(batch))
 
-        return pd.concat([self._dataset.data["target"], pd.Series(prediction, name="predictions")],
-                         axis=1)
+        self._dataset.data["predictions"] = prediction
+        return self._dataset.data[["target", "predictions"]]
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
