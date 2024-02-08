@@ -296,4 +296,4 @@ class TaskEvaluator(AbstractTaskEvaluator):
         metrics_evaluation = metric.compute(references=df_to_evaluate['target'].tolist(),
                                             predictions=df_to_evaluate['prediction'].tolist()
                                             )
-        return metrics_evaluation
+        return dict(metrics_evaluation)
