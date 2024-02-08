@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import torchinfo
 from datasets import load_dataset
+from evaluate import load
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer, BertForSequenceClassification
 
@@ -75,7 +76,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
 
     def _count_samples(self) -> int:
         """
-        Count number of rows in a DataFrame
+        Count number of rows in a DataFrame.
 
         Returns:
             int: number of rows in a DataFrame
@@ -84,7 +85,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
 
     def _count_columns(self) -> int:
         """
-        Count number of columns in a DataFrame
+        Count number of columns in a DataFrame.
 
         Returns:
             int: number of columns in a DataFrame
@@ -93,7 +94,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
 
     def _count_duplicates(self) -> int:
         """
-        Count number of duplicates in a DataFrame
+        Count number of duplicates in a DataFrame.
 
         Returns:
             int: number of duplicates in a DataFrame
@@ -102,7 +103,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
 
     def _count_empty(self) -> int:
         """
-        Count number of empty rows in a DataFrame including those having empty strings
+        Count number of empty rows in a DataFrame including those having empty strings.
 
         Returns:
             int: number of empty rows in a DataFrame
@@ -111,7 +112,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
 
     def _count_min(self) -> int:
         """
-        Count length of the shortest sample
+        Count length of the shortest sample.
 
         Returns:
             int: length of the shortest sample
@@ -121,7 +122,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
 
     def _count_max(self) -> int:
         """
-        Count length of the longest sample
+        Count length of the longest sample.
 
         Returns:
             int: length of the longest sample
@@ -273,7 +274,7 @@ class LLMPipeline(AbstractLLMPipeline):
 
     def _get_summary(self, ids: torch.Tensor) -> torchinfo.model_statistics.ModelStatistics:
         """
-        Get model summary using torchinfo
+        Get model summary using torchinfo.
 
         Args:
             ids (torch.Tensor): input data imitation
@@ -318,6 +319,20 @@ class LLMPipeline(AbstractLLMPipeline):
         output = self._model(**tokens).logits
         return [str(prediction.item()) for prediction in list(torch.argmax(output, dim=1))]
 
+    @staticmethod
+    def save_results(predictions: pd.DataFrame, save_path: Path) -> None:
+        """
+        Save dataframe with predictions as csv file.
+        This will rewrite existing files in destination folder.
+
+        Args:
+            predictions (pd.DataFrame): Dataframe with model's predictions
+            save_path (Path): Path to save predictions
+        """
+        if not save_path.parent.exists():
+            save_path.parent.mkdir()
+        predictions.to_csv(save_path, index_label='id')
+
 
 class TaskEvaluator(AbstractTaskEvaluator):
     """
@@ -332,6 +347,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        super().__init__(metrics)
+        self._data_path = data_path
 
     @report_time
     def run(self) -> dict | None:
@@ -341,3 +358,22 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        scores = {}
+        for metric in self._metrics:
+            evaluator = load(metric.value)
+            predictions = self._load_data()
+            score = evaluator.compute(
+                predictions=predictions['predictions'],
+                references=predictions['target']
+            )
+            scores.update(score)
+        return scores
+
+    def _load_data(self) -> pd.DataFrame:
+        """
+        Load predictions data
+
+        Returns:
+            pd.DataFrame: A dataframe with predictions and actual labels
+        """
+        return pd.read_csv(self._data_path, index_col='id')

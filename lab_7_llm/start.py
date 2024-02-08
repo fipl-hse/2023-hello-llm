@@ -6,8 +6,10 @@ import json
 from random import randint
 
 from config.constants import PROJECT_ROOT
+from core_utils.llm.metrics import Metrics
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset
+from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset, \
+    TaskEvaluator
 
 
 @report_time
@@ -37,8 +39,17 @@ def main() -> None:
     sample_inference = pipeline.infer_sample(sample)
     print(f'SAMPLE: {sample}\nPREDICTION: {sample_inference}')
 
-    result = sample_inference
-    print(pipeline.infer_dataset())
+    predictions = pipeline.infer_dataset()
+    data_path = PROJECT_ROOT / 'lab_7_llm' / 'dist' / 'predictions.csv'
+    pipeline.save_results(predictions, data_path)
+
+    evaluator = TaskEvaluator(
+        data_path,
+        [Metrics[metric.upper()] for metric in configs['parameters']['metrics']]
+    )
+    result = evaluator.run()
+    print(result)
+
     assert result is not None, "Demo does not work correctly"
 
 
