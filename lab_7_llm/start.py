@@ -29,10 +29,11 @@ def main() -> None:
                            batch_size=1,
                            device='cpu')
 
-    analysis = pipeline.analyze_model()
-    # inference = pipeline.infer_sample()
+    result = pipeline.analyze_model()
+    # result = pipeline.infer_sample('')
+    print(result)
 
-    assert analysis is not None, "Demo does not work correctly"
+    assert result is not None, "Demo does not work correctly"
 
 
 if __name__ == "__main__":

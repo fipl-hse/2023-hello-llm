@@ -2,33 +2,14 @@
 Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
-from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 from datasets import load_dataset
-
-
-try:
-    from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-except ImportError:
-    print('Library "transformers" not installed. Failed to import.')
-
-
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-    from torchinfo import summary
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-    summary = None
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from torchinfo import summary
+import torch
+from torch.utils.data.dataset import Dataset
+from pandas import DataFrame
 
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
@@ -164,7 +145,12 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-        summary_result = self._get_summary()
+        torch_data = torch.ones(self._batch_size, self._model.config.decoder.max_position_embeddings, dtype=torch.long)
+        torch_dict = {'input_ids': torch_data, 'attention_mask': torch_data, 'decoder_input_ids': torch_data}
+        summary_result = summary(self._model,
+                                 input_data=torch_dict,
+                                 device='cpu',
+                                 verbose=0)
         model_properties = {'input_shape': summary_result.summary_list[0].output_size[:2],
                             'embedding_size': self._model.config.decoder.max_position_embeddings,
                             'output_shape': summary_result.summary_list[-1].output_size,
@@ -172,7 +158,6 @@ class LLMPipeline(AbstractLLMPipeline):
                             'vocab_size': self._model.config.decoder.vocab_size,
                             'size': summary_result.total_param_bytes,
                             'max_context_length': self._model.config.decoder.max_length}
-        # print(model_properties)
         return model_properties
 
     @report_time
@@ -191,7 +176,7 @@ class LLMPipeline(AbstractLLMPipeline):
         output = self._model.generate(**tokens)
         decoded = tokenizer.batch_decode(output, skip_special_tokens=True)
 
-        return decoded
+        return decoded[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -213,13 +198,6 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-
-    def _get_summary(self):
-        torch_data = torch.ones(self._batch_size, self._model.config.decoder.max_position_embeddings, dtype=torch.long)
-        torch_dict = {'input_ids': torch_data, 'attention_mask': torch_data, 'decoder_input_ids': torch_data}
-        summary_result = summary(self._model, input_data=torch_dict, verbose=0)
-
-        return summary_result
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
