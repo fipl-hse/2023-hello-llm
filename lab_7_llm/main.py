@@ -27,6 +27,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
+    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -86,7 +87,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             int: number of duplicates in a DataFrame
         """
-        return self._raw_data.duplicated().sum()
+        return sum(self._raw_data.duplicated())
 
     def _count_empty(self) -> int:
         """
@@ -181,6 +182,7 @@ class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
     """
+    _model: torch.nn.Module
 
     def __init__(
             self,
@@ -254,9 +256,11 @@ class LLMPipeline(AbstractLLMPipeline):
         loader = DataLoader(self._dataset, batch_size=self._batch_size)
         for batch in loader:
             predictions.extend(self._infer_batch(batch))
-        return pd.concat(
-            [self._dataset.data['target'], pd.Series(predictions, name='predictions')],
-            axis=1
+        return pd.DataFrame(
+            pd.concat(
+                [self._dataset.data['target'], pd.Series(predictions, name='predictions')],
+                axis=1
+            )
         )
 
     def _get_summary(self, ids: torch.Tensor) -> torchinfo.model_statistics.ModelStatistics:
