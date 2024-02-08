@@ -181,9 +181,9 @@ class LLMPipeline(AbstractLLMPipeline):
             "embedding_size": self._model.config.max_position_embeddings,
             "input_shape": {'attention_mask': list(analytics.input_size['attention_mask']),
                             'input_ids': list(analytics.input_size['input_ids'])},
-            "max_context_length": self._model.config.max_position_embeddings,
+            "max_context_length": self._model.config.max_length,
             "num_trainable_params": analytics.trainable_params,
-            "output_shape": analytics.summary_list[1].output_size,
+            "output_shape": analytics.summary_list[-1].output_size,
             "size": analytics.total_param_bytes,
             "vocab_size": self._model.config.vocab_size
         }
