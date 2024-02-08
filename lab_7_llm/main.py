@@ -220,7 +220,7 @@ class LLMPipeline(AbstractLLMPipeline):
             prediction.extend(self._infer_batch(batch))
 
         self._dataset.data["predictions"] = prediction
-        return self._dataset.data[["target", "predictions"]]
+        return pd.DataFrame(self._dataset.data[["target", "predictions"]])
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
