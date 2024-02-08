@@ -19,11 +19,7 @@ except ImportError:
     print('Library "torch" not installed. Failed to import.')
     torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
 
-try:
-    from pandas import concat, DataFrame, read_csv, Series
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
+import pandas as pd
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -87,7 +83,7 @@ class TaskDataset(Dataset):
     A class that converts pd.DataFrame to Dataset and works with it.
     """
 
-    def __init__(self, data: DataFrame) -> None:
+    def __init__(self, data: pd.DataFrame) -> None:
         """
         Initialize an instance of TaskDataset.
 
@@ -118,7 +114,7 @@ class TaskDataset(Dataset):
         return self._data.iloc[index][ColumnNames.SOURCE]
 
     @property
-    def data(self) -> DataFrame:
+    def data(self) -> pd.DataFrame:
         """
         Property with access to preprocessed DataFrame.
 
@@ -206,7 +202,7 @@ class LLMPipeline(AbstractLLMPipeline):
         return self._infer_batch((sample,))[0]
 
     @report_time
-    def infer_dataset(self) -> DataFrame:
+    def infer_dataset(self) -> pd.DataFrame:
         """
         Infer model on a whole dataset.
 
@@ -219,10 +215,10 @@ class LLMPipeline(AbstractLLMPipeline):
         for batch_data in dataset_loader:
             predictions.extend(self._infer_batch(batch_data))
 
-        return concat(
+        return pd.concat(
             [
                 self._dataset.data[ColumnNames.TARGET],
-                Series(predictions, name=ColumnNames.PREDICTION)
+                pd.Series(predictions, name=ColumnNames.PREDICTION)
             ],
             axis=1
         )
@@ -272,7 +268,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
             dict | None: A dictionary containing information about the calculated metric
         """
         metrics = [load(metric) for metric in self._metrics]
-        predictions = read_csv(self._data_path)
+        predictions = pd.read_csv(self._data_path)
         return {metric.name: metric.compute(
             references=predictions[ColumnNames.TARGET.value],
             predictions=predictions[ColumnNames.PREDICTION.value])[metric.name]
