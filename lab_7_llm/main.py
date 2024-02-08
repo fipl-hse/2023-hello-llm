@@ -1,9 +1,8 @@
 """
 Neural machine translation module.
 """
-# pylint: disable=too-few-public-methods,
-# undefined-variable, too-many-arguments,
-# super-init-not-called
+# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+
 from pathlib import Path
 from typing import Iterable, Sequence
 
