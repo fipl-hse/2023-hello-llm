@@ -1,4 +1,48 @@
 {
+    "EleutherAI/gpt-neo-125m": {
+        "embedding_size": 2048,
+        "input_shape": {
+            "attention_mask": [
+                1,
+                2048
+            ],
+            "input_ids": [
+                1,
+                2048
+            ]
+        },
+        "max_context_length": 20,
+        "num_trainable_params": 163795968,
+        "output_shape": [
+            1,
+            2048,
+            50257
+        ],
+        "size": 655183872,
+        "vocab_size": 50257
+    },
+    "EleutherAI/pythia-160m-deduped": {
+        "embedding_size": 2048,
+        "input_shape": {
+            "attention_mask": [
+                1,
+                2048
+            ],
+            "input_ids": [
+                1,
+                2048
+            ]
+        },
+        "max_context_length": 20,
+        "num_trainable_params": 162322944,
+        "output_shape": [
+            1,
+            2048,
+            50304
+        ],
+        "size": 649291776,
+        "vocab_size": 50304
+    },
     "Helsinki-NLP/opus-mt-en-fr": {
         "embedding_size": 512,
         "input_shape": [
@@ -46,6 +90,28 @@
         ],
         "size": 438460416,
         "vocab_size": 63430
+    },
+    "JackFram/llama-68m": {
+        "embedding_size": 2048,
+        "input_shape": {
+            "attention_mask": [
+                1,
+                2048
+            ],
+            "input_ids": [
+                1,
+                2048
+            ]
+        },
+        "max_context_length": 20,
+        "num_trainable_params": 68030208,
+        "output_shape": [
+            1,
+            2048,
+            32000
+        ],
+        "size": 272120832,
+        "vocab_size": 32000
     },
     "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli": {
         "embedding_size": 512,
@@ -148,6 +214,27 @@
         ],
         "size": 439710720,
         "vocab_size": 31102
+    },
+    "blanchefort/rubert-base-cased-sentiment-rusentiment": {
+        "embedding_size": 512,
+        "input_shape": {
+            "attention_mask": [
+                1,
+                512
+            ],
+            "input_ids": [
+                1,
+                512
+            ]
+        },
+        "max_context_length": 20,
+        "num_trainable_params": 177853440,
+        "output_shape": [
+            1,
+            768
+        ],
+        "size": 711413760,
+        "vocab_size": 119547
     },
     "cointegrated/rubert-base-cased-nli-threeway": {
         "embedding_size": 512,
@@ -360,6 +447,27 @@
         "size": 1112174592,
         "vocab_size": 250002
     },
+    "s-nlp/russian_toxicity_classifier": {
+        "embedding_size": 512,
+        "input_shape": {
+            "attention_mask": [
+                1,
+                512
+            ],
+            "input_ids": [
+                1,
+                512
+            ]
+        },
+        "max_context_length": 20,
+        "num_trainable_params": 177853440,
+        "output_shape": [
+            1,
+            768
+        ],
+        "size": 711413760,
+        "vocab_size": 119547
+    },
     "stevhliu/my_awesome_billsum_model": {
         "embedding_size": 512,
         "input_shape": [
@@ -392,6 +500,27 @@
         "size": 307824640,
         "vocab_size": 32128
     },
+    "tatiana-merz/turkic-cyrillic-classifier": {
+        "embedding_size": 512,
+        "input_shape": {
+            "attention_mask": [
+                1,
+                512
+            ],
+            "input_ids": [
+                1,
+                512
+            ]
+        },
+        "max_context_length": 20,
+        "num_trainable_params": 177853440,
+        "output_shape": [
+            1,
+            768
+        ],
+        "size": 711413760,
+        "vocab_size": 119547
+    },
     "test_Helsinki-NLP/opus-mt-en-fr": {
         "embedding_size": 512,
         "input_shape": [
@@ -407,6 +536,28 @@
         ],
         "size": 422420480,
         "vocab_size": 59514
+    },
+    "test_JackFram/llama-68m": {
+        "embedding_size": 2048,
+        "input_shape": {
+            "attention_mask": [
+                1,
+                2048
+            ],
+            "input_ids": [
+                1,
+                2048
+            ]
+        },
+        "max_context_length": 20,
+        "num_trainable_params": 68030208,
+        "output_shape": [
+            1,
+            2048,
+            32000
+        ],
+        "size": 272120832,
+        "vocab_size": 32000
     },
     "test_VMware/electra-small-mrqa": {
         "embedding_size": 512,
