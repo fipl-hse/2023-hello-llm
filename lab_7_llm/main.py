@@ -42,16 +42,6 @@ class RawDataImporter(AbstractRawDataImporter):
         if not isinstance(self._raw_data, DataFrame):
             raise TypeError("Downloaded dataset is not pd.DataFrame")
 
-    @property
-    def raw_data(self) -> DataFrame:
-        """
-        Property with access to Raw DataFrame.
-
-        Returns:
-            pandas.DataFrame: Raw DataFrame
-        """
-        return self._raw_data
-
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
