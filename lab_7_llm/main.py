@@ -8,6 +8,7 @@ from typing import Iterable, Iterator, Sequence
 import pandas as pd
 import torch
 from datasets import load_dataset
+from evaluate import load
 from pandas import DataFrame
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
@@ -239,7 +240,6 @@ class LLMPipeline(AbstractLLMPipeline):
             output = self._model.generate(**tokens)
             result = tokenizer.batch_decode(output, skip_special_tokens=True)
             predictions.extend(result)
-            print(predictions)
 
         return predictions
 
@@ -259,7 +259,6 @@ class TaskEvaluator(AbstractTaskEvaluator):
         """
         super().__init__(metrics)
         self._data_path = data_path
-        self._metrics = metrics
 
     @report_time
     def run(self) -> dict | None:
@@ -269,3 +268,25 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        predictions = pd.read_csv(self._data_path)
+        scores = {}
+
+        for metric in self._metrics:
+            if metric.value == 'rouge':
+                metric = load(metric.value, seed=77)
+            else:
+                metric = load(metric.value)
+
+            result = metric.compute(references=predictions['target'],
+                                    predictions=predictions['predictions'])
+
+            if metric.name == 'rouge':
+                scores['rouge'] = result.get('rougeL')
+            else:
+                scores[metric.name] = result.get(metric.name)
+
+        return scores
+
+
+
+
