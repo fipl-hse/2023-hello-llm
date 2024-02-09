@@ -1,10 +1,7 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
-absl
 datasets==2.16.1
 evaluate==0.4.1
-nltk==3.8.1
 pandas==2.1.4
-rouge_score
 torch==2.1.2
 torchinfo==1.8.0
 transformers==4.37.1
