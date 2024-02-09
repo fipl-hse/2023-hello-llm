@@ -1,15 +1,13 @@
 """
 Neural summarization module.
 """
-# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from pathlib import Path
 from typing import Iterable, Sequence
 
-import pandas as pd
 import torch
 from datasets import load_dataset
 from evaluate import load
-from pandas import DataFrame
+from pandas import DataFrame, read_csv
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
@@ -18,7 +16,7 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -124,7 +122,8 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return str(self._data.iloc[index]["source"]), str(self._data.iloc[index]["target"])
+        return str(self._data[ColumnNames.SOURCE.value].iloc[index]),\
+            str(self._data[ColumnNames.TARGET.value].iloc[index])
 
     @property
     def data(self) -> DataFrame:
@@ -173,6 +172,7 @@ class LLMPipeline(AbstractLLMPipeline):
         tensor_data = torch.ones(1,
                                  self._model.config.decoder.max_position_embeddings,
                                  dtype=torch.long)
+
         input_data = {"input_ids": tensor_data,
                       "token_type_ids": tensor_data,
                       "attention_mask": tensor_data}
@@ -206,7 +206,7 @@ class LLMPipeline(AbstractLLMPipeline):
         if self._model is None:
             return None
 
-        return str(self._infer_batch([sample])[0])
+        return self._infer_batch([sample])[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -216,16 +216,16 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
-        dataset_loader = DataLoader(dataset=self._dataset, batch_size=self._batch_size)
+        dataset_loader = DataLoader(dataset=self._dataset,
+                                    batch_size=self._batch_size)
 
         predictions = []
 
         for batch_data in dataset_loader:
-            batch_predictions = self._infer_batch(batch_data)
-            predictions.extend(batch_predictions)
+            predictions.extend(self._infer_batch(batch_data))
 
         return DataFrame({
-            "target": self._dataset.data['target'],
+            "target": self._dataset.data["target"],
             "predictions": predictions
         })
 
@@ -240,23 +240,14 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-        batch_predictions = []
+        inputs = self._tokenizer(sample_batch[0],
+                                 padding=True,
+                                 truncation=True,
+                                 max_length=self._max_length,
+                                 return_tensors="pt").to(self._device)
+        outputs = self._model.generate(**inputs)
 
-        for sample in sample_batch[0]:
-            inputs = self._tokenizer(sample,
-                                     padding=True,
-                                     truncation=True,
-                                     max_length=self._max_length,
-                                     return_tensors="pt")
-            input_ids = inputs.input_ids.to(self._device)
-            attention_mask = inputs.attention_mask.to(self._device)
-            output = self._model.generate(input_ids, attention_mask=attention_mask)
-
-            prediction = self._tokenizer.decode(output[0], skip_special_tokens=True)
-
-            batch_predictions.append(prediction)
-
-        return batch_predictions
+        return [self._tokenizer.decode(output, skip_special_tokens=True) for output in outputs]
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -284,3 +275,22 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        predictions_df = read_csv(self._data_path)
+        res = {}
+
+        for metric in self._metrics:
+            metric = Metrics[str(metric).upper()]
+            if metric is Metrics.ROUGE:
+                metric = load(metric.value, seed=77)
+            else:
+                metric = load(metric.value)
+
+            result = metric.compute(references=predictions_df["target"],
+                                    predictions=predictions_df["predictions"])
+
+            if metric.name == "rouge":
+                res["rouge"] = result.get("rougeL")
+            else:
+                res[metric.name] = result.get(metric.name)
+
+        return res
