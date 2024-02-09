@@ -4,27 +4,13 @@ Neural machine translation module.
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
+from typing import Iterable, Sequence
 
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
-
-try:
-    from datasets import load_dataset
-except ImportError:
-    print('Library "datasets" not installed. Failed to import.')
-    load_dataset = None
+import pandas
+import torch
+from datasets import load_dataset
+from pandas import DataFrame
+from torch.utils.data.dataset import Dataset
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -48,8 +34,7 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        dataset = load_dataset(path="glue", name="qnli", split="validation")
-        self._raw_data = dataset
+        self._raw_data = load_dataset(self._hf_name, 'qnli', split='validation').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -64,6 +49,21 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        dataset_analysis = {
+            "dataset_number_of_samples": len(self._raw_data),
+            "dataset_columns": len(self._raw_data.columns),
+            "dataset_duplicates": self._raw_data.duplicated().sum(),
+            "dataset_empty_rows": len(self._raw_data[self._raw_data.isna().any(axis=1)])
+        }
+
+        self._raw_data = self._raw_data.dropna()
+
+        dataset_analysis["dataset_sample_min_len"] = min(len(min(self._raw_data['question'], key=len)),
+                                                         len(min(self._raw_data['sentence'], key=len)))
+        dataset_analysis["dataset_sample_max_len"] = max(len(max(self._raw_data['question'], key=len)),
+                                                         len(max(self._raw_data['sentence'], key=len)))
+
+        return dataset_analysis
 
     @report_time
     def transform(self) -> None:
