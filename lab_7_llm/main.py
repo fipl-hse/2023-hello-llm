@@ -25,7 +25,7 @@ except ImportError:
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -73,6 +73,13 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        self._data = (self._raw_data.drop(columns='id')
+                      .rename(columns={'article': ColumnNames.SOURCE.value,
+                                       'highlights': ColumnNames.TARGET.value})
+                      .drop_duplicates()
+                      .reset_index(drop=True))
+
+        self._data['source'] = self._data['source'].str.replace('(CNN)', '')
 
 
 class TaskDataset(Dataset):
@@ -87,6 +94,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+        self._data = data
 
     def __len__(self) -> int:
         """
@@ -95,6 +103,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -106,6 +115,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
+        return self._data["source"].iloc[index]
 
     @property
     def data(self) -> DataFrame:
@@ -115,6 +125,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
+        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):

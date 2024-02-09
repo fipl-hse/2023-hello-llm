@@ -21,6 +21,9 @@ def main() -> None:
 
     preprocessor = RawDataPreprocessor(importer.raw_data)
     result = preprocessor.analyze()
+
+    preprocessor.transform()
+
     assert result is not None, "Demo does not work correctly"
 
 
