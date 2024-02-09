@@ -74,7 +74,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         self._data = (
             self._raw_data.drop(['ru_annotated', 'styles'], axis=1)
-            .rename(columns={'ru': ColumnNames.SOURCE, 'en': ColumnNames.TARGET})
+            .rename(columns={'ru': ColumnNames.SOURCE.value, 'en': ColumnNames.TARGET.value})
         )
 
 
@@ -231,10 +231,10 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-        sample_batch = [sample for tuples in sample_batch for sample in tuples]
+        sample_batch_squeezed = [sample for tuples in sample_batch for sample in tuples]
 
         inputs = self._tokenizer(
-            sample_batch,
+            sample_batch_squeezed,
             padding=True,
             truncation=True,
             return_tensors='pt').input_ids
