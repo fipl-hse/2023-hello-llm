@@ -42,15 +42,14 @@ class RawDataImporter(AbstractRawDataImporter):
     @report_time
     def obtain(self) -> None:
         """
-<<<<<<< HEAD
-        Import dataset.
-=======
+
         Download a dataset.
->>>>>>> 33a009d61e32c0e100ced4e5fa9c6832f32053da
 
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        dataset = load_dataset(path="glue", name="qnli", split="validation")
+        self._raw_data = dataset
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
