@@ -28,13 +28,14 @@ def main() -> None:
     dataset = TaskDataset(preprocessor.data.head(100))
 
     pipeline = LLMPipeline(settings['parameters']['model'], dataset,
-                           max_length=512, batch_size=1, device='cpu')
+                           max_length=120, batch_size=2, device='cpu')
 
     model_analysis = pipeline.analyze_model()
     print(model_analysis)
 
-    sample = dataset.__getitem__(0)
-    result = pipeline.infer_sample(sample)
+    pipeline.infer_sample(dataset[0])
+    result = pipeline.infer_dataset()
+    print(result)
 
     assert result is not None, "Demo does not work correctly"
 

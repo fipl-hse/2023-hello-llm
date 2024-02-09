@@ -2,12 +2,14 @@
 Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+import pandas as pd
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
 from datasets import load_dataset
 from torchinfo import summary
+from torch.utils.data import DataLoader
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 try:
@@ -168,7 +170,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-        tensor_data = torch.ones(self._batch_size,
+        tensor_data = torch.ones(1,
                                  self._model.config.decoder.max_position_embeddings,
                                  dtype=torch.long)
 
@@ -205,12 +207,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         if not self._model:
             return None
-
-        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-        tokens = tokenizer(sample[0], max_length=512, return_tensors='pt', truncation=True)
-        output = self._model.generate(**tokens)
-        results = tokenizer.batch_decode(output, skip_special_tokens=True)
-        return results[0]
+        return self._infer_batch((sample,))[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -220,6 +217,19 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        dataset_loader = DataLoader(self._dataset, self._batch_size)
+
+        all_predictions = []
+
+        for batch in dataset_loader:
+            all_predictions.extend(self._infer_batch(batch))
+
+        df_predict = pd.DataFrame({
+            "target": self._dataset.data[ColumnNames.TARGET],
+            "predictions": all_predictions
+        })
+
+        return df_predict
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -232,6 +242,18 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        predictions = []
+
+        for index, sample in enumerate(sample_batch[0]):
+            tokens = tokenizer(sample_batch[0][index], max_length=120, padding=True,
+                               return_tensors='pt', truncation=True)
+            output = self._model.generate(**tokens)
+            result = tokenizer.batch_decode(output, skip_special_tokens=True)
+            predictions.extend(result)
+            print(predictions)
+
+        return predictions
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
