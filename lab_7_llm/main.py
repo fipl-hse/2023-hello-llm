@@ -2,14 +2,13 @@
 Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
-import pandas as pd
-import torch
-
-from collections import namedtuple
-from datasets import load_dataset
-from pandas import DataFrame
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
+
+import pandas as pd
+import torch
+from datasets import load_dataset
+from pandas import DataFrame
 from torchinfo import summary
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
@@ -258,6 +257,9 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        super().__init__(metrics)
+        self._data_path = data_path
+        self._metrics = metrics
 
     @report_time
     def run(self) -> dict | None:
