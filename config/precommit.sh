@@ -5,8 +5,6 @@ if [[ "$1" == "smoke" ]]; then
   DIRS_TO_CHECK=(
     "config"
     "seminars"
-    "core_utils"
-    "lab_7_llm"
   )
 else
   DIRS_TO_CHECK=(

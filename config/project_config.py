@@ -1,6 +1,7 @@
 """
-Config class implementation: stores the configuration information
+Config class implementation: stores the configuration information.
 """
+
 import json
 import re
 from dataclasses import field
@@ -17,7 +18,7 @@ from config.constants import PROJECT_ROOT
 @dataclass
 class Lab:
     """
-    BaseModel for labs
+    BaseModel for labs.
     """
     name: str = field(default_factory=str)
     coverage: int = field(default_factory=int)
@@ -26,7 +27,7 @@ class Lab:
 @dataclass
 class Addon:
     """
-    BaseModel for addons
+    BaseModel for addons.
     """
     name: str = field(default_factory=str)
     coverage: int = field(default_factory=int)
@@ -35,7 +36,7 @@ class Addon:
 @dataclass
 class Repository:
     """
-    BaseModel for repository
+    BaseModel for repository.
     """
     admins: list = field(default_factory=list)
     pr_name_regex: str = field(default_factory=str)
@@ -45,7 +46,7 @@ class Repository:
 @dataclass
 class ProjectConfigDTO:
     """
-    BaseModel for ProjectConfig
+    BaseModel for ProjectConfig.
     """
     labs: list[Lab] = field(default_factory=list[Lab])
     addons: list[Addon] = field(default_factory=list[Addon])
@@ -54,10 +55,16 @@ class ProjectConfigDTO:
 
 class ProjectConfig(ProjectConfigDTO):
     """
-    Project Config implementation
+    Project Config implementation.
     """
 
     def __init__(self, config_path: Path) -> None:
+        """
+        Initialize ProjectConfig.
+
+        Args:
+             config_path (Path): Path to config
+        """
         super().__init__()
         with config_path.open(encoding='utf-8', mode='r') as config_file:
             json_content = config_file.read()
@@ -66,7 +73,10 @@ class ProjectConfig(ProjectConfigDTO):
 
     def get_thresholds(self) -> dict:
         """
-        Returns labs thresholds
+        Get labs thresholds.
+
+        Returns:
+            dict: Labs thresholds
         """
         all_thresholds = {}
         labs_thresholds = {lab.name: lab.coverage for lab in self._dto.labs}
@@ -77,13 +87,22 @@ class ProjectConfig(ProjectConfigDTO):
 
     def get_labs_names(self) -> list:
         """
-        Returns labs names
+        Get labs names.
+
+        Returns:
+            list: Labs names
         """
         return [lab.name for lab in self._dto.labs]
 
     def get_labs_paths(self, include_addons: bool = True) -> list:
         """
-        Returns labs paths
+        Get labs paths.
+
+        Args:
+            include_addons (bool): Include addons or not
+
+        Returns:
+            list: Paths to labs
         """
         labs_list = self.get_labs_names()
         if include_addons:
@@ -92,31 +111,46 @@ class ProjectConfig(ProjectConfigDTO):
 
     def get_addons_names(self) -> list:
         """
-        Returns addons names
+        Get addons names.
+
+        Returns:
+            list: Addons names
         """
         return [addon.name for addon in self._dto.addons]
 
     def get_admins(self) -> list[str]:
         """
-        Returns admins names
+        Get admins names.
+
+        Returns:
+            list[str]: Admins
         """
         return list(self._dto.repository.admins)
 
     def get_pr_name_regex(self) -> Pattern:
         """
-        Return pull request name regex example
+        Get pull request name regex example.
+
+        Returns:
+            Pattern: Compiled pattern
         """
         return re.compile(self._dto.repository.pr_name_regex)
 
     def get_pr_name_example(self) -> str:
         """
-        Returns pull request name example
+        Get pull request name example.
+
+        Returns:
+            str: PR name example
         """
         return str(self._dto.repository.pr_name_example)
 
     def update_thresholds(self, new_thresholds: dict[str, int]) -> None:
         """
-        Returns json content from project_config.json with updated thresholds
+        Get json content from project_config.json with updated thresholds.
+
+        Args:
+            new_thresholds (dict[str, int]): Updated thresholds
         """
         for index, lab in enumerate(self._dto.labs):
             self._dto.labs[index] = \
@@ -127,12 +161,18 @@ class ProjectConfig(ProjectConfigDTO):
 
     def __str__(self) -> str:
         """
-        Returns a string with fields
+        Get a string with fields.
+
+        Returns:
+            str: A string with fields
         """
         return f'{self._dto}'
 
     def get_json(self) -> str:
         """
-        Return a json view of ProjectConfig
+        Get a json view of ProjectConfig.
+
+        Returns:
+            str: A json view of ProjectConfig
         """
         return json.dumps(self._dto, indent=4, default=pydantic_encoder)
