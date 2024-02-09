@@ -14,6 +14,13 @@ except ImportError:
     Dataset = dict
     torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
 
+import pandas as pd
+from datasets import load_dataset
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import Dataset
+from torchinfo import summary
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+
 try:
     from pandas import DataFrame
 except ImportError:
@@ -41,12 +48,13 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-
+        self._raw_data = load_dataset(self._hf_name, name='default', split='train').to_pandas()
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     A class that analyzes and preprocesses a dataset.
     """
+
 
     def analyze(self) -> dict:
         """
@@ -55,6 +63,12 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+
+        analyse_dataset = {'dataset_columns': self._raw_data.shape[1],
+                           'dataset_duplicates': self._raw_data.duplicated().sum(),
+                           'dataset_empty_rows': self._raw_data.isna().sum().sum(),
+                           'dataset_number_of_samples': self._raw_data.shape[0]}
+        return analyse_dataset
 
     @report_time
     def transform(self) -> None:
