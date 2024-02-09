@@ -45,10 +45,7 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
 
-        dataset = load_dataset(
-            'ag_news',
-            split='test'
-        )
+        dataset = load_dataset(self._hf_name, split='test')
         dataset_df = dataset.to_pandas()
         self._raw_data = dataset_df
 
@@ -65,8 +62,33 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
-        num_samples = len(self._raw_data)
-        columns = self._raw_data.columns
+        '''num_samples = len(self._raw_data)
+        num_columns = len(self._raw_data.columns)
+        num_duplicates = len(self._raw_data[self._raw_data.duplicated()])
+        num_empty = len(self._raw_data[self._raw_data.isna().any(axis=1)])'''
+
+        analysis = {
+            'dataset_number_of_samples': len(self._raw_data),
+            'dataset_columns': len(self._raw_data.columns),
+            'dataset_duplicates': len(self._raw_data[self._raw_data.duplicated()]),
+            'dataset_empty_rows': len(self._raw_data[self._raw_data.isna().any(axis=1)])
+        }
+
+        cleaned = self._raw_data.dropna().drop_duplicates()
+        raw_data_df = cleaned.rename(columns={
+            'label': 'target',
+            'text': 'source'
+        })
+
+        analysis['dataset_sample_max_len'] = max(raw_data_df['source'], key=len)
+        analysis['dataset_sample_min_len'] = min(raw_data_df['source'], key=len)
+
+        self._data = raw_data_df.reset_index(inplace=True)
+
+        return analysis
+
+
+
 
 
     @report_time
