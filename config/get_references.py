@@ -481,6 +481,9 @@ def get_task(model: str, main_params: MainParams, inference_params: InferencePar
     Returns:
         Any: Metric for a specific task
     """
+    if 'test_' in model:
+        model = model.replace('test_', '')
+
     nmt_model = [
         'Helsinki-NLP/opus-mt-en-fr',
         'Helsinki-NLP/opus-mt-ru-en',
@@ -551,12 +554,13 @@ def main() -> None:
     max_length = 120
     batch_size = 1
     num_samples = 100
+    device = 'cpu'
 
     inference_params = InferenceParams(num_samples,
                                        max_length,
                                        batch_size,
                                        Path('result.csv'),
-                                       'cpu')
+                                       device)
 
     references = get_references(path=references_path)
     result = {}
@@ -567,7 +571,7 @@ def main() -> None:
             for metric in metrics:
                 result[model][dataset][metric] = {}
                 if 'test_' in model:
-                    continue
+                    inference_params.num_samples = 10
 
                 print(model, dataset, metric)
                 main_params = MainParams(model, dataset, [Metrics(metric)])
