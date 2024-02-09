@@ -54,6 +54,13 @@ jinja_template = Jinja2Templates(directory=str(Path(BASE_DIR, 'assets')))
 
 @app.get('/', response_class=HTMLResponse)
 async def root(request: Request) -> HTMLResponse:
+    """
+
+    Args:
+        request: Client's request to the server
+    Returns:
+        HTMLResponse: Main instance of the app's frontend part
+    """
     return jinja_template.TemplateResponse(
         name="index.html",
         request=request
