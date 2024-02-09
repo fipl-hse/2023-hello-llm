@@ -30,7 +30,7 @@ def main() -> None:
 
     dataset = TaskDataset(preprocessor.data.head(100))
 
-    pipeline = LLMPipeline(configs['parameters']['model'], dataset, 120, 2, 'cpu')
+    pipeline = LLMPipeline(configs['parameters']['model'], dataset, 120, 1, 'cpu')
 
     model_analysis = pipeline.analyze_model()
     print(model_analysis)

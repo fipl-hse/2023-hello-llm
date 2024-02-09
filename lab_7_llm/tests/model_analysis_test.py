@@ -26,7 +26,7 @@ def run_model_analysis_check(
 
     settings = LabSettings(lab_path / 'settings.json')
     device = 'cpu'
-    batch_size = 64
+    batch_size = 1
     max_length = 120
 
     pipeline = pipeline_class(settings.parameters.model, None, max_length, batch_size, device)

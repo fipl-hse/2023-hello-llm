@@ -237,7 +237,7 @@ class LLMPipeline(AbstractLLMPipeline):
             'num_trainable_params': model_summary.trainable_params,
             'vocab_size': self._model.config.vocab_size,
             'size': model_summary.total_param_bytes,
-            'max_context_length': 'idk where to get it'
+            'max_context_length': self._model.config.max_length
         }
         return info
 
@@ -267,10 +267,8 @@ class LLMPipeline(AbstractLLMPipeline):
         for batch in loader:
             predictions.extend(self._infer_batch(batch))
         return pd.DataFrame(
-            pd.concat(
-                [self._dataset.data['target'], pd.Series(predictions, name='predictions')],
-                axis=1
-            )
+            {'target': self._dataset.data['target'],
+             'predictions': pd.Series(predictions)}
         )
 
     def _get_summary(self, ids: torch.Tensor) -> torchinfo.model_statistics.ModelStatistics:
