@@ -170,7 +170,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-        tensor_data = torch.ones(self._batch_size,
+        tensor_data = torch.ones(1,
                                  self._model.config.decoder.max_position_embeddings,
                                  dtype=torch.long)
         input_data = {"input_ids": tensor_data,
@@ -180,7 +180,6 @@ class LLMPipeline(AbstractLLMPipeline):
         model_summary = summary(model=self._model,
                                 input_data=input_data,
                                 decoder_input_ids=tensor_data,
-                                device=self._device,
                                 verbose=False)
 
         return {
@@ -207,7 +206,7 @@ class LLMPipeline(AbstractLLMPipeline):
         if self._model is None:
             return None
 
-        return str(self._infer_batch([sample]))
+        return str(self._infer_batch([sample])[0])
 
     @report_time
     def infer_dataset(self) -> DataFrame:
