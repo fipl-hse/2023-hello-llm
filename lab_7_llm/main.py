@@ -3,13 +3,13 @@ Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
-from datasets import load_dataset
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
-from torchinfo import summary
-from transformers import AutoModelForSeq2SeqLM
 
 import pandas as pd
+from datasets import load_dataset
+from torchinfo import summary
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 try:
     import torch
@@ -167,6 +167,11 @@ class LLMPipeline(AbstractLLMPipeline):
 
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
+        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        self._dataset = dataset
+        self._max_length = max_length
+        self._batch_size = batch_size
+        self._device = device
 
     def analyze_model(self) -> dict:
         """
@@ -235,6 +240,24 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+
+        batch_predictions = []
+
+        for sample in sample_batch[0]:
+            inputs = self._tokenizer(sample,
+                                     padding=True,
+                                     truncation=True,
+                                     max_length=self._max_length,
+                                     return_tensors="pt")
+            input_ids = inputs.input_ids.to(self._device)
+            attention_mask = inputs.attention_mask.to(self._device)
+            output = self._model.generate(input_ids, attention_mask=attention_mask)
+
+            prediction = self._tokenizer.decode(output[0], skip_special_tokens=True)
+
+            batch_predictions.append(prediction)
+
+        return batch_predictions
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
