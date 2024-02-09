@@ -113,7 +113,7 @@ class TaskDataset(Dataset):
         """
         row = self._data.iloc[index]
 
-        return tuple(row['report'],)
+        return tuple(row[ColumnNames.SOURCE],)
 
     @property
     def data(self) -> DataFrame:
