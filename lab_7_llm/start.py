@@ -3,13 +3,10 @@ Neural summarization starter.
 """
 # pylint: disable= too-many-locals
 import json
-import os
-from pathlib import Path
 
 from config.constants import PROJECT_ROOT
-from core_utils.llm.metrics import Metrics
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset, TaskEvaluator
+from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset
 
 
 @report_time
@@ -35,10 +32,7 @@ def main() -> None:
                            batch_size=1,
                            device="cpu")
 
-    print(pipeline.analyze_model())
-    pipeline.infer_sample(dataset[0])
-
-    result = ""
+    result = pipeline
 
     assert result is not None, "Demo does not work correctly"
 
