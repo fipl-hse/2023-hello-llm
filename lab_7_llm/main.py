@@ -85,6 +85,11 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        self._data = self._raw_data.copy()
+        self._data.drop(["de", "en", "fr", "it", "nl", "pl"], axis=1)
+        self._data.rename({"es": "target", "ru": "source"})
+        self._data.dropna().drop_duplicates()
+        self._data.reset_index()
 
 
 class TaskDataset(Dataset):
@@ -99,6 +104,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+        self._data = data
 
     def __len__(self) -> int:
         """
@@ -107,6 +113,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -118,6 +125,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
+        return self._data["source"].iloc(index)
 
     @property
     def data(self) -> DataFrame:
@@ -127,6 +135,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
+        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
@@ -152,6 +161,7 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        super().__init__(model_name, dataset, max_length, batch_size, device=device)
 
     def analyze_model(self) -> dict:
         """
