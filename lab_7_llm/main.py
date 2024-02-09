@@ -171,7 +171,7 @@ class LLMPipeline(AbstractLLMPipeline):
             dict: Properties of a model
         """
         tensor_data = torch.ones(1,
-                                 self._model.config.decoder.max_position_embeddings,
+                                 layout=self._model.config.decoder.max_position_embeddings,
                                  dtype=torch.long)
         input_data = {"input_ids": tensor_data,
                       "token_type_ids": tensor_data,
