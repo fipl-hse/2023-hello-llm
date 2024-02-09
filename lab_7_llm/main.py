@@ -61,7 +61,11 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             'dataset_number_of_samples': len(self._raw_data),
             'dataset_columns': len(self._raw_data.columns),
             'dataset_duplicates': len(self._raw_data[self._raw_data.duplicated()]),
+            'dataset_empty_rows': len(self._raw_data[self._raw_data.isna().any(axis=1)]),
+            'dataset_sample_min_len': len(min(self._raw_data["info"], key=len)),
+            'dataset_sample_max_len': len(max(self._raw_data["info"], key=len))
         }
+        return analysis
 
     @report_time
     def transform(self) -> None:

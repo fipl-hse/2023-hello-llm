@@ -17,11 +17,10 @@ def main() -> None:
     with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as file:
         settings = json.load(file)
 
-    importer = RawDataImporter(settings.parameters.dataset)
+    importer = RawDataImporter(settings['parameters']['dataset'])
     preprocessor = RawDataPreprocessor(importer.raw_data)
 
-
-    result = None
+    result = preprocessor.analyze()
     assert result is not None, "Demo does not work correctly"
 
 
