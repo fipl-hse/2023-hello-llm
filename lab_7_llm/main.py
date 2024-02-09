@@ -111,7 +111,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return (self._data.iloc[index][ColumnNames.SOURCE],)
+        return (self._data.iloc[index][ColumnNames.SOURCE.value],)
 
     @property
     def data(self) -> pd.DataFrame:
@@ -167,7 +167,7 @@ class LLMPipeline(AbstractLLMPipeline):
         }
 
         if not self._model:
-            return None
+            return {}
 
         model_stats = summary(
             self._model,
@@ -215,12 +215,9 @@ class LLMPipeline(AbstractLLMPipeline):
         for batch_data in dataset_loader:
             predictions.extend(self._infer_batch(batch_data))
 
-        return pd.concat(
-            [
-                self._dataset.data[ColumnNames.TARGET],
-                pd.Series(predictions, name=ColumnNames.PREDICTION)
-            ],
-            axis=1
+        return pd.DataFrame(
+            {ColumnNames.TARGET.value: self._dataset.data[ColumnNames.TARGET.value],
+             ColumnNames.PREDICTION.value: pd.Series(predictions)}
         )
 
     @torch.no_grad()
