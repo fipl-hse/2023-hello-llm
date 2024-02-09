@@ -20,7 +20,14 @@ def main() -> None:
     importer = RawDataImporter(settings['parameters']['dataset'])
     preprocessor = RawDataPreprocessor(importer.raw_data)
 
-    result = preprocessor.analyze()
+    data_analysis = preprocessor.analyze()
+
+    dataset = TaskDataset(preprocessor.data.head(100))
+
+    pipeline = LLMPipeline(settings['parameters']['model'], dataset, 512, 1, 'cpu')
+    model_analysis = pipeline.analyze_model()
+    result = pipeline.infer_sample(dataset[0])
+
     assert result is not None, "Demo does not work correctly"
 
 
