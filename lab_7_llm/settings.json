@@ -2,7 +2,7 @@
   "parameters": {
     "model": "mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization",
     "dataset": "ccdv/govreport-summarization",
-    "metrics": ["blue", "rouge"]
+    "metrics": []
   },
   "target_score": 6
 }
