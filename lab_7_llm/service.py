@@ -28,21 +28,21 @@ def init_application() -> tuple[FastAPI, LLMPipeline]:
     """
     server = FastAPI()
 
-    # with open(PROJECT_ROOT/'lab_7_llm'/'settings.json', "r", encoding='utf-8') as settings_path:
-    #     settings = json.load(settings_path)
-    # ds_obtained = RawDataImporter(settings["parameters"]["dataset"]).obtain()
-    # preprocessed_ds = RawDataPreprocessor(ds_obtained.raw_data)
-    # preprocessed_ds.transform()
-    # task_ds = TaskDataset(preprocessed_ds.data.head(100))
-    # llm_infer = LLMPipeline(model_name=settings["parameters"]["model"], dataset=task_ds,
-    #                         max_length=120, batch_size=64, device='cpu')
+    with open(PROJECT_ROOT/'lab_7_llm'/'settings.json', "r", encoding='utf-8') as settings_path:
+        settings = json.load(settings_path)
+    ds_obtained = RawDataImporter(settings["parameters"]["dataset"]).obtain()
+    preprocessed_ds = RawDataPreprocessor(ds_obtained.raw_data)
+    preprocessed_ds.transform()
+    task_ds = TaskDataset(preprocessed_ds.data.head(100))
+    llm_infer = LLMPipeline(model_name=settings["parameters"]["model"], dataset=task_ds,
+                            max_length=120, batch_size=64, device='cpu')
 
-    return server #,  llm_infer
+    return server, llm_infer
 
 
 init_server = init_application()
 
-app = init_server #, init_server[1]
+app, pipeline = init_server[0], init_server[1]
 app_dir = os.path.dirname(__file__)
 assets_abs_file_path = os.path.join(app_dir, "assets")
 print(str(assets_abs_file_path))
