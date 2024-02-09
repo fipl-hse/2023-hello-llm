@@ -9,6 +9,7 @@ markers = [
     "reference_lab_summarization: tests for summarization task",
     "reference_lab_nli: tests for nli task",
     "reference_lab_generation: tests for generation task",
+    "reference_lab_open_qa: tests for open generative Q&A task",
     "lab_7_llm: tests for lab 7",
 ]
 norecursedirs = [
@@ -65,12 +66,29 @@ disable_error_code = [
 ]
 
 [[tool.mypy.overrides]]
+module = ['seminars.seminar_01_16_2024.try_iter_data', ]
+disable_error_code = [
+    'arg-type'
+]
+
+[[tool.mypy.overrides]]
 module = [
     'core_utils.llm.llm_pipeline',
     'lab_7_llm.service',
     'lab_7_llm.main',
 ]
 disable_error_code = [
+    'no-any-unimported'
+]
+
+[[tool.mypy.overrides]]
+module = [
+    'config.get_datasets_analytics',
+    'config.get_references',
+    'seminars.seminar_02_06_2024.try_fastapi',
+]
+disable_error_code = [
+    'import-not-found',
     'no-any-unimported'
 ]
 
@@ -107,6 +125,16 @@ order_by_type = true
 remove_redundant_aliases = true
 group_by_package = true
 force_alphabetical_sort_within_sections = true
+src_paths = [
+    "reference_lab_classification",
+    "reference_lab_summarization",
+    "reference_lab_nmt",
+    "reference_lab_nli",
+    "reference_lab_generation",
+    "core_utils",
+    "config",
+    "lab_7_llm"
+]
 
 [tool.doc8]
 allow-long-titles = true

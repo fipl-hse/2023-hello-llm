@@ -1,5 +1,5 @@
 """
-Checks that datasets gets analyzed proreprly
+Checks that the dataset is being analyzed correctly
 """
 # pylint: disable=duplicate-code, assignment-from-no-return
 import unittest
@@ -40,7 +40,7 @@ class DatasetWorkingTest(unittest.TestCase):
 
         references = ReferenceAnalysisScores()
 
-        self.assertEqual(dataset_analysis,
-                         references.get(settings.parameters.dataset))
+        self.assertEqual(references.get(settings.parameters.dataset),
+                         dataset_analysis)
 
-        self.assertEqual(len(dataset_analysis), 6)
+        self.assertEqual(6, len(dataset_analysis))
