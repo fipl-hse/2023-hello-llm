@@ -2,10 +2,10 @@
 Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+from pathlib import Path
 from typing import Iterable, Sequence
 
 import pandas as pd
-from pathlib import Path
 import torch
 from datasets import load_dataset
 from pandas import DataFrame
