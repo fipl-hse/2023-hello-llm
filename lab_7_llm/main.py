@@ -5,22 +5,13 @@ Neural machine translation module.
 
 from collections import namedtuple
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
+from typing import Iterable, Sequence
 
-
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
+import pandas as pd
+import torch
+from datasets import load_dataset
+from pandas import DataFrame
+from torch.utils.data.dataset import Dataset
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -28,7 +19,6 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
-from datasets import load_dataset
 
 
 class RawDataImporter(AbstractRawDataImporter):
@@ -80,16 +70,12 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             'text': 'source'
         })
 
-        analysis['dataset_sample_max_len'] = max(raw_data_df['source'], key=len)
-        analysis['dataset_sample_min_len'] = min(raw_data_df['source'], key=len)
+        analysis['dataset_sample_max_len'] = len(max(raw_data_df['source'], key=len))
+        analysis['dataset_sample_min_len'] = len(min(raw_data_df['source'], key=len))
 
         self._data = raw_data_df.reset_index(inplace=True)
 
         return analysis
-
-
-
-
 
     @report_time
     def transform(self) -> None:
