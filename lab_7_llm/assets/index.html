@@ -8,6 +8,40 @@
     <title>Title</title>
 </head>
 <body>
-    <p>Hello</p>
+    <div class="bg">
+        <script src="https://unpkg.com/hydra-synth"></script>
+        <script>
+            // create a new hydra-synth instance
+            var hydra = new Hydra({ detectAudio: false })
+            function r(min=0,max=1) { return Math.random()*(max-min)+min; }
+
+            solid(1,1,1)
+                .diff(shape([4,4,4,24].smooth().fast(.5),0.6,0.93,.09).repeat(20,10))
+                .modulateScale(osc(8).rotate(-.5,.5),.52)
+                .add(
+                    src(o0).scale(0.965).rotate(.012)
+                    .color(0.075, 0.459, 0.69)
+                    .modulateRotate(o0,0.5)
+                    .brightness(.15)
+                    ,.7)
+                .out()
+        </script>
+    </div>
+    <div class="wrapper">
+        <div class="form_wrapper">
+            <h1>Check your sample</h1>
+            <form id="inferForm">
+                <div class="premise">
+                    <label for="premise">Type your premise</label>
+                    <input type="text" name="premise" id="premise" placeholder="your premise goes here">
+                </div>
+                <div class="hypothesis">
+                    <label for="hypothesis">Type your hypothesis</label>
+                    <input type="text" id="hypothesis" placeholder="your hypothesis goes here">
+                </div>
+                <button type="">Check</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
