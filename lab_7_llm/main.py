@@ -232,8 +232,7 @@ class LLMPipeline(AbstractLLMPipeline):
 
         if len(sample_batch) == 1:
             input_tokens = tokenizer(
-                sample_batch[0][0],
-                sample_batch[0][1],
+                sample_batch[0],
                 padding=True,
                 truncation=True,
                 return_tensors='pt'
