@@ -149,7 +149,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self._tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self._model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+        self._model: torch.nn.Module = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
     def analyze_model(self) -> dict:
         """
