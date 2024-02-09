@@ -43,7 +43,7 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        dataset = load_dataset(self._hf_name, name='document', split='test')
+        dataset = load_dataset(path="ccdv/pubmed-summarization", name='document', split='test')
         self._raw_data = dataset.to_pandas()
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
