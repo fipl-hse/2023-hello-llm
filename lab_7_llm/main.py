@@ -51,7 +51,7 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
         self._raw_data = load_dataset(self._hf_name,
-                                      split='train').to_pandas()
+                                      split='validation').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -250,7 +250,6 @@ class LLMPipeline(AbstractLLMPipeline):
         output = self._model(**input_tokens).logits
 
         return [str(prediction.item()) for prediction in list(torch.argmax(output, dim=1))]
-
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
