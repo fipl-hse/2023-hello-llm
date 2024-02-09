@@ -10,7 +10,8 @@ from pathlib import Path
 from config.constants import PROJECT_ROOT
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset, TaskEvaluator
+from lab_7_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor,
+                            TaskDataset, TaskEvaluator)
 
 
 @report_time
@@ -45,8 +46,9 @@ def main() -> None:
 
     pipeline.infer_dataset().to_csv(prediction_path, index=False)
 
-    evaluator = TaskEvaluator(Path(prediction_path),
-                              [Metrics[metric.upper()] for metric in settings['parameters']['metrics']])
+    metrics = [Metrics[metric.upper()] for metric in settings['parameters']['metrics']]
+
+    evaluator = TaskEvaluator(Path(prediction_path), metrics)
 
     result = evaluator.run()
 
