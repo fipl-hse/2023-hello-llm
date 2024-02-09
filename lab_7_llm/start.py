@@ -21,8 +21,7 @@ def main():
     importer = RawDataImporter(settings['parameters']['dataset'])
     importer.obtain()
     processor = RawDataPreprocessor(importer.raw_data)
-    processor.analyze()
-    return processor
+    return processor.analyze()
 
 
 if __name__ == "__main__":
