@@ -111,7 +111,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data.iloc[index][ColumnNames.SOURCE]
+        return (self._data.iloc[index][ColumnNames.SOURCE],)
 
     @property
     def data(self) -> pd.DataFrame:
@@ -199,7 +199,7 @@ class LLMPipeline(AbstractLLMPipeline):
         if not self._model:
             return None
 
-        return self._infer_batch((sample,))[0]
+        return self._infer_batch([sample])[0]
 
     @report_time
     def infer_dataset(self) -> pd.DataFrame:
@@ -234,6 +234,8 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+        sample_batch = [sample for tuples in sample_batch for sample in tuples]
+
         inputs = self._tokenizer(
             sample_batch,
             padding=True,

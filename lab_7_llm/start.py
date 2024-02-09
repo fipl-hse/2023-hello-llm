@@ -31,7 +31,7 @@ def main() -> None:
     pipeline = LLMPipeline(settings['parameters']['model'], dataset, 120, 64, 'cpu')
     print(pipeline.analyze_model())
     infer_sample_result = pipeline.infer_sample(dataset[0])
-    print(f'INPUT TEXT: {dataset[0]}\nTRANSLATION: {infer_sample_result}')
+    print(f'INPUT TEXT: {dataset[0][0]}\nTRANSLATION: {infer_sample_result}')
 
     predictions_path = Path('predictions.csv')
     pipeline.infer_dataset().to_csv(predictions_path, index=False)
