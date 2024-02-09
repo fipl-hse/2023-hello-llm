@@ -6,7 +6,12 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
+import pandas as pd
+import torch
 from datasets import load_dataset
+from pandas import DataFrame
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import AutoTokenizer, BertForSequenceClassification
 
@@ -45,9 +50,8 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = load_dataset("OxAISH-AL-LLM/wiki_toxic",
-                                      name=self._hf_name,
-                                      split='balanced_train').to_pandas()
+        self._raw_data = load_dataset(self._hf_name,
+                                      split='train').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -135,7 +139,7 @@ class TaskDataset(Dataset):
             pandas.DataFrame: Preprocessed DataFrame
         """
         return self._data
-    
+
 
 class LLMPipeline(AbstractLLMPipeline):
     """
@@ -177,15 +181,15 @@ class LLMPipeline(AbstractLLMPipeline):
             'input_ids': ids,
             'attention_mask': ids
         }
-        summary = summary(self._model, input_data=input_shape, verbose=False)
+        model_summary = summary(self._model, input_data=input_shape, verbose=False)
 
         analysis_dict = {
             "input_shape": input_shape,
             "embedding_size": embedding_size,
-            "output_shape": summary.summary_list[-1].output_size,
-            "num_trainable_params": summary.trainable_params,
+            "output_shape": model_summary.summary_list[-1].output_size,
+            "num_trainable_params": model_summary.trainable_params,
             "vocab_size": self._model.config.vocab_size,
-            "size": summary.total_params,
+            "size": model_summary.total_params,
             "max_context_length": self._model.config.vocab_size,
         }
         return analysis_dict
@@ -201,6 +205,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        return None if self._model is None else self._infer_batch((sample,))[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -210,7 +215,6 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
-
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -223,6 +227,30 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+
+        if len(sample_batch) == 1:
+            input_tokens = tokenizer(
+                sample_batch[0][0],
+                sample_batch[0][1],
+                padding=True,
+                truncation=True,
+                return_tensors='pt'
+            )
+        else:
+            input_tokens = tokenizer(
+                sample_batch[0],
+                sample_batch[1],
+                padding=True,
+                truncation=True,
+                return_tensors='pt'
+            )
+
+        output = self._model(**input_tokens).logits
+
+        return [str(prediction.item()) for prediction in list(torch.argmax(output, dim=1))]
+
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
