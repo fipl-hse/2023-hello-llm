@@ -74,7 +74,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             'dataset_empty_rows': len(self._raw_data[self._raw_data.isna().any(axis=1)])
         }
 
-        cleaned = self._raw_data.dropna().drop_duplicates()
+        cleaned = self._raw_data.dropna()
         raw_data_df = cleaned.rename(columns={
             'label': 'target',
             'text': 'source'
