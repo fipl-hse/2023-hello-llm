@@ -1,28 +1,19 @@
 """
-Neural machine translation module.
+Neural summarization module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
-import torchinfo
-
-from collections import namedtuple
-from datasets import load_dataset
 from pathlib import Path
-from transformers import EncoderDecoderModel
-from typing import Iterable, Iterator, Sequence
+from typing import Iterable, Sequence
 
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
+import pandas as pd
+import torch
+from datasets import load_dataset
+from evaluate import load
+from pandas import DataFrame
+from torchinfo import summary
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import Dataset
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -36,7 +27,6 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
-
     @report_time
     def obtain(self) -> None:
         """
@@ -46,17 +36,29 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
         self._raw_data = load_dataset(
-            path="cnn_dailymail",
+            path=self._hf_name,
             name="1.0.0",
             split="test"
         ).to_pandas()
+
+        if not isinstance(self._raw_data, DataFrame):
+            raise TypeError("Downloaded dataset is not pd.DataFrame")
+
+    @property
+    def raw_data(self) -> DataFrame:
+        """
+        Property with access to Raw DataFrame.
+
+        Returns:
+            pandas.DataFrame: Raw DataFrame
+        """
+        return self._raw_data
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     A class that analyzes and preprocesses a dataset.
     """
-
     def analyze(self) -> dict:
         """
         Analyze a dataset.
@@ -81,7 +83,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         self._data = (
             self._raw_data
             .drop(labels="id", axis=1)
-            .rename(columns={"article": "source", "highlights": "target"})
+            .rename(columns={"article": "source",
+                             "highlights": "target"})
             .dropna().drop_duplicates()
             .reset_index(drop=True)
         )
@@ -109,7 +112,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
-        return len(self._data)
+        return self._data.shape[0]
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -121,7 +124,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data["source"].iloc[index]
+        return str(self._data.iloc[index]["source"]), str(self._data.iloc[index]["target"])
 
     @property
     def data(self) -> DataFrame:
@@ -139,6 +142,8 @@ class LLMPipeline(AbstractLLMPipeline):
     A class that initializes a model, analyzes its properties and infers it.
     """
 
+    _model: torch.nn.Module
+
     def __init__(self, model_name: str, dataset: TaskDataset, max_length: int, batch_size: int, device: str) -> None:
         """
         Initialize an instance of LLMPipeline.
@@ -151,9 +156,12 @@ class LLMPipeline(AbstractLLMPipeline):
             device (str): The device for inference
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
-        self._model = EncoderDecoderModel.from_pretrained(
-            self._model_name
-        )
+        self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
+        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        self._dataset = dataset
+        self._max_length = max_length
+        self._batch_size = batch_size
+        self._device = device
 
     def analyze_model(self) -> dict:
         """
@@ -162,16 +170,27 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-        summary = self._get_summary()
+        tensor_data = torch.ones(self._batch_size,
+                                 self._model.config.decoder.max_position_embeddings,
+                                 dtype=torch.long)
+        input_data = {"input_ids": tensor_data,
+                      "token_type_ids": tensor_data,
+                      "attention_mask": tensor_data}
+
+        model_summary = summary(model=self._model,
+                                input_data=input_data,
+                                decoder_input_ids=tensor_data,
+                                device=self._device,
+                                verbose=False)
 
         return {
-            "input_shape": summary.summary_list[0].output_size[:2],
+            "input_shape": model_summary.summary_list[0].output_size[:2],
             "embedding_size": self._model.config.decoder.max_position_embeddings,
-            "output_shape": summary.summary_list[-1].output_size,
-            "num_trainable_params": summary.trainable_params,
+            "output_shape": model_summary.summary_list[-1].output_size,
+            "num_trainable_params": model_summary.trainable_params,
             "vocab_size": self._model.config.decoder.vocab_size,
-            "size": summary.total_param_bytes,
-            "max_context_length": self._model.config.decoder.max_length
+            "size": model_summary.total_param_bytes,
+            "max_context_length": self._model.config.max_length
         }
 
     @report_time
@@ -185,6 +204,10 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        if self._model is None:
+            return None
+
+        return str(self._infer_batch([sample]))
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -194,6 +217,18 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        dataset_loader = DataLoader(dataset=self._dataset, batch_size=self._batch_size)
+
+        predictions = []
+
+        for batch_data in dataset_loader:
+            batch_predictions = self._infer_batch(batch_data)
+            predictions.extend(batch_predictions)
+
+        return DataFrame({
+            "target": self._dataset.data['target'],
+            "predictions": predictions
+        })
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -206,25 +241,23 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+        batch_predictions = []
 
-    def _get_summary(self) -> torchinfo.ModelStatistics:
-        """
-        Get summary of the model using torchinfo module
+        for sample in sample_batch[0]:
+            inputs = self._tokenizer(sample,
+                                     padding=True,
+                                     truncation=True,
+                                     max_length=self._max_length,
+                                     return_tensors="pt")
+            input_ids = inputs.input_ids.to(self._device)
+            attention_mask = inputs.attention_mask.to(self._device)
+            output = self._model.generate(input_ids, attention_mask=attention_mask)
 
-        Returns:
-            torchinfo.ModelStatistics: model summary
-        """
-        tensor_data = torch.ones(self._batch_size,
-                                 self._model.config.decoder.max_position_embeddings,
-                                 dtype=torch.long)
-        input_data = {"input_ids": tensor_data,
-                      "token_type_ids": tensor_data,
-                      "attention_mask": tensor_data}
-        summary = torchinfo.summary(model=self._model,
-                                    input_data=input_data,
-                                    decoder_input_ids=tensor_data,
-                                    verbose=False)
-        return summary
+            prediction = self._tokenizer.decode(output[0], skip_special_tokens=True)
+
+            batch_predictions.append(prediction)
+
+        return batch_predictions
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -240,6 +273,9 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        super().__init__(metrics)
+        self._data_path = data_path
+        self._metrics = metrics
 
     @report_time
     def run(self) -> dict | None:

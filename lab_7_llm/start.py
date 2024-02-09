@@ -1,18 +1,21 @@
 """
-Neural machine translation starter.
+Neural summarization starter.
 """
 # pylint: disable= too-many-locals
 import json
+import os
+from pathlib import Path
 
 from config.constants import PROJECT_ROOT
+from core_utils.llm.metrics import Metrics
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import RawDataImporter, RawDataPreprocessor, TaskDataset, LLMPipeline
+from lab_7_llm.main import RawDataImporter, RawDataPreprocessor, TaskDataset, LLMPipeline, TaskEvaluator
 
 
 @report_time
 def main() -> None:
     """
-    Run the translation pipeline.
+    Run the summarization pipeline.
     """
     with open(PROJECT_ROOT / "lab_7_llm" / "settings.json", "r", encoding="utf-8") as settings_file:
         settings = json.load(settings_file)
@@ -32,10 +35,7 @@ def main() -> None:
                            batch_size=1,
                            device="cpu")
 
-    print(pipeline._model)
-
-    result = "Hello, world"
-    # print(pipeline.analyze_model())
+    result = ""
 
     assert result is not None, "Demo does not work correctly"
 

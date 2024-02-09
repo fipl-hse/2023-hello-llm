@@ -2,7 +2,7 @@
   "parameters": {
     "model": "mrm8488/bert-mini2bert-mini-finetuned-cnn_daily_mail-summarization",
     "dataset": "cnn_dailymail",
-    "metrics": ["accuracy"]
+    "metrics": ["rouge"]
   },
-  "target_score": 4
+  "target_score": 6
 }
