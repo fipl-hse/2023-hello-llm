@@ -30,7 +30,8 @@ def init_application() -> tuple[FastAPI, LLMPipeline]:
 
     with open(PROJECT_ROOT/'lab_7_llm'/'settings.json', "r", encoding='utf-8') as settings_path:
         settings = json.load(settings_path)
-    ds_obtained = RawDataImporter(settings["parameters"]["dataset"]).obtain()
+    ds_obtained = RawDataImporter(settings["parameters"]["dataset"])
+    ds_obtained.obtain()
     preprocessed_ds = RawDataPreprocessor(ds_obtained.raw_data)
     preprocessed_ds.transform()
     task_ds = TaskDataset(preprocessed_ds.data.head(100))
