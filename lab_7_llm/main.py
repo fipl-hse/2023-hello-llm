@@ -5,27 +5,16 @@ import math
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
+from typing import Iterable, Sequence
 
+import torch
+from datasets import load_dataset
 from evaluate import load
-
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-    from torch.utils.data.dataloader import DataLoader
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame, read_csv
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
-
+from pandas import DataFrame, read_csv
+from torch.utils.data.dataloader import DataLoader
+from torch.utils.data.dataset import Dataset
 from torchinfo import summary
-from transformers import MarianMTModel, AutoTokenizer
+from transformers import MarianTokenizer, MarianMTModel
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -33,8 +22,6 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
-
-from datasets import load_dataset
 
 
 class RawDataImporter(AbstractRawDataImporter):
@@ -135,7 +122,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return str(self._data[ColumnNames.SOURCE.value].iloc[index]),
+        return (str(self._data[ColumnNames.SOURCE.value].iloc[index]),)
 
     @property
     def data(self) -> DataFrame:
@@ -176,8 +163,9 @@ class LLMPipeline(AbstractLLMPipeline):
         self._device = device
         self._max_length = max_length
         self._batch_size = batch_size
-        self._model = MarianMTModel.from_pretrained(model_name).to(device)
-        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self._model = MarianMTModel.from_pretrained(model_name)
+        self._model.to(device)
+        self._tokenizer = MarianTokenizer.from_pretrained(model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -190,7 +178,8 @@ class LLMPipeline(AbstractLLMPipeline):
         model_info = summary(self._model,
                              input_data=noise,
                              decoder_input_ids=noise,
-                             device=self._device)
+                             device=self._device,
+                             verbose=0)
 
         return {
             "input_shape": list(model_info.input_size),
@@ -249,7 +238,7 @@ class LLMPipeline(AbstractLLMPipeline):
         inputs = self._tokenizer(sample_batch[0],
                                  padding=True, truncation=True,
                                  max_length=self._max_length, return_tensors="pt").to(self._device)
-        outputs = self._model.generate(**inputs)
+        outputs = self._model.generate(**inputs, max_length=self._max_length)
         return [self._tokenizer.decode(output, skip_special_tokens=True) for output in outputs]
 
 

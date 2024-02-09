@@ -6,9 +6,8 @@ from pathlib import Path
 from config.lab_settings import LabSettings
 # pylint: disable= too-many-locals
 from core_utils.llm.time_decorator import report_time
-
-from lab_7_llm.main import RawDataImporter, RawDataPreprocessor, TaskDataset, LLMPipeline, \
-    TaskEvaluator
+from lab_7_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset,
+                            TaskEvaluator)
 
 
 @report_time
