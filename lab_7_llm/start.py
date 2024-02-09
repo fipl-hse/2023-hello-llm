@@ -33,7 +33,9 @@ def main() -> None:
     infer_sample_result = pipeline.infer_sample(dataset[0])
     print(f'INPUT TEXT: {dataset[0][0]}\nTRANSLATION: {infer_sample_result}')
 
-    predictions_path = Path('predictions.csv')
+    predictions_path = Path(PROJECT_ROOT / 'lab_7_llm' / 'dist' / 'predictions.csv')
+    if not predictions_path.parent.exists():
+        predictions_path.parent.mkdir()
     pipeline.infer_dataset().to_csv(predictions_path, index=False)
 
     evaluator = TaskEvaluator(predictions_path, settings['parameters']['metrics'])
