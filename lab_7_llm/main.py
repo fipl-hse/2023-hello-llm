@@ -38,7 +38,7 @@ class RawDataImporter(AbstractRawDataImporter):
         """
         self._raw_data = load_dataset(self._hf_name, split='test').to_pandas()
 
-        if type(self._raw_data) is not DataFrame:
+        if not isinstance(self._raw_data, DataFrame):
             raise TypeError
 
 
@@ -113,7 +113,7 @@ class TaskDataset(Dataset):
         """
         row = self._data.iloc[index]
 
-        return row[ColumnNames.SOURCE],
+        return tuple(row[ColumnNames.SOURCE],)
 
     @property
     def data(self) -> DataFrame:
@@ -286,7 +286,3 @@ class TaskEvaluator(AbstractTaskEvaluator):
                 scores[metric.name] = result.get(metric.name)
 
         return scores
-
-
-
-
