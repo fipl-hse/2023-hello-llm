@@ -266,7 +266,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
-        metrics = [load(metric) for metric in self._metrics]
+        metrics = [load(str(metric)) for metric in self._metrics]
         predictions = pd.read_csv(self._data_path)
         return {metric.name: metric.compute(
             references=predictions[ColumnNames.TARGET.value],
