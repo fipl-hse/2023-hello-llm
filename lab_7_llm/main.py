@@ -76,7 +76,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Apply preprocessing transformations to the raw dataset.
         """
         self._data = self._raw_data.rename(columns={
-            'info': ColumnNames.SOURCE, 
+            'info': ColumnNames.SOURCE,
             'summary': ColumnNames.TARGET}).reset_index(drop=True)
 
 
@@ -162,7 +162,10 @@ class LLMPipeline(AbstractLLMPipeline):
         config = self._model.config
         embeddings_length = config.d_model
         ids = torch.ones(self._batch_size, embeddings_length, dtype=torch.long)
-        model_summary = summary(self._model, input_data=ids, verbose=False)
+        input_data = {'input_ids': ids,
+                      'attention_mask': ids,
+                      'decoder_input_ids': ids}
+        model_summary = summary(self._model, input_data=input_data, verbose=False)
 
         analysis = {
             'input_shape': list(ids.shape),
@@ -171,7 +174,7 @@ class LLMPipeline(AbstractLLMPipeline):
             'num_trainable_params': model_summary.trainable_params,
             'vocab_size': config.vocab_size,
             'size': model_summary.total_param_bytes,
-            'max_context_length': config.task_specific_params.summarization.max_length
+            'max_context_length': config.max_length
         }
         return analysis
 
@@ -186,7 +189,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        if isinstance(self._model, None):
+        if self._model is None:
             return None
         tokenizer = AutoTokenizer.from_pretrained(self._model_name)
         tokens = tokenizer(sample, return_tensors='pt')
