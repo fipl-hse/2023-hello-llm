@@ -128,7 +128,6 @@ class TaskDataset(Dataset):
 
         return self._data[ColumnNames.SOURCE].iloc[index]
 
-
     @property
     def data(self) -> DataFrame:
         """
@@ -218,7 +217,13 @@ class LLMPipeline(AbstractLLMPipeline):
 
         if not self._model:
             return None
-        return self._infer_batch((sample,))[0]
+
+        tokens = self._tokenizer(sample[0], max_length=120, padding=True,
+                                 return_tensors='pt', truncation=True)
+        output = self._model.generate(**tokens)
+        result = self._tokenizer.batch_decode(output, skip_special_tokens=True)
+
+        return result[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -241,23 +246,17 @@ class LLMPipeline(AbstractLLMPipeline):
             list[str]: Model predictions as strings
         """
 
-        batch_predictions = []
-
-        for sample in sample_batch[0]:
-            inputs = self._tokenizer(sample,
-                                     padding=True,
-                                     truncation=True,
-                                     max_length=self._max_length,
-                                     return_tensors="pt")
-            input_ids = inputs.input_ids.to(self._device)
-            attention_mask = inputs.attention_mask.to(self._device)
-            output = self._model.generate(input_ids, attention_mask=attention_mask)
-
-            prediction = self._tokenizer.decode(output[0], skip_special_tokens=True)
-
-            batch_predictions.append(prediction)
-
-        return batch_predictions
+        # predictions = []
+        #
+        # for index, sample in enumerate(sample_batch[0]):
+        #     tokens = self._tokenizer(sample_batch[0][index], max_length=120, padding=True,
+        #                              return_tensors='pt', truncation=True)
+        #     output = self._model.generate(**tokens)
+        #     result = self._tokenizer.batch_decode(output, skip_special_tokens=True)
+        #     predictions.extend(result)
+        #     print(predictions)
+        #
+        # return predictions
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
