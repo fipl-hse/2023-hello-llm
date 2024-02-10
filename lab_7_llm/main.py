@@ -130,6 +130,7 @@ class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
     """
+    _model: torch.nn.Module
 
     def __init__(
             self,
