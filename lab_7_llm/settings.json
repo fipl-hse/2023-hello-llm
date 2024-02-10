@@ -1,6 +1,6 @@
 {
   "parameters": {
-    "model": "https://huggingface.co/mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization",
+    "model": "mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization",
     "dataset": "ccdv/pubmed-summarization",
     "metrics": []
   },
