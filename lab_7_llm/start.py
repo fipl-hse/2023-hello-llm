@@ -22,7 +22,7 @@ def main() -> None:
     importer = RawDataImporter(settings['parameters']['dataset'])
     importer.obtain()
 
-    assert importer.raw_data is not None, "Demo does not work correctly"
+    assert importer.raw_data is not None, "Demo does not work correctly!"
     preprocessor = RawDataPreprocessor(importer.raw_data)
     print(preprocessor.analyze())
     preprocessor.transform()
