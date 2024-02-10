@@ -223,11 +223,11 @@ class LLMPipeline(AbstractLLMPipeline):
             dict: Properties of a model
         """
         embeddings_length = self._model.config.max_position_embeddings
-        ids = torch.ones(self._batch_size, embeddings_length, dtype=torch.long)
+        ids = torch.ones(1, embeddings_length, dtype=torch.long)
         model_summary = self._get_summary(ids)
         input_shape = {
-            'attention_mask': [ids.shape[0], ids.shape[1]],
-            'input_ids': [ids.shape[0], ids.shape[1]]
+            'input_ids': [ids.shape[0], ids.shape[1]],
+            'attention_mask': [ids.shape[0], ids.shape[1]]
         }
 
         info = {
