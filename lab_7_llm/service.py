@@ -2,11 +2,10 @@
 Web service for model inference.
 """
 # pylint: disable=undefined-variable
-try:
-    from fastapi import FastAPI
-except ImportError:
-    print('Library "fastapi" not installed. Failed to import.')
-    FastAPI = None
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 from lab_7_llm.main import LLMPipeline
 

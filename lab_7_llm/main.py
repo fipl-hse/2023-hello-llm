@@ -46,7 +46,7 @@ class RawDataImporter(AbstractRawDataImporter):
             raise TypeError("Downloaded dataset is not pd.DataFrame")
 
     @property
-    def raw_data(self) -> DataFrame:
+    def raw_data(self) -> DataFrame | None:
         return self._raw_data
 
 
