@@ -65,8 +65,9 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._data = self._raw_data.rename(columns={'Reviews': ColumnNames.SOURCE.value,
-                                                    'Summary': ColumnNames.TARGET.value}).reset_index(drop=True)
+        self._data = self._raw_data.rename(
+            columns={'Reviews': ColumnNames.SOURCE.value,
+                     'Summary': ColumnNames.TARGET.value}).reset_index(drop=True)
 
 
 class TaskDataset(Dataset):
@@ -103,7 +104,7 @@ class TaskDataset(Dataset):
             tuple[str, ...]: The item to be received
         """
 
-        return self._data['source'].iloc[index]
+        return self._data.iloc[index]['source']
 
     @property
     def data(self) -> DataFrame:
@@ -141,7 +142,8 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self._model: torch.nn.Module = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
-        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name, model_max_length=self._max_length)
+        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name,
+                                                        model_max_length=self._max_length)
 
     def analyze_model(self) -> dict:
         """
@@ -150,8 +152,10 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-        torch_data = torch.ones(1, self._model.config.decoder.max_position_embeddings, dtype=torch.long)
-        torch_dict = {'input_ids': torch_data, 'attention_mask': torch_data, 'decoder_input_ids': torch_data}
+        torch_data = torch.ones(1, self._model.config.decoder.max_position_embeddings,
+                                dtype=torch.long)
+        torch_dict = {'input_ids': torch_data, 'attention_mask': torch_data,
+                      'decoder_input_ids': torch_data}
         summary_result = summary(self._model,
                                  input_data=torch_dict,
                                  device='cpu',
@@ -248,11 +252,13 @@ class TaskEvaluator(AbstractTaskEvaluator):
             metric = Metrics[str(metric).upper()]
             if metric is Metrics.ROUGE:
                 metric = load(metric.value, seed=77)
-                metric_scores['rouge'] = metric.compute(references=predictions['target'],
-                                                        predictions=predictions['prediction']).get('rougeL')
+                metric_scores['rouge'] = metric.compute(
+                    references=predictions['target'],
+                    predictions=predictions['prediction']).get('rougeL')
             else:
                 metric = load(metric.value)
-                metric_scores[metric.name] = metric.compute(references=predictions['target'],
-                                                            predictions=predictions['prediction']).get(metric.name)
+                metric_scores[metric.name] = metric.compute(
+                    references=predictions['target'],
+                    predictions=predictions['prediction']).get(metric.name)
 
         return metric_scores

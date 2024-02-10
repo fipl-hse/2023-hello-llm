@@ -8,7 +8,8 @@ from pathlib import Path
 
 from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import RawDataImporter, RawDataPreprocessor, LLMPipeline, TaskDataset, TaskEvaluator
+from lab_7_llm.main import RawDataImporter, RawDataPreprocessor, \
+    LLMPipeline, TaskDataset, TaskEvaluator
 
 
 @report_time
@@ -43,7 +44,8 @@ def main() -> None:
     path_to_predictions = PROJECT_ROOT / 'lab_7_llm' / 'dist' / 'predictions.csv'
     pipeline.infer_dataset().to_csv(path_to_predictions, index=False)
 
-    evaluation = TaskEvaluator(data_path=Path(path_to_predictions), metrics=settings['parameters']['metrics'])
+    evaluation = TaskEvaluator(data_path=Path(path_to_predictions),
+                               metrics=settings['parameters']['metrics'])
     result = evaluation.run()
     print(result)
 
