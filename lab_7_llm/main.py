@@ -226,8 +226,8 @@ class LLMPipeline(AbstractLLMPipeline):
         ids = torch.ones(self._batch_size, embeddings_length, dtype=torch.long)
         model_summary = self._get_summary(ids)
         input_shape = {
-            'input_ids': [ids.shape[0], ids.shape[1]],
-            'attention_mask': [ids.shape[0], ids.shape[1]]
+            'attention_mask': [ids.shape[0], ids.shape[1]],
+            'input_ids': [ids.shape[0], ids.shape[1]]
         }
 
         info = {
