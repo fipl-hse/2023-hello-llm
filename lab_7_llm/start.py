@@ -25,7 +25,7 @@ def main() -> None:
     device = "cpu"
     batch_size = 1
     max_length = 120
-    num_samples = 100
+    num_samples = 10
 
     raw_data_importer = RawDataImporter(settings.parameters.dataset)
     raw_data_importer.obtain()

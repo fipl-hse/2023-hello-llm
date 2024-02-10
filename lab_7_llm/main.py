@@ -52,22 +52,19 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             dict: Dataset key properties
         """
 
-        min_value = math.inf
-        max_value = 0
+        column_length = self._raw_data["ru"].astype(str).str.len()
 
-        for _, row in self._raw_data.iterrows():
-            if row.str.len().max() > max_value:
-                max_value = row.str.len().max()
-            if row.str.len().min() < min_value:
-                min_value = row.str.len().min()
+        for text in self._raw_data["ru"].tolist():
+            if text and len(text) > 640:
+                print(text, len(text))
 
         analytics = {
             "dataset_number_of_samples": len(self._raw_data),
             "dataset_columns": len(self._raw_data.columns),
             "dataset_duplicates": self._raw_data.duplicated().sum(),
             "dataset_empty_rows": self._raw_data.isnull().T.any().T.sum(),
-            "dataset_sample_min_len": int(min_value),
-            "dataset_sample_max_len": int(max_value)
+            "dataset_sample_min_len": int(column_length.min()),
+            "dataset_sample_max_len": int(column_length.max())
         }
 
         return analytics
