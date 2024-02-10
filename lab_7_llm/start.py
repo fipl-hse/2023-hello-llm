@@ -3,10 +3,12 @@ Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
 import json
+import os
+from pathlib import Path
 
 from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset
+from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset, TaskEvaluator
 
 
 @report_time
@@ -32,8 +34,18 @@ def main() -> None:
     model_analysis = pipeline.analyze_model()
     print(model_analysis)
 
-    result = pipeline.infer_sample(dataset[0])
-    # result = pipeline.infer_dataset()
+    pipeline.infer_sample(dataset[0])
+
+    if not os.path.exists(f'{PROJECT_ROOT}/lab_7_llm/dist'):
+        os.mkdir(f'{PROJECT_ROOT}/lab_7_llm/dist')
+    prediction_path = f'{PROJECT_ROOT}/lab_7_llm/dist/predictions.csv'
+
+    pipeline.infer_dataset().to_csv(prediction_path, index=False)
+
+    metrics = settings['parameters']['metrics']
+    evaluator = TaskEvaluator(Path(prediction_path), metrics)
+
+    result = evaluator.run()
 
     assert result is not None, "Demo does not work correctly"
 

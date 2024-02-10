@@ -1,5 +1,5 @@
 """
-Neural machine translation module.
+Neural summarization module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
@@ -7,23 +7,14 @@ from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
 import pandas as pd
+import torch
 from datasets import load_dataset
+from evaluate import load
+from pandas import DataFrame, read_csv
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -218,17 +209,7 @@ class LLMPipeline(AbstractLLMPipeline):
         if not self._model:
             return None
 
-        tokens = self._tokenizer(sample,
-                                 padding=True,
-                                 truncation=True,
-                                 max_length=self._max_length,
-                                 return_tensors="pt")
-        output = self._model.generate(**tokens,
-                                      max_new_tokens=self._max_length)
-
-        prediction = self._tokenizer.batch_decode(output, skip_special_tokens=True)
-
-        return prediction[0]
+        return self._infer_batch((sample,))[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -238,6 +219,21 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+
+        data_loader = DataLoader(dataset=self._dataset,
+                                 batch_size=self._batch_size)
+
+        predictions = []
+
+        for batch in data_loader:
+            predictions.extend(self._infer_batch(batch))
+
+        df = pd.DataFrame({
+            "target": self._dataset.data[ColumnNames.TARGET],
+            "predictions": predictions
+        })
+
+        return df
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -251,17 +247,20 @@ class LLMPipeline(AbstractLLMPipeline):
             list[str]: Model predictions as strings
         """
 
-        # predictions = []
-        #
-        # for index, sample in enumerate(sample_batch[0]):
-        #     tokens = self._tokenizer(sample_batch[0][index], max_length=120, padding=True,
-        #                              return_tensors='pt', truncation=True)
-        #     output = self._model.generate(**tokens)
-        #     result = self._tokenizer.batch_decode(output, skip_special_tokens=True)
-        #     predictions.extend(result)
-        #     print(predictions)
-        #
-        # return predictions
+        predictions = []
+
+        tokens = self._tokenizer(sample_batch[0],
+                                 max_length=120,
+                                 padding=True,
+                                 return_tensors='pt',
+                                 truncation=True)
+        output = self._model.generate(**tokens,
+                                      max_new_tokens=self._max_length)
+        result = self._tokenizer.batch_decode(output,
+                                              skip_special_tokens=True)
+        predictions.extend(result)
+
+        return predictions
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -278,6 +277,10 @@ class TaskEvaluator(AbstractTaskEvaluator):
             metrics (Iterable[Metrics]): List of metrics to check
         """
 
+        super().__init__(metrics)
+        self._data_path = data_path
+        self._metrics = metrics
+
     @report_time
     def run(self) -> dict | None:
         """
@@ -286,3 +289,25 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+
+        df = read_csv(self._data_path)
+        result = {}
+
+        print(self._metrics)
+
+        for metric in self._metrics:
+            metric = Metrics[str(metric).upper()]
+            if metric is Metrics.ROUGE:
+                metric = load(metric.value, seed=77)
+            else:
+                metric = load(metric.value)
+
+            result = metric.compute(references=df['target'],
+                                    predictions=df['predictions'])
+
+            if metric.name == 'rouge':
+                result['rouge'] = result.get('rougeL')
+            else:
+                result[metric.name] = result.get(metric.name)
+
+        return result
