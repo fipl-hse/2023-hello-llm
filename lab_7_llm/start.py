@@ -19,6 +19,7 @@ def main() -> None:
     loader.obtain()
 
     preprocessor = RawDataPreprocessor(loader.raw_data)
+
     preprocessor.analyze()
     preprocessor.transform()
 
