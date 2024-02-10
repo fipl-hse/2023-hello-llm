@@ -6,8 +6,8 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-from torchinfo import summary
 
+from torchinfo import summary
 try:
     import torch
     from torch.utils.data.dataset import Dataset
