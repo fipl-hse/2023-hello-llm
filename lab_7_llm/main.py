@@ -2,6 +2,7 @@
 Neural summarization module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+
 from pathlib import Path
 from typing import Iterable, Sequence
 
@@ -46,11 +47,6 @@ class RawDataImporter(AbstractRawDataImporter):
 
     @property
     def raw_data(self) -> DataFrame:
-        """
-        Property with access to Raw DataFrame.
-        Returns:
-            pandas.DataFrame: Raw DataFrame
-        """
         return self._raw_data
 
 
