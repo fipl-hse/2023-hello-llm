@@ -211,7 +211,7 @@ class LLMPipeline(AbstractLLMPipeline):
             predictions.extend(self._infer_batch(batch))
 
         return DataFrame({
-            'target': [sample[0] for sample in self._dataset],
+            'target': self._dataset.data[ColumnNames.TARGET.value].tolist(),
             'predictions': predictions
         })
 
@@ -265,6 +265,6 @@ class TaskEvaluator(AbstractTaskEvaluator):
         for metric in self._metrics:
             metric_instance = load(metric.value)
             result = metric_instance.compute(predictions=predictions, references=references)
-            results[metric] = result
+            results[metric.value] = result
 
         return results
