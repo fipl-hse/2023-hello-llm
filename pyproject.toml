@@ -9,6 +9,7 @@ markers = [
     "reference_lab_summarization: tests for summarization task",
     "reference_lab_nli: tests for nli task",
     "reference_lab_generation: tests for generation task",
+    "reference_lab_open_qa: tests for open generative Q&A task",
     "lab_7_llm: tests for lab 7",
 ]
 norecursedirs = [
@@ -83,10 +84,14 @@ disable_error_code = [
 [[tool.mypy.overrides]]
 module = [
     'config.get_datasets_analytics',
+    'config.get_inference_analytics',
     'config.get_references',
+    'seminars.seminar_02_06_2024.try_fastapi',
 ]
 disable_error_code = [
-    'import-not-found'
+    'import-not-found',
+    'no-any-unimported',
+    'assignment'
 ]
 
 [[tool.mypy.overrides]]

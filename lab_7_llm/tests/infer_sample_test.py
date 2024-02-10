@@ -13,7 +13,7 @@ from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from lab_7_llm.main import LLMPipeline
 
 
-def run_model_analysis_check(
+def run_model_inference_check(
         lab_path: Path,
         pipeline_class: type[AbstractLLMPipeline]
 ) -> None:
@@ -35,7 +35,11 @@ def run_model_analysis_check(
     model_name = settings.parameters.model.replace('test_', '')
     samples = references.get(model_name)
     for query, prediction in samples.items():
-        res = pipeline.infer_sample((query,))
+        if '[TEST SEP]' in query:
+            first_value, second_value = query.split('[TEST SEP]')
+            res = pipeline.infer_sample((first_value, second_value))
+        else:
+            res = pipeline.infer_sample((query,))
         if res != prediction:
             assert False, (f'Inference of {settings.parameters.model} model is incorrect.\n'
                            f'Expected: {prediction}\n'
@@ -55,4 +59,4 @@ class ModelWorkingTest(unittest.TestCase):
         """
         Ideal inference scenario
         """
-        self.assertIsNone(run_model_analysis_check(Path(__file__).parent.parent, LLMPipeline))
+        self.assertIsNone(run_model_inference_check(Path(__file__).parent.parent, LLMPipeline))
