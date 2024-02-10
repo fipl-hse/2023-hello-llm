@@ -174,25 +174,24 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-        config = self._model.config
-        embedding_size = self._model.config.max_position_embeddings
-        ids = torch.ones(self._batch_size, embedding_size, dtype=torch.long)
-        input_shape = {
-            'input_ids': ids,
-            'attention_mask': ids
-        }
-        model_summary = summary(self._model, input_data=input_shape, verbose=False)
+        tensor_ones = torch.ones(1, self._model.config.max_position_embeddings, dtype=torch.long)
 
-        analysis_dict = {
-            "input_shape": input_shape,
-            "embedding_size": embedding_size,
+        input_data = {'attention_mask': tensor_ones,
+                      "input_ids": tensor_ones}
+
+        model_summary = summary(self._model, input_data=input_data, verbose=False)
+
+        summary_dict = {
+            "input_shape": {'attention_mask': list(model_summary.input_size['attention_mask']),
+                            'input_ids': list(model_summary.input_size['input_ids'])},
+            "embedding_size": self._model.config.max_position_embeddings,
             "output_shape": model_summary.summary_list[-1].output_size,
             "num_trainable_params": model_summary.trainable_params,
             "vocab_size": self._model.config.vocab_size,
-            "size": model_summary.total_params,
-            "max_context_length": self._model.config.vocab_size,
+            "size": model_summary.total_param_bytes,
+            "max_context_length": self._model.config.max_length
         }
-        return analysis_dict
+        return summary_dict
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
