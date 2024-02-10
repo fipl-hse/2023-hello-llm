@@ -42,6 +42,10 @@ class RawDataImporter(AbstractRawDataImporter):
         if not isinstance(self._raw_data, DataFrame):
             raise TypeError
 
+    @property
+    def raw_data(self) -> DataFrame:
+        return self._raw_data
+
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
