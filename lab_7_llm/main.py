@@ -77,7 +77,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         self._data = self._raw_data.rename(columns={
             'info': ColumnNames.SOURCE,
-            'summary': ColumnNames.TARGET}).reset_index(drop=True)
+            'summary': ColumnNames.TARGET
+            }).reset_index(drop=True)
 
 
 class TaskDataset(Dataset):
