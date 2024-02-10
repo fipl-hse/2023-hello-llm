@@ -180,11 +180,11 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        tokenizer = AutoTokenizer.from_pretrained("stevhliu/my_awesome_billsum_model")
-        tokens = tokenizer(sample, padding=True, truncation=True, return_tensors="pt")
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name, model_max_length=self._max_length)
+        tokens = tokenizer(sample, padding=True, truncation=True, return_tensors='pt')
         output = self._model.generate(**tokens)
         decoded = tokenizer.batch_decode(output, skip_special_tokens=True)
-        return decoded
+        return None if self._model is None else decoded[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -194,19 +194,19 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
-        data_loader = DataLoader(dataset=self._dataset,
-                                 batch_size=self._batch_size)
-        predictions = []
-        for batch in data_loader:
-            batch_predictions = self._infer_batch(batch)
-            predictions.extend(batch_predictions)
+        # data_loader = DataLoader(dataset=self._dataset,
+        #                          batch_size=self._batch_size)
+        # predictions = []
+        # for batch in data_loader:
+        #     batch_predictions = self._infer_batch(batch)
+        #     predictions.extend(batch_predictions)
+        #
+        # predictions_df = pd.DataFrame({
+        #     "target": self._dataset.data['target'],
+        #     "predictions": predictions
+        # })
 
-        predictions_df = pd.DataFrame({
-            "target": self._dataset.data['target'],
-            "predictions": predictions
-        })
-
-        return predictions_df
+        # return predictions_df
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -219,21 +219,21 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-        predictions = []
-
-        for index, sample in enumerate(sample_batch[0]):
-            tokens = tokenizer(sample_batch[0][index],
-                               max_length=120,
-                               padding=True,
-                               return_tensors='pt',
-                               truncation=True)
-            output = self._model.generate(**tokens)
-            result = tokenizer.batch_decode(output,
-                                            skip_special_tokens=True)
-            predictions.extend(result)
-
-        return predictions
+        # tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        # predictions = []
+        #
+        # for index, sample in enumerate(sample_batch[0]):
+        #     tokens = tokenizer(sample_batch[0][index],
+        #                        max_length=120,
+        #                        padding=True,
+        #                        return_tensors='pt',
+        #                        truncation=True)
+        #     output = self._model.generate(**tokens)
+        #     result = tokenizer.batch_decode(output,
+        #                                     skip_special_tokens=True)
+        #     predictions.extend(result)
+        #
+        # return predictions
 
 class TaskEvaluator(AbstractTaskEvaluator):
     """
