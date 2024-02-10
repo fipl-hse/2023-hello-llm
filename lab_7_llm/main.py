@@ -5,7 +5,8 @@ Neural summarization module.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
-from transformers import AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from torchinfo import summary
 
 try:
     import torch
@@ -163,6 +164,29 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        tensor_data = torch.ones(1,
+                                 self._model.config.decoder.max_position_embeddings,
+                                 dtype=torch.long)
+
+        input_data = {"input_ids": tensor_data,
+                      "token_type_ids": tensor_data,
+                      "attention_mask": tensor_data}
+
+        model_statistics = summary(self._model,
+                                   input_data=input_data,
+                                   decoder_input_ids=tensor_data,
+                                   verbose=False)
+
+        model_info = {
+            "input_shape": list(input_data['input_ids'].shape),
+            "embedding_size": self._model.config.decoder.max_position_embeddings,
+            "output_shape": model_statistics.summary_list[-1].output_size,
+            "num_trainable_params": model_statistics.trainable_params,
+            "vocab_size": self._model.config.decoder.vocab_size,
+            "size": model_statistics.total_param_bytes,
+            "max_context_length": self._model.config.max_length
+        }
+        return model_info
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -175,6 +199,9 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        if not self._model:
+            return None
+        return self._infer_batch((sample,))[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
