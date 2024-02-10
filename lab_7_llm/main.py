@@ -58,6 +58,16 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        properties_dict = {
+            "dataset_number_of_samples": self._raw_data.shape[0],
+            "dataset_columns": self._raw_data.shape[0],
+            "dataset_duplicates": self._raw_data.duplicated(),
+            "dataset_empty_rows": self._raw_data.isna().all(axis=1),
+            "dataset_sample_min_len": min((self._raw_data["prompt"]), self._raw_data["messages"]),
+            "dataset_sample_max_len": max(self._raw_data["prompt"]),
+        }
+
+        return properties_dict
 
     @report_time
     def transform(self) -> None:
@@ -202,15 +212,15 @@ class TaskEvaluator(AbstractTaskEvaluator):
         """
 
 
-importer = RawDataImporter('')
-importer.obtain()
+#importer = RawDataImporter('')
+#importer.obtain()
 
 # Load model directly
-from transformers import AutoTokenizer, AutoModelForQuestionAnswering
+'''from transformers import AutoTokenizer, AutoModelForQuestionAnswering
 
 tokenizer = AutoTokenizer.from_pretrained("timpal0l/mdeberta-v3-base-squad2")
 model = AutoModelForQuestionAnswering.from_pretrained("timpal0l/mdeberta-v3-base-squad2")
 question = "Where do I live?"
 context = "My name is Tim and I live in Sweden."
 tokens = tokenizer(question, context, return_tensors='pt')
-print(tokens)
+print(tokens)'''
