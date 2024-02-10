@@ -2,16 +2,13 @@
 Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
-from collections import namedtuple
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
+from typing import Iterable, Sequence
 from datasets import load_dataset
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 import torch
-from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
-import pandas as pd
 from pandas import DataFrame
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
@@ -137,7 +134,11 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
-        super().__init__(model_name, dataset, max_length, batch_size, device)
+        super().__init__(model_name,
+                         dataset,
+                         max_length,
+                         batch_size,
+                         device)
         self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
@@ -180,10 +181,18 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        tokenizer = AutoTokenizer.from_pretrained(self._model_name, model_max_length=self._max_length)
-        tokens = tokenizer(sample, padding=True, truncation=True, return_tensors='pt')
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name,
+                                                  model_max_length=self._max_length)
+
+        tokens = tokenizer(sample,
+                           padding=True,
+                           truncation=True,
+                           return_tensors='pt')
+
         output = self._model.generate(**tokens)
-        decoded = tokenizer.batch_decode(output, skip_special_tokens=True)
+        decoded = tokenizer.batch_decode(output,
+                                         skip_special_tokens=True)
+
         return None if self._model is None else decoded[0]
 
     @report_time
