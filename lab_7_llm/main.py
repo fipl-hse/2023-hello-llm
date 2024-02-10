@@ -61,8 +61,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         properties_dict = {
             "dataset_number_of_samples": self._raw_data.shape[0],
             "dataset_columns": self._raw_data.shape[1],
-            "dataset_duplicates": self._raw_data.drop(["messages"], axis=1).duplicated(),
-            "dataset_empty_rows": self._raw_data.isna()
+            "dataset_duplicates": self._raw_data.drop(["messages"], axis=1).duplicated().sum(),
+            "dataset_empty_rows": self._raw_data.isna().sum().sum()
         }
         self._raw_data = self._raw_data.dropna()
         properties_dict["dataset_sample_min_len"] = min(len(min(self._raw_data["prompt"], key=len)),
@@ -95,8 +95,11 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
 
         self._data = self._raw_data[(self._raw_data.category == 'Closed QA')]
         self._data = self._data.drop(['prompt_id', 'category'], axis=1)
-        self._data = self._data.dropna()
+        #self._data = self._data.drop_duplicates()
         self._data = self._data.rename(columns={'prompt': 'questions'}, inplace=False)
+        self._data = self._data.dropna()
+        print(self._data.shape)
+        print(min(self._data["prompt"], key=len))
 
 
 class TaskDataset(Dataset):
