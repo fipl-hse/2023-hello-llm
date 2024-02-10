@@ -30,6 +30,9 @@ def main() -> None:
     raw_data_importer = RawDataImporter(settings.parameters.dataset)
     raw_data_importer.obtain()
 
+    if not raw_data_importer.raw_data:
+        raise ValueError("raw_data_importer.raw_data is None.")
+
     raw_data_preprocessor = RawDataPreprocessor(raw_data_importer.raw_data)
     print(raw_data_preprocessor.analyze())
 

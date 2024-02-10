@@ -3,7 +3,6 @@ Neural machine translation module.
 """
 import math
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
-from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
@@ -14,7 +13,7 @@ from pandas import DataFrame, read_csv
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
-from transformers import MarianTokenizer, MarianMTModel
+from transformers import MarianMTModel, MarianTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -175,7 +174,7 @@ class LLMPipeline(AbstractLLMPipeline):
             dict: Properties of a model
         """
         noise = torch.ones(1, self._model.config.max_length, dtype=torch.long)
-        model_info = summary(self._model,
+        model_info = summary(self._model,  # type: ignore
                              input_data=noise,
                              decoder_input_ids=noise,
                              device=self._device,
