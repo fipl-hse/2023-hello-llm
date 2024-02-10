@@ -111,9 +111,9 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        row = self._data.iloc[index]
+        item = (self._data.iloc[index][ColumnNames.SOURCE],)
 
-        return row[ColumnNames.SOURCE],
+        return item
 
     @property
     def data(self) -> DataFrame:
@@ -239,7 +239,6 @@ class LLMPipeline(AbstractLLMPipeline):
                                return_tensors='pt', truncation=True)
             output = self._model.generate(**tokens)
             result = tokenizer.batch_decode(output, skip_special_tokens=True)
-            print(result)
             predictions.extend(result)
 
         return predictions
