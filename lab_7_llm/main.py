@@ -240,12 +240,11 @@ class LLMPipeline(AbstractLLMPipeline):
         tokenizer = AutoTokenizer.from_pretrained(self._model_name)
         predictions = []
 
-        for index, sample in enumerate(sample_batch[0]):
-            tokens = tokenizer(sample_batch[0][index], max_length=120, padding=True,
-                               return_tensors='pt', truncation=True)
-            output = self._model.generate(**tokens)
-            result = tokenizer.batch_decode(output, skip_special_tokens=True)
-            predictions.extend(result)
+        tokens = tokenizer(sample_batch[0], max_length=120, padding=True,
+                           return_tensors='pt', truncation=True)
+        output = self._model.generate(**tokens)
+        result = tokenizer.batch_decode(output, skip_special_tokens=True)
+        predictions.extend(result)
 
         return predictions
 
