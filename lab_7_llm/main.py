@@ -202,7 +202,7 @@ class LLMPipeline(AbstractLLMPipeline):
             return None
         tokenizer = AutoTokenizer.from_pretrained(self._model_name)
 
-        tokens = tokenizer(sample[0], max_length=512, padding=True,
+        tokens = tokenizer(sample[0], max_length=120, padding=True,
                            return_tensors='pt', truncation=True)
         output = self._model.generate(**tokens)
         result = tokenizer.batch_decode(output, skip_special_tokens=True)
