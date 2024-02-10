@@ -44,6 +44,9 @@ class RawDataImporter(AbstractRawDataImporter):
 
     @property
     def get_raw_data(self) -> DataFrame:
+        """
+        Get raw dataset
+        """
         return self._raw_data
 
 
@@ -110,7 +113,8 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data['source'].iloc[index]
+        item_by_index = (self._data['source'].iloc[index],)
+        return item_by_index
 
     @property
     def data(self) -> DataFrame:
