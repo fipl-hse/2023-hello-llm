@@ -224,7 +224,7 @@ class LLMPipeline(AbstractLLMPipeline):
                                  max_length=self._max_length,
                                  return_tensors="pt")
         output = self._model.generate(**tokens,
-                                      max_length=self._max_length)
+                                      max_new_tokens=self._max_length)
 
         prediction = self._tokenizer.batch_decode(output, skip_special_tokens=True)
 
