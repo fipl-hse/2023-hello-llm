@@ -7,6 +7,7 @@ from typing import Iterable, Sequence
 
 import pandas as pd
 import torch
+import torchinfo
 from datasets import load_dataset
 from evaluate import load
 from pandas import DataFrame
@@ -176,7 +177,7 @@ class LLMPipeline(AbstractLLMPipeline):
             'attention_mask': ids
         }
 
-        model_summary = summary(self._model, input_data=data, verbose=0)
+        model_summary = torchinfo.summary(self._model, input_data=data, verbose=0)
 
         summary_dict = {
             "input_shape": {'attention_mask': list(model_summary.input_size['attention_mask']),
