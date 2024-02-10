@@ -14,7 +14,7 @@ def main() -> None:
     """
     Run the translation pipeline.
     """
-    with open(PROJECT_ROOT / 'lab_7_llm' / 'setting.json', 'r', encoding='utf-8') as file:
+    with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as file:
         settings = json.load(file)
     importer = RawDataImporter(settings['parameters']['dataset'])
     importer.obtain()
