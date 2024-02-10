@@ -60,16 +60,32 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         properties_dict = {
             "dataset_number_of_samples": self._raw_data.shape[0],
-            "dataset_columns": self._raw_data.shape[0],
-            "dataset_duplicates": self._raw_data.duplicated().sum(),
-            "dataset_empty_rows": self._raw_data.isna().all(axis=1),
-            "dataset_sample_min_len": min(len(min(self._raw_data["prompt"], key=len)),
-                                          len(min(self._raw_data["messages"][0]["context"]))),
-            "dataset_sample_max_len": max(len(max(self._raw_data["prompt"], key=len)),
-                                          len(max(self._raw_data["messages"][0]["context"])))
+            "dataset_columns": self._raw_data.shape[1],
+            "dataset_duplicates": self._raw_data.drop(["messages"], axis=1).duplicated(),
+            "dataset_empty_rows": self._raw_data.isna()
         }
-
+        self._raw_data = self._raw_data.dropna()
+        properties_dict["dataset_sample_min_len"] = min(len(min(self._raw_data["prompt"], key=len)),
+                                                        self.get_min_len())
+        properties_dict["dataset_sample_max_len"] = max(len(max(self._raw_data["prompt"], key=len)),
+                                                        self.get_max_len())
         return properties_dict
+
+    def get_min_len(self):
+        min_len = (len(self._raw_data["messages"][0][0]["content"])
+                   + len(self._raw_data["messages"][0][1]["content"]))
+        for row in self._raw_data["messages"]:
+            if len(row[0]["content"]) + len(row[1]["content"]) < min_len:
+                min_len = len(row[0]["content"]) + len(row[1]["content"])
+        return min_len
+
+    def get_max_len(self):
+        max_len = (len(self._raw_data["messages"][0][0]["content"])
+                   + len(self._raw_data["messages"][0][1]["content"]))
+        for row in self._raw_data["messages"]:
+            if len(row[0]["content"]) + len(row[1]["content"]) > max_len:
+                max_len = len(row[0]["content"]) + len(row[1]["content"])
+        return max_len
 
     @report_time
     def transform(self) -> None:
@@ -77,9 +93,10 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Apply preprocessing transformations to the raw dataset.
         """
 
-        self._raw_data = self._raw_data[(self._raw_data.category == 'Closed QA')]
-        self._raw_data = self._raw_data.drop(['prompt_id', 'category'], axis=1)
-        self._raw_data = self._raw_data.rename(columns={'prompt': 'questions'}, inplace=False)
+        self._data = self._raw_data[(self._raw_data.category == 'Closed QA')]
+        self._data = self._data.drop(['prompt_id', 'category'], axis=1)
+        self._data = self._data.dropna()
+        self._data = self._data.rename(columns={'prompt': 'questions'}, inplace=False)
 
 
 class TaskDataset(Dataset):

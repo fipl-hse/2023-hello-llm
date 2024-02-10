@@ -3,6 +3,7 @@ Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
 import json
+import pandas as pd
 from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
 from lab_7_llm.main import RawDataImporter, RawDataPreprocessor
