@@ -170,7 +170,6 @@ class LLMPipeline(AbstractLLMPipeline):
                                  dtype=torch.long)
 
         input_data = {"input_ids": tensor_data,
-                      "token_type_ids": tensor_data,
                       "attention_mask": tensor_data}
 
         model_statistics = summary(self._model,
@@ -209,6 +208,7 @@ class LLMPipeline(AbstractLLMPipeline):
                                return_tensors='pt', truncation=True)
             output = self._model.generate(**tokens)
             result = tokenizer.batch_decode(output, skip_special_tokens=True)
+            print(tokens.keys())
 
             return result[0]
 
