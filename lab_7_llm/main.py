@@ -40,7 +40,7 @@ class RawDataImporter(AbstractRawDataImporter):
         """
 
         self._raw_data = load_dataset(self._hf_name,
-                                      name='default', split='train').to_pandas()
+                                      split='train').to_pandas()
 
     @property
     def get_raw_data(self) -> DataFrame:
@@ -113,7 +113,8 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data['source'].iloc[index]
+        item_by_index = (self._data['source'].iloc[index],)
+        return item_by_index
 
     @property
     def data(self) -> DataFrame:
@@ -189,7 +190,9 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        return self._infer_batch([sample])[0]
+        if not self._model:
+            return None
+        return self._infer_batch((sample,))[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -204,7 +207,7 @@ class LLMPipeline(AbstractLLMPipeline):
         for batch in data_load:
             predictions.extend(self._infer_batch(batch))
 
-        data_with_predictions = pd.DataFrame({'target': self._dataset.data['target'],
+        data_with_predictions = pd.DataFrame({'target': self._dataset.data[ColumnNames.TARGET.value],
                                               'prediction': pd.Series(predictions)})
         return data_with_predictions
 
@@ -220,12 +223,11 @@ class LLMPipeline(AbstractLLMPipeline):
             list[str]: Model predictions as strings
         """
         predictions = []
-
-        for sample in sample_batch:
-            tokens = self._tokenizer(sample, padding=True, truncation=True, return_tensors='pt')
-            output = self._model.generate(**tokens)
-            decoded = self._tokenizer.batch_decode(output, skip_special_tokens=True)
-            predictions.append(decoded[0])
+        tokens = self._tokenizer(sample_batch[0], max_length=120,
+                                 padding=True, truncation=True, return_tensors='pt')
+        output = self._model.generate(**tokens)
+        decoded = self._tokenizer.batch_decode(output, skip_special_tokens=True)
+        predictions.extend(decoded)
 
         return predictions
 
