@@ -73,8 +73,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Apply preprocessing transformations to the raw dataset.
         """
         self._data = self._raw_data.rename(columns={
-            'report': ColumnNames.SOURCE,
-            'summary': ColumnNames.TARGET,
+            'report': ColumnNames.SOURCE.value,
+            'summary': ColumnNames.TARGET.value,
         }).reset_index()
 
 
@@ -111,9 +111,9 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
+        item = (self._data.iloc[index]['source'],)
 
-        return (self._data.iloc[index][ColumnNames.SOURCE],
-                self._data.iloc[index][ColumnNames.TARGET])
+        return item
 
     @property
     def data(self) -> DataFrame:
@@ -214,7 +214,7 @@ class LLMPipeline(AbstractLLMPipeline):
             all_predictions.extend(self._infer_batch(batch))
 
         df_predict = pd.DataFrame({
-            "target": self._dataset.data[ColumnNames.TARGET],
+            "target": self._dataset.data[ColumnNames.TARGET.value],
             "predictions": all_predictions
         })
 
