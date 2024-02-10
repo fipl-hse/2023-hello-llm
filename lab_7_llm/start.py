@@ -22,6 +22,7 @@ def main() -> None:
 
     assert result is not None, "Demo does not work correctly"
 
+#dataset = TaskDataset(preprocessor.data.head(100))
 
 if __name__ == "__main__":
     main()

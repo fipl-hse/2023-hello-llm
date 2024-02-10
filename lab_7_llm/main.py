@@ -1,10 +1,11 @@
 """
-Neural machine translation module.
+Neural summarization module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
+from transformers import AutoModelForSeq2SeqLM
 
 try:
     import torch
@@ -75,6 +76,12 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        self._data = (self._raw_data
+            .drop(labels="id", axis=1)
+            .rename(columns={"article": "source", "highlights": "target"})
+            .dropna().drop_duplicates()
+            .reset_index(drop=True))
+        self._data["source"] = self._data["source"].str.replace(r"\(CNN\)", "", regex=True)
 
 
 class TaskDataset(Dataset):
@@ -89,6 +96,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+        self._data = data
 
     def __len__(self) -> int:
         """
@@ -97,6 +105,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -108,6 +117,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
+        return self._data["source"].iloc[index]
 
     @property
     def data(self) -> DataFrame:
@@ -117,6 +127,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
+        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
@@ -142,6 +153,8 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        super().__init__(model_name, dataset, max_length, batch_size, device)
+        self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
