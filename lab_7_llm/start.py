@@ -24,7 +24,6 @@ def main() -> None:
 
     preprocessor = RawDataPreprocessor(data_loader.raw_data)
     data_analysis = preprocessor.analyze()
-    print(data_analysis)
 
     preprocessor.transform()
 
@@ -33,11 +32,9 @@ def main() -> None:
     pipeline = LLMPipeline(configs['parameters']['model'], dataset, 120, 1, 'cpu')
 
     model_analysis = pipeline.analyze_model()
-    print(model_analysis)
 
     sample = dataset[randint(0, len(dataset))]
     sample_inference = pipeline.infer_sample(sample)
-    print(f'SAMPLE: {sample}\nPREDICTION: {sample_inference}')
 
     predictions = pipeline.infer_dataset()
     data_path = PROJECT_ROOT / 'lab_7_llm' / 'dist' / 'predictions.csv'
@@ -48,7 +45,6 @@ def main() -> None:
         [Metrics[metric.upper()] for metric in configs['parameters']['metrics']]
     )
     result = evaluator.run()
-    print(result)
 
     assert result is not None, "Demo does not work correctly"
 
