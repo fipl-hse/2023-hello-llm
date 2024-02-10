@@ -1,6 +1,7 @@
 """
 Neural machine translation starter.
 """
+# pylint: disable= too-many-locals
 import json
 from pathlib import Path
 from pprint import pprint
@@ -8,12 +9,12 @@ from pprint import pprint
 from config.constants import PROJECT_ROOT
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.time_decorator import report_time
-# pylint: disable= too-many-locals
 from lab_7_llm.main import (LLMPipeline,
                             RawDataImporter,
                             RawDataPreprocessor,
                             TaskDataset,
                             TaskEvaluator)
+
 
 @report_time
 def main() -> None:
@@ -43,7 +44,7 @@ def main() -> None:
 
     sample_infer = llm.infer_sample(dataset[0])
 
-    print('prediction for sample (',dataset[0],')',sample_infer)
+    print('prediction for sample (', dataset[0], ')', sample_infer)
 
     predictions = llm.infer_dataset().to_csv(predictions_path, index=False)
 
