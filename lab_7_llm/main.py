@@ -161,7 +161,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         config = self._model.config
         embeddings_length = config.d_model
-        ids = torch.ones(self._batch_size, embeddings_length, dtype=torch.long)
+        ids = torch.ones(1, embeddings_length, dtype=torch.long)
         input_data = {'input_ids': ids,
                       'attention_mask': ids,
                       'decoder_input_ids': ids}
@@ -192,10 +192,13 @@ class LLMPipeline(AbstractLLMPipeline):
         if self._model is None:
             return None
         tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-        tokens = tokenizer(sample, return_tensors='pt')
-        output = self._model.generate(**tokens)
+        tokens = tokenizer(sample, 
+                           truncation=True, 
+                           max_length=self._max_length, 
+                           return_tensors='pt')
+        output = self._model.generate(**tokens, max_new_tokens=200)
         results = tokenizer.batch_decode(output, skip_special_tokens=True)
-        return results
+        return results[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
