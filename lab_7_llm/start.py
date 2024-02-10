@@ -49,7 +49,8 @@ def main() -> None:
                                    batch_size=64,
                                    device="cpu")
 
-    pipeline_batch64.infer_dataset().to_csv(predictions_path / "predictions.csv", index=False, encoding="utf-8")
+    pipeline_batch64.infer_dataset()\
+        .to_csv(predictions_path / "predictions.csv", index=False, encoding="utf-8")
 
     result = TaskEvaluator(data_path=predictions_path / "predictions.csv",
                            metrics=settings["parameters"]["metrics"])
