@@ -4,12 +4,13 @@ Neural machine translation module.
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from pathlib import Path
 from typing import Iterable, Sequence
-from datasets import load_dataset
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+
 import torch
+from datasets import load_dataset
+from pandas import DataFrame
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
-from pandas import DataFrame
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
