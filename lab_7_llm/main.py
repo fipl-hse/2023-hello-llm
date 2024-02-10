@@ -37,7 +37,7 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = load_dataset(self._hf_name, name='default', split='train').to_pandas()
+        self._raw_data: DataFrame = load_dataset(self._hf_name, name='default', split='train').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -103,8 +103,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-
-        return self._data.iloc[index]['source']
+        return tuple(self._data.iloc[index]['source'],)
 
     @property
     def data(self) -> DataFrame:
