@@ -43,7 +43,7 @@ def save_reference(path: Path, refs: dict) -> None:
             refs,
             file,
             indent=4,
-            ensure_ascii=True,
+            ensure_ascii=False,
             sort_keys=True
         )
     with open(path, mode='a', encoding='utf-8') as file:
@@ -63,11 +63,13 @@ def main() -> None:
 
     references = get_references(path=references_path)
     result = {}
+
     for model, _ in references.items():
         pipeline = LLMPipeline(model, TaskDataset(DataFrame([])), max_length, batch_size, device)
         print(model)
         model_analysis = pipeline.analyze_model()
         result[model] = model_analysis
+
     save_reference(dest, result)
 
 
