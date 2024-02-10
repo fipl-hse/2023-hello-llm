@@ -46,7 +46,7 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
         self._raw_data = load_dataset(
-            path="cnn_dailymail",
+            path=self._hf_name,
             name="1.0.0",
             split="test"
         ).to_pandas()
@@ -208,7 +208,6 @@ class LLMPipeline(AbstractLLMPipeline):
                                return_tensors='pt', truncation=True)
             output = self._model.generate(**tokens, max_length=self._max_length)
             result = tokenizer.batch_decode(output, skip_special_tokens=True)
-            print(tokens.keys())
 
             return result[0]
 
