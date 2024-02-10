@@ -13,6 +13,7 @@ def main():
     """
     # result = None
     # assert result is not None, "Demo does not work correctly"
+
     load_set = RawDataImporter('d0rj/curation-corpus-ru')
 
     return load_set.obtain()

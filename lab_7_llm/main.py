@@ -1,15 +1,14 @@
 """
 Neural machine translation module.
 """
-import json
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
 from datasets import load_dataset
-
-from config.constants import PROJECT_ROOT
+# from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+# from torchinfo import summary
 
 try:
     import torch
@@ -128,7 +127,7 @@ class LLMPipeline(AbstractLLMPipeline):
             max_length: int,
             batch_size: int,
             device: str
-    ) -> None:
+    ):
         """
         Initialize an instance of LLMPipeline.
 
@@ -139,6 +138,23 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        # Load model directly
+
+        # tokenizer = AutoTokenizer.from_pretrained("stevhliu/my_awesome_billsum_model")
+        # model = AutoModelForSeq2SeqLM.from_pretrained("stevhliu/my_awesome_billsum_model")
+        #
+        # sample_string = 'sample'
+        # tokens = tokenizer(sample_string, return_tensors='pt')
+        # print(tokens)
+        #
+        # torch_ones = torch.ones(1, 32128, dtype=torch.long)
+        # torch_dict = {'input_ids': torch_ones, 'attention_mask': torch_ones, 'decoder_input_ids': torch_ones}
+        # output_save = summary(model, input_data=torch_dict, verbose=False)
+        # total_param = output_save.total_params
+        # trainable_params = output_save.trainable_params
+        # summary_list = output_save['summary_list'][-1]
+        #
+        # print(total_param, trainable_params, summary_list)
 
     def analyze_model(self) -> dict:
         """
