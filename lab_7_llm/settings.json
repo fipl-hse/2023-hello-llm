@@ -1,8 +1,8 @@
 {
   "parameters": {
     "model": "",
-    "dataset": "",
+    "dataset": "RocioUrquijo/en_de",
     "metrics": []
   },
-  "target_score": 0
+  "target_score": 4
 }
