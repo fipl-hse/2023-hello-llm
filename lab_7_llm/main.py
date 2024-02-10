@@ -182,10 +182,10 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        tokenizer = AutoTokenizer.from_pretrained(self._model_name,
-                                                  model_max_length=self._max_length)
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
 
-        tokens = tokenizer(sample,
+        tokens = tokenizer(sample[0],
+                           max_length=120,
                            padding=True,
                            truncation=True,
                            return_tensors='pt')
