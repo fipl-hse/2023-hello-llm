@@ -192,7 +192,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         if not self._model:
             return None
-        return self._infer_batch((sample,))[0]
+        return self._infer_batch([sample])[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -207,8 +207,9 @@ class LLMPipeline(AbstractLLMPipeline):
         for batch in data_load:
             predictions.extend(self._infer_batch(batch))
 
-        data_with_predictions = pd.DataFrame({'target': self._dataset.data[ColumnNames.TARGET.value],
-                                              'prediction': pd.Series(predictions)})
+        data_with_predictions = pd.DataFrame(
+            {'target': self._dataset.data[ColumnNames.TARGET.value],
+             'prediction': pd.Series(predictions)})
         return data_with_predictions
 
     @torch.no_grad()
