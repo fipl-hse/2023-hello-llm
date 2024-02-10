@@ -3,10 +3,10 @@ Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
 
-import json
-import os
 from pathlib import Path
 
+import json
+import os
 from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
 from lab_7_llm.main import (RawDataImporter, RawDataPreprocessor,
@@ -22,9 +22,9 @@ def main() -> None:
         settings = json.load(file)
     importer = RawDataImporter(settings['parameters']['dataset'])
     importer.obtain()
-
-    preprocessor = RawDataPreprocessor(importer.raw_data)
-    preprocessor.analyze()
+    preprocessor = RawDataPreprocessor(importer.get_raw_data)
+    dataset_analysis = preprocessor.analyze()
+    print(dataset_analysis)
     preprocessor.transform()
 
     dataset = TaskDataset(preprocessor.data.head(100))
