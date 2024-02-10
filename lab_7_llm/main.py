@@ -50,7 +50,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     A class that analyzes and preprocesses a dataset.
     """
-
+    @report_time
     def analyze(self) -> dict:
         """
         Analyze a dataset.
@@ -61,10 +61,12 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         properties_dict = {
             "dataset_number_of_samples": self._raw_data.shape[0],
             "dataset_columns": self._raw_data.shape[0],
-            "dataset_duplicates": self._raw_data.duplicated(),
+            "dataset_duplicates": self._raw_data.duplicated().sum(),
             "dataset_empty_rows": self._raw_data.isna().all(axis=1),
-            "dataset_sample_min_len": min((self._raw_data["prompt"]), self._raw_data["messages"]),
-            "dataset_sample_max_len": max(self._raw_data["prompt"]),
+            "dataset_sample_min_len": min(len(min(self._raw_data["prompt"], key=len)),
+                                          len(min(self._raw_data["messages"][0]["context"]))),
+            "dataset_sample_max_len": max(len(max(self._raw_data["prompt"], key=len)),
+                                          len(max(self._raw_data["messages"][0]["context"])))
         }
 
         return properties_dict

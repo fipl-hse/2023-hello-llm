@@ -19,8 +19,9 @@ def main() -> None:
     raw_dataset = RawDataImporter(settings_dict["parameters"]["dataset"])
     raw_dataset.obtain()
     processed_dataset = RawDataPreprocessor(raw_dataset.raw_data)
-    #processed_dataset.analyze()
+    analysis = processed_dataset.analyze()
     #processed_dataset.transform()
+    print(analysis)
 
     result = None
     assert result is not None, "Demo does not work correctly"
