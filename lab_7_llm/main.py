@@ -1,8 +1,6 @@
 """
 Neural summarization module.
 """
-# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
-from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
@@ -43,7 +41,7 @@ class RawDataImporter(AbstractRawDataImporter):
             split='test'
         ).to_pandas()
 
-        if type(self._raw_data) is not DataFrame:
+        if not isinstance(self._raw_data, DataFrame):
             raise TypeError
 
 
@@ -228,12 +226,10 @@ class LLMPipeline(AbstractLLMPipeline):
         for batch in data_loader:
             predictions.extend(self._infer_batch(batch))
 
-        df = pd.DataFrame({
+        return DataFrame({
             "target": self._dataset.data[ColumnNames.TARGET],
             "predictions": predictions
         })
-
-        return df
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -250,7 +246,7 @@ class LLMPipeline(AbstractLLMPipeline):
         predictions = []
 
         tokens = self._tokenizer(sample_batch[0],
-                                 max_length=120,
+                                 max_length=self._max_length,
                                  padding=True,
                                  return_tensors='pt',
                                  truncation=True)
@@ -290,7 +286,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
             dict | None: A dictionary containing information about the calculated metric
         """
 
-        df = read_csv(self._data_path)
+        pred_df = read_csv(self._data_path)
         result = {}
 
         print(self._metrics)
@@ -302,8 +298,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             else:
                 metric = load(metric.value)
 
-            result = metric.compute(references=df['target'],
-                                    predictions=df['predictions'])
+            result = metric.compute(references=pred_df['target'],
+                                    predictions=pred_df['predictions'])
 
             if metric.name == 'rouge':
                 result['rouge'] = result.get('rougeL')

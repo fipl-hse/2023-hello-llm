@@ -1,13 +1,13 @@
 """
-Neural machine translation starter.
+Neural summarization starter.
 """
-# pylint: disable= too-many-locals
 import json
 import os
 from pathlib import Path
 
 from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
+
 from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset, TaskEvaluator
 
 
@@ -28,8 +28,11 @@ def main() -> None:
 
     dataset = TaskDataset(preprocessor.data.head(100))
 
-    pipeline = LLMPipeline(settings['parameters']['model'], dataset,
-                           max_length=120, batch_size=1, device='cpu')
+    pipeline = LLMPipeline(settings['parameters']['model'],
+                           dataset,
+                           max_length=120,
+                           batch_size=1,
+                           device='cpu')
 
     model_analysis = pipeline.analyze_model()
     print(model_analysis)
