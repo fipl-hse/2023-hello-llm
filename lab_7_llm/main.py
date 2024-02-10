@@ -6,13 +6,11 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 import pandas as pd
+import torch
 from datasets import load_dataset
 from evaluate import load
-import torch
 from pandas import DataFrame
-from torch.utils.data import DataLoader
-from torch.utils.data.dataset import Dataset
-from torchinfo import summary
+from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer, BertForSequenceClassification
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
