@@ -8,6 +8,7 @@ from typing import Iterable, Iterator, Sequence
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from torchinfo import summary
+from datasets import load_dataset
 
 try:
     import torch
@@ -29,7 +30,6 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
-from datasets import load_dataset
 
 
 class RawDataImporter(AbstractRawDataImporter):
@@ -170,6 +170,7 @@ class LLMPipeline(AbstractLLMPipeline):
                                  dtype=torch.long)
 
         input_data = {"input_ids": tensor_data,
+                      "token_type_ids": tensor_data,
                       "attention_mask": tensor_data}
 
         model_statistics = summary(self._model,
