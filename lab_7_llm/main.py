@@ -22,6 +22,11 @@ except ImportError:
     print('Library "pandas" not installed. Failed to import.')
     DataFrame = dict  # type: ignore
 
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import Dataset
+from torchinfo import summary
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
@@ -133,14 +138,12 @@ class LLMPipeline(AbstractLLMPipeline):
     A class that initializes a model, analyzes its properties and infers it.
     """
 
-    def __init__(
-            self,
-            model_name: str,
-            dataset: TaskDataset,
-            max_length: int,
-            batch_size: int,
-            device: str
-    ) -> None:
+    def __init__(self,
+                 model_name: str,
+                 dataset: TaskDataset,
+                 max_length: int,
+                 batch_size: int,
+                 device: str) -> None:
         """
         Initialize an instance of LLMPipeline.
 
@@ -151,6 +154,8 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        super().__init__(model_name, dataset, max_length, batch_size, device)
+        self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -159,6 +164,30 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        embeddings_length = self._model.config.decoder.max_position_embeddings
+        tensor = torch.ones(1, embeddings_length, dtype=torch.long)
+
+        ids = {"input_ids": tensor,
+               "token_type_ids": tensor,
+               "attention_mask": tensor}
+
+        statistics = summary(self._model,
+                             input_data=ids,
+                             decoder_input_ids=tensor,
+                             verbose=False)
+
+        model_info = {
+            "input_shape": list(statistics.input_size['input_ids']),
+            "embedding_size": embeddings_length,
+            "output_shape": statistics.summary_list[-1].output_size,
+            "num_trainable_params": statistics.trainable_params,
+            "vocab_size": self._model.config.decoder.vocab_size,
+            "size": statistics.total_param_bytes,
+            "max_context_length": self._model.config.max_length
+        }
+
+        return model_info
+
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -171,6 +200,17 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+
+        tokens = tokenizer(sample[0], max_length=120, padding=True,
+                           return_tensors='pt', truncation=True)
+        print(tokens.keys())
+
+        output = self._model.generate(**tokens)
+        result = tokenizer.batch_decode(output, skip_special_tokens=True)
+
+        return result[0]
+
 
     @report_time
     def infer_dataset(self) -> DataFrame:
