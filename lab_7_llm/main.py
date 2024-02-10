@@ -4,15 +4,12 @@ Neural machine translation module.
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
+from typing import Iterable, Sequence
 
 import pandas as pd
-import torch
 from datasets import load_dataset
 from evaluate import load
-from pandas import DataFrame
 from torch.utils.data import DataLoader
-from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import AutoTokenizer, BertForSequenceClassification
 
@@ -59,9 +56,6 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     A class that analyzes and preprocesses a dataset.
     """
-
-    def __init__(self, _raw_data):
-        super().__init__(_raw_data)
 
     def analyze(self) -> dict:
         """
@@ -302,4 +296,3 @@ class TaskEvaluator(AbstractTaskEvaluator):
             evaluations.update(evaluation)
 
         return evaluations
-
