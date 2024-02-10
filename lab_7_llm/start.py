@@ -31,7 +31,6 @@ def main() -> None:
     pipeline = LLMPipeline(settings['parameters']['model'], dataset, 120, 64, 'cpu')
     print(pipeline.analyze_model())
     infer_sample_result = pipeline.infer_sample(dataset[0])
-    print(f'INPUT TEXT: {dataset[0][0]}\nTRANSLATION: {infer_sample_result}')
 
     predictions_path = Path(PROJECT_ROOT / 'lab_7_llm' / 'dist' / 'predictions.csv')
     if not predictions_path.parent.exists():
