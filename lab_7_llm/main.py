@@ -1,6 +1,7 @@
 """
 Neural summarization module.
 """
+# pylint: disable=too-few-public-methods
 from pathlib import Path
 from typing import Iterable, Sequence
 
@@ -39,6 +40,9 @@ class RawDataImporter(AbstractRawDataImporter):
             name="1.0.0",
             split="test"
         ).to_pandas()
+
+        if not isinstance(self._raw_data, DataFrame):
+            raise TypeError("Downloaded dataset is not pd.DataFrame")
 
     @property
     def raw_data(self) -> DataFrame:
@@ -162,11 +166,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
 
         super().__init__(model_name, dataset, max_length, batch_size, device)
-        self._model_name = model_name
         self._dataset = dataset
-        self._max_length = max_length
-        self._batch_size = batch_size
-        self._device = device
         self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
         self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
 
