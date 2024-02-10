@@ -84,12 +84,14 @@ disable_error_code = [
 [[tool.mypy.overrides]]
 module = [
     'config.get_datasets_analytics',
+    'config.get_inference_analytics',
     'config.get_references',
     'seminars.seminar_02_06_2024.try_fastapi',
 ]
 disable_error_code = [
     'import-not-found',
-    'no-any-unimported'
+    'no-any-unimported',
+    'assignment'
 ]
 
 [[tool.mypy.overrides]]
