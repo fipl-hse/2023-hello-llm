@@ -72,10 +72,10 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._data = self._raw_data.rename(columns={
+        self._data = (self._raw_data.rename(columns={
             'report': ColumnNames.SOURCE.value,
             'summary': ColumnNames.TARGET.value,
-        }).reset_index()
+        }).reset_index())
 
 
 class TaskDataset(Dataset):
