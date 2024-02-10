@@ -81,9 +81,9 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        names = ColumnNames
-        self._data = (self._raw_data.rename(columns={"label": names.TARGET,
-                                                     "comment_text": names.SOURCE})
+
+        self._data = (self._raw_data.rename(columns={"label": ColumnNames.TARGET,
+                                                     "comment_text": ColumnNames.SOURCE})
                       .drop('id', axis=1)
                       .reset_index(drop=True))
 
@@ -121,7 +121,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data.iloc[index]['premise'], self._data.iloc[index]['hypothesis']
+        return self._data.iloc[index][ColumnNames.SOURCE], self._data.iloc[index][ColumnNames.TARGET]
 
     @property
     def data(self) -> DataFrame:
@@ -160,6 +160,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self._model = BertForSequenceClassification.from_pretrained(self._model_name)
+        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -237,27 +238,24 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-
         tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-
         if len(sample_batch) == 1:
-            input_tokens = tokenizer(
-                sample_batch[0],
+            tokens = tokenizer(
+                sample_batch[0][0],
+                sample_batch[0][1],
                 padding=True,
                 truncation=True,
                 return_tensors='pt'
             )
         else:
-            input_tokens = tokenizer(
+            tokens = tokenizer(
                 sample_batch[0],
                 sample_batch[1],
                 padding=True,
                 truncation=True,
                 return_tensors='pt'
             )
-
-        output = self._model(**input_tokens).logits
-
+        output = self._model(**tokens).logits
         return [str(prediction.item()) for prediction in list(torch.argmax(output, dim=1))]
 
 
