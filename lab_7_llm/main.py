@@ -1,7 +1,6 @@
 """
 Neural machine translation module.
 """
-import math
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from pathlib import Path
 from typing import Iterable, Sequence
@@ -53,10 +52,6 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
 
         column_length = self._raw_data["ru"].astype(str).str.len()
-
-        for text in self._raw_data["ru"].tolist():
-            if text and len(text) > 640:
-                print(text, len(text))
 
         analytics = {
             "dataset_number_of_samples": len(self._raw_data),
