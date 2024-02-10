@@ -25,6 +25,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
+
     @report_time
     def obtain(self) -> None:
         """
@@ -39,14 +40,12 @@ class RawDataImporter(AbstractRawDataImporter):
             split="test"
         ).to_pandas()
 
-        if not isinstance(self._raw_data, DataFrame):
-            raise TypeError("Downloaded dataset is not pd.DataFrame")
-
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     A class that analyzes and preprocesses a dataset.
     """
+
     def analyze(self) -> dict:
         """
         Analyze a dataset.
@@ -59,8 +58,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             "dataset_columns": self._raw_data.shape[1],
             "dataset_duplicates": self._raw_data.duplicated().sum(),
             "dataset_empty_rows": self._raw_data.isna().sum().sum(),
-            "dataset_sample_min_len": len(min(self._raw_data['article'], key=len)),
-            "dataset_sample_max_len": len(max(self._raw_data['article'], key=len))
+            "dataset_sample_min_len": len(min(self._raw_data["article"], key=len)),
+            "dataset_sample_max_len": len(max(self._raw_data["article"], key=len))
         }
 
     @report_time
@@ -68,6 +67,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
+
         self._data = (
             self._raw_data
             .drop(labels="id", axis=1)
@@ -100,7 +100,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
-        return self._data.shape[0]
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -151,13 +151,15 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+
         super().__init__(model_name, dataset, max_length, batch_size, device)
-        self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
-        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        self._model_name = model_name
         self._dataset = dataset
         self._max_length = max_length
         self._batch_size = batch_size
         self._device = device
+        self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
+        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -166,6 +168,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+
         tensor_data = torch.ones(1,
                                  self._model.config.decoder.max_position_embeddings,
                                  dtype=torch.long)
@@ -200,6 +203,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+
         if self._model is None:
             return None
 
@@ -213,6 +217,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+
         dataset_loader = DataLoader(dataset=self._dataset,
                                     batch_size=self._batch_size)
 
@@ -237,6 +242,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+
         inputs = self._tokenizer(sample_batch[0],
                                  padding=True,
                                  truncation=True,
@@ -260,9 +266,10 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+
         super().__init__(metrics)
         self._data_path = data_path
-        self._metrics = metrics
+        self._metrics = [Metrics(metric) for metric in self._metrics]
 
     @report_time
     def run(self) -> dict | None:
@@ -272,22 +279,16 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+
         predictions_df = read_csv(self._data_path)
-        res = {}
 
+        results = {}
         for metric in self._metrics:
-            metric = Metrics[str(metric).upper()]
-            if metric is Metrics.ROUGE:
-                metric = load(metric.value, seed=77)
-            else:
-                metric = load(metric.value)
+            metric_instance = load(metric.value, seed=77)
+            result = metric_instance.compute(predictions=predictions_df["predictions"].tolist(),
+                                             references=predictions_df["target"].tolist())
 
-            result = metric.compute(references=predictions_df["target"],
-                                    predictions=predictions_df["predictions"])
+            if metric.value == "rouge":
+                results["rouge"] = result.get("rougeL")
 
-            if metric.name == "rouge":
-                res["rouge"] = result.get("rougeL")
-            else:
-                res[metric.name] = result.get(metric.name)
-
-        return res
+        return results
