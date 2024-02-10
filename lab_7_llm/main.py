@@ -113,7 +113,7 @@ class TaskDataset(Dataset):
         """
         row = self._data.iloc[index]
 
-        return tuple(row[ColumnNames.SOURCE],)
+        return row[ColumnNames.SOURCE],
 
     @property
     def data(self) -> DataFrame:
@@ -167,7 +167,7 @@ class LLMPipeline(AbstractLLMPipeline):
                       "token_type_ids": tensor_data,
                       "attention_mask": tensor_data}
 
-        model_statistics = summary(self._model,
+        model_statistics = summary(model=self._model,
                                    input_data=input_data,
                                    decoder_input_ids=tensor_data,
                                    verbose=False)
@@ -239,6 +239,7 @@ class LLMPipeline(AbstractLLMPipeline):
                                return_tensors='pt', truncation=True)
             output = self._model.generate(**tokens)
             result = tokenizer.batch_decode(output, skip_special_tokens=True)
+            print(result)
             predictions.extend(result)
 
         return predictions
