@@ -88,7 +88,7 @@ class TaskDataset(Dataset):
     A class that converts pd.DataFrame to Dataset and works with it.
     """
 
-    def __init__(self, data: DataFrame) -> None:
+    def __init__(self, data: DataFrame):
         """
         Initialize an instance of TaskDataset.
 
