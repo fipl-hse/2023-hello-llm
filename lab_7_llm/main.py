@@ -9,6 +9,7 @@ import pandas as pd
 from datasets import load_dataset
 from evaluate import load
 import torch
+from pandas import DataFrame
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
@@ -26,6 +27,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
+    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -110,7 +112,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data[ColumnNames.SOURCE].iloc[index]
+        return self._data.iloc[index]['premise'], self._data.iloc[index]['hypothesis']
 
     @property
     def data(self) -> DataFrame:
