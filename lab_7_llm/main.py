@@ -2,13 +2,13 @@
 Neural summarization module.
 """
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
+from typing import Iterable, Sequence
 
 import pandas as pd
 import torch
 from datasets import load_dataset
 from evaluate import load
-from pandas import DataFrame, read_csv
+from pandas import DataFrame
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
@@ -226,7 +226,7 @@ class LLMPipeline(AbstractLLMPipeline):
         for batch in data_loader:
             predictions.extend(self._infer_batch(batch))
 
-        return DataFrame({
+        return pd.DataFrame({
             "target": self._dataset.data[ColumnNames.TARGET],
             "predictions": predictions
         })
@@ -286,7 +286,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
             dict | None: A dictionary containing information about the calculated metric
         """
 
-        pred_df = read_csv(self._data_path)
+        pred_df = pd.read_csv(self._data_path)
         result = {}
 
         print(self._metrics)
