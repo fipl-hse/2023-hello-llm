@@ -5,9 +5,10 @@ Neural summarization module.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from torchinfo import summary
+
 try:
     import torch
     from torch.utils.data.dataset import Dataset

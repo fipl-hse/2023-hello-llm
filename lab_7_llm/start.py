@@ -19,8 +19,8 @@ def main() -> None:
     data_importer.obtain()
 
     preprocessor = RawDataPreprocessor(data_importer.raw_data)
-    result = preprocessor.analyze()
-    result = preprocessor.transform()
+    preprocessor.analyze()
+    preprocessor.transform()
 
     dataset = TaskDataset(preprocessor.data.head(100))
 
