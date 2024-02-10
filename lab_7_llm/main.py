@@ -9,6 +9,7 @@ from typing import Iterable, Iterator, Sequence
 import pandas as pd
 import torch
 from datasets import load_dataset
+from evaluate import load
 from pandas import DataFrame
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
@@ -222,7 +223,7 @@ class LLMPipeline(AbstractLLMPipeline):
             dataset_predictions.extend(self._infer_batch(batch))
 
         pd_predictions = pd.DataFrame(
-            {'target': self._dataset.data['target'],
+            {'target': self._dataset.data[ColumnNames.TARGET],
              'predictions': pd.Series(dataset_predictions)}
         )
 
@@ -276,6 +277,9 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        super().__init__(metrics)
+        self._data_path = data_path
+        self._metrics = metrics
 
     @report_time
     def run(self) -> dict | None:
@@ -285,3 +289,17 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        evaluations = {}
+
+        for metric in self._metrics:
+            evaluator = load(metric.value)
+            predictions = pd.read_csv(self._data_path)
+            evaluation = evaluator.compute(
+                predictions=predictions['predictions'].tolist(),
+                references=predictions['target'].tolist()
+            )
+
+            evaluations.update(evaluation)
+
+        return evaluations
+

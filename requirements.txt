@@ -1,5 +1,6 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
 datasets==2.16.1
+evaluate==0.4.1
 pandas==2.2.0rc0
 pytest==7.4.4
 torch==2.1.1

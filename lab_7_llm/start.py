@@ -2,13 +2,18 @@
 Neural machine translation starter.
 """
 import json
+from pathlib import Path
 from pprint import pprint
 
 from config.constants import PROJECT_ROOT
-# pylint: disable= too-many-locals
+from core_utils.llm.metrics import Metrics
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset
-
+# pylint: disable= too-many-locals
+from lab_7_llm.main import (LLMPipeline,
+                            RawDataImporter,
+                            RawDataPreprocessor,
+                            TaskDataset,
+                            TaskEvaluator)
 
 @report_time
 def main() -> None:
@@ -16,6 +21,9 @@ def main() -> None:
     Run the translation pipeline.
     """
     result = None
+
+    predictions_path = f'{PROJECT_ROOT}/lab_7_llm/results_csv/predictions.csv'
+
     with open(PROJECT_ROOT / "lab_7_llm" / "settings.json", "r", encoding="utf-8") as settings_json:
         settings = json.load(settings_json)
 
@@ -33,8 +41,16 @@ def main() -> None:
 
     pprint(llm.analyze_model())
 
-    result = llm.infer_sample(dataset[0])
-    print(result)
+    sample_infer = llm.infer_sample(dataset[0])
+
+    print('prediction for sample (',dataset[0],')',sample_infer)
+
+    predictions = llm.infer_dataset().to_csv(predictions_path, index=False)
+
+    evaluator = TaskEvaluator(data_path=Path(predictions_path), metrics=Metrics)
+    evaluator.run()
+
+    result = evaluator
 
     assert result is not None, "Demo does not work correctly"
 
