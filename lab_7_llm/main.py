@@ -5,9 +5,21 @@ Neural machine translation module.
 from pathlib import Path
 from typing import Iterable, Sequence
 
-import torch
 from datasets import load_dataset
-from pandas import DataFrame
+
+try:
+    import torch
+    from torch.utils.data.dataset import Dataset
+except ImportError:
+    print('Library "torch" not installed. Failed to import.')
+    Dataset = dict
+    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
+try:
+    from pandas import DataFrame
+except ImportError:
+    print('Library "pandas" not installed. Failed to import.')
+    DataFrame = dict
+
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
