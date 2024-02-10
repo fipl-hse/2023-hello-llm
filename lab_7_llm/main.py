@@ -214,6 +214,19 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        dataset_predictions = []
+
+        dataset_loader = DataLoader(self._dataset, batch_size=self._batch_size)
+
+        for batch in dataset_loader:
+            dataset_predictions.extend(self._infer_batch(batch))
+
+        pd_predictions = pd.DataFrame(
+            {'target': self._dataset.data['target'],
+             'predictions': pd.Series(dataset_predictions)}
+        )
+
+        return pd_predictions
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
