@@ -200,7 +200,14 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         if not self._model:
             return None
-        return self._infer_batch((sample,))[0]
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+
+        tokens = tokenizer(sample[0][index], max_length=120, padding=True,
+                           return_tensors='pt', truncation=True)
+        output = self._model.generate(**tokens)
+        result = tokenizer.batch_decode(output, skip_special_tokens=True)
+
+        return result[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
