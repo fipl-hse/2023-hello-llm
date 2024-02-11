@@ -27,6 +27,8 @@ from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
+from datasets import load_dataset
+
 
 class RawDataImporter(AbstractRawDataImporter):
     """
@@ -41,7 +43,11 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        pass
+        self._raw_data = load_dataset(self._hf_name, split="validation")
+
+    @property
+    def raw_data(self) -> DataFrame:
+        return self._raw_data
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
