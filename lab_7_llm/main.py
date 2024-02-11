@@ -77,7 +77,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             drop_duplicates().reset_index()
 
     @property
-    def data(self) -> DataFrame:
+    def data(self) -> DataFrame | None:
         """
         Property with access to preprocessed DataFrame.
 

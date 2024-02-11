@@ -20,9 +20,9 @@ def main() -> None:
     """
     with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as settings:
         settings = json.load(settings)
-    govreport = RawDataImporter(settings["parameters"]["dataset"])
-    govreport.obtain()
-    preprocessor = RawDataPreprocessor(govreport.raw_data)
+    raw_data_importer = RawDataImporter(settings["parameters"]["dataset"])
+    raw_data_importer.obtain()
+    preprocessor = RawDataPreprocessor(raw_data_importer.raw_data)
     preprocessor.analyze()
     preprocessor.transform()
 
