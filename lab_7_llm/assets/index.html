@@ -2,9 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>NLI inference webservice</title>
+    <link rel="stylesheet" href="{{ url_for('assets', path='styles.css') }}">
+    <script type="text/javascript" src="{{ url_for('assets', path='main.js') }}"></script>
 </head>
 <body>
-
+    <div id="main">
+        <form>
+            <div>
+                <div>
+                    <h1>Awesome NLI webservice</h1>
+                    <p>Premise input</p>
+                    <label>
+                        <input type="text" name="premise" id="premise" placeholder="premise">
+                    </label>
+                </div>
+                <div>
+                    <p>Hypothesis input</p>
+                    <label>
+                        <input type="text" name="hype" id="hype" placeholder="hypothesis">
+                    </label>
+                </div>
+                <button id="submit" class="btn" type="button">Get prediction</button>
+            </div>
+        </form>
+        <h2>Prediction:</h2>
+        <h3 id="pred"></h3>
+    </div>
 </body>
 </html>

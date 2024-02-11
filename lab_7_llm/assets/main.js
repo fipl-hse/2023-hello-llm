@@ -11,7 +11,7 @@ let inferSample = async (premise, hypothesis, result) => {
     }).then(res => {return res.json()})
         .then(data => {
             result.innerHTML = ''
-            result.appendChild(document.createTextNode(data['infer']))
+            result.appendChild(document.createTextNode(data['infer'].toUpperCase()))
         })
 }
 
@@ -21,10 +21,10 @@ let disableButton = (btn, premise, hypothesis) => {
 
 
 window.onload = function() {
-    const btn = document.getElementById('btn_submit');
-    const premise = document.getElementById('premise');
-    const hypothesis = document.getElementById('hypothesis');
-    const showResults = document.getElementById('result');
+    let btn = document.getElementById('submit');
+    let premise = document.getElementById('premise');
+    let hypothesis = document.getElementById('hype');
+    let prediction = document.getElementById('pred');
 
     disableButton(
         btn,
@@ -41,6 +41,6 @@ window.onload = function() {
     });
 
     btn.addEventListener('click', () => {
-        inferSample(premise, hypothesis, showResults)
+        inferSample(premise, hypothesis, prediction)
     })
 }

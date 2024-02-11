@@ -19,7 +19,7 @@ from lab_7_llm.main import LLMPipeline, TaskDataset
 @dataclass
 class Query:
     """
-    Abstraction which contains text of the query.
+    Abstraction class which contains text of the query.
     """
     question: str
 
@@ -35,7 +35,11 @@ def init_application() -> tuple[FastAPI, LLMPipeline]:
         tuple[fastapi.FastAPI, LLMPipeline]: instance of server and pipeline
     """
     server = FastAPI()
-    server.mount("/assets", StaticFiles(directory="assets"), name="assets")
+    server.mount(
+        "/assets",
+        StaticFiles(directory=PROJECT_ROOT / 'lab_7_llm' / 'assets'),
+        name="assets"
+    )
 
     with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as settings_file:
         configs = json.load(settings_file)
@@ -75,13 +79,13 @@ async def infer(query: Query) -> dict:
         dict: a dictionary with a prediction.
     """
     sample = (query.question.split('|'))
-    labels_mapping = pipeline.get_config()['id2label']
+    labels_mapping = pipeline.get_config().id2label
     if len(sample) == 1:
         sample_tuple = (sample[0], sample[0])
     else:
         sample_tuple = (sample[0], sample[1])
     prediction = pipeline.infer_sample(sample_tuple)
-    return {'infer': labels_mapping.get(prediction)}
+    return {'infer': labels_mapping.get(int(prediction))}
 
 
 if __name__ == "__main__":
