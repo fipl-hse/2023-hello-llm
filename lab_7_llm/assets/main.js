@@ -1,12 +1,12 @@
 let inferSample = async (premise, hypothesis, result) => {
-    let sample = premise.value.concat('|', hypothesis.value)
     await fetch('/infer', {
         method: 'POST',
         headers: {
             'Content-type': 'application/json'
         },
         body: JSON.stringify({
-            question: sample
+            question: premise.value,
+            hypothesis: hypothesis.value
         })
     }).then(res => {return res.json()})
         .then(data => {
@@ -15,30 +15,12 @@ let inferSample = async (premise, hypothesis, result) => {
         })
 }
 
-let disableButton = (btn, premise, hypothesis) => {
-    btn.disabled = !(premise.value && hypothesis.value);
-}
-
 
 window.onload = function() {
     let btn = document.getElementById('submit');
     let premise = document.getElementById('premise');
     let hypothesis = document.getElementById('hype');
     let prediction = document.getElementById('pred');
-
-    disableButton(
-        btn,
-        premise,
-        hypothesis,
-    );
-
-    premise.addEventListener('change', () => {
-        disableButton(btn, premise, hypothesis)
-    });
-
-    hypothesis.addEventListener('change', () => {
-        disableButton(btn, premise, hypothesis)
-    });
 
     btn.addEventListener('click', () => {
         inferSample(premise, hypothesis, prediction)

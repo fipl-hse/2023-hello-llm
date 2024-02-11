@@ -36,14 +36,6 @@ p {
     font-size: 20px;
 }
 
-.btn:disabled {
-    cursor: not-allowed;
-}
-
-.btn:disabled:hover {
-    background-color: rgba(66,66,66,0.52)
-}
-
 h1 {
     color: #fff;
     font-size: 40px;

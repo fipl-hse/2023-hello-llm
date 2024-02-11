@@ -21,7 +21,8 @@ class Query:
     """
     Abstraction class which contains text of the query.
     """
-    question: str
+    question: str | None = None
+    hypothesis: str | None = None
 
 
 def init_application() -> tuple[FastAPI, LLMPipeline]:
@@ -78,13 +79,12 @@ async def infer(query: Query) -> dict:
     Returns:
         dict: a dictionary with a prediction.
     """
-    sample = query.question.split('|')
     labels_mapping = pipeline.get_config().id2label
-    if len(sample) == 1:
-        sample_tuple = (sample[0], sample[0])
-    else:
-        sample_tuple = (sample[0], sample[1])
-    prediction = pipeline.infer_sample(sample_tuple)
+    print(query)
+    if not query.hypothesis or not query.question:
+        return {'infer': 'Unable to process input. Please, fill both text fields.'}
+    sample = query.question, query.hypothesis
+    prediction = pipeline.infer_sample(sample)
     return {'infer': labels_mapping.get(int(prediction))}
 
 
