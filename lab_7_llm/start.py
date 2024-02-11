@@ -22,7 +22,8 @@ def main() -> None:
     importer = RawDataImporter(settings['parameters']['dataset'])
     importer.obtain()
 
-    preprocessor = RawDataPreprocessor(importer.get_raw_data)
+    assert importer.raw_data is not None, "Demo does not work correctly!"
+    preprocessor = RawDataPreprocessor(importer.raw_data)
     preprocessor.analyze()
     preprocessor.transform()
 
