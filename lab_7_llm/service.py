@@ -86,7 +86,7 @@ async def infer(question: Query) -> dict:
     try:
         sample_tuple = (sample[0], sample[1])
     except IndexError:
-        sample_tuple = (sample, sample)
+        sample_tuple = (sample[0], sample[0])
 
     return {
         'infer': pipeline.infer_sample(sample_tuple)
