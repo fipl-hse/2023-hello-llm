@@ -36,7 +36,6 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
-    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -160,8 +159,6 @@ class LLMPipeline(AbstractLLMPipeline):
         self._max_length = max_length
         self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
         self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-        # self._model: torch.nn.Module = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
-        # self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
