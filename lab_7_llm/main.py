@@ -18,7 +18,7 @@ from transformers import AutoTokenizer, BertForSequenceClassification
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -72,8 +72,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Apply preprocessing transformations to the raw dataset.
         """
         self._data = self._raw_data.rename(columns={
-            'label': ColumnNames.TARGET,
-            'text': ColumnNames.SOURCE
+            'label': 'target',
+            'text': 'source'
         }).reset_index()
 
 
@@ -213,7 +213,7 @@ class LLMPipeline(AbstractLLMPipeline):
         for batch in dataset_loader:
             predictions.extend(self._infer_batch(batch))
 
-        return pd.DataFrame({"target": self._dataset.data[ColumnNames.TARGET],
+        return pd.DataFrame({"target": self._dataset.data['target'],
                              "predictions": predictions})
 
     @torch.no_grad()
