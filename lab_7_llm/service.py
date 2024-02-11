@@ -21,8 +21,7 @@ class Query:
     """
     Abstraction which contains text of the query.
     """
-    premise: str
-    hypothesis: str
+    question: str
 
 
 def init_application() -> tuple[FastAPI, LLMPipeline]:
@@ -42,7 +41,7 @@ def init_application() -> tuple[FastAPI, LLMPipeline]:
         configs = json.load(settings_file)
 
     dataset = TaskDataset(pd.DataFrame())
-    llm = LLMPipeline(configs['parameters']['model'], dataset, 120, 64, 'cpu')
+    llm = LLMPipeline(configs['parameters']['model'], dataset, 120, 1, 'cpu')
     return server, llm
 
 
@@ -75,9 +74,13 @@ async def infer(query: Query) -> dict:
     Returns:
         dict: a dictionary with a prediction.
     """
-    sample = (query.premise, query.hypothesis)
+    sample = (query.question.split('|'))
     labels_mapping = pipeline.get_config()['id2label']
-    prediction = pipeline.infer_sample(sample)
+    if len(sample) == 1:
+        sample_tuple = (sample[0], sample[0])
+    else:
+        sample_tuple = (sample[0], sample[1])
+    prediction = pipeline.infer_sample(sample_tuple)
     return {'infer': labels_mapping.get(prediction)}
 
 
