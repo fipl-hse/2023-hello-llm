@@ -4,6 +4,8 @@ Web service for model inference.
 # pylint: disable=undefined-variable
 import json
 
+import pandas as pd
+import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -11,7 +13,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic.dataclasses import dataclass
 
 from config.constants import PROJECT_ROOT
-from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset
+from lab_7_llm.main import LLMPipeline, TaskDataset
 
 
 @dataclass
@@ -39,11 +41,7 @@ def init_application() -> tuple[FastAPI, LLMPipeline]:
     with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as settings_file:
         configs = json.load(settings_file)
 
-    data_loader = RawDataImporter(configs['parameters']['dataset'])
-    data_loader.obtain()
-    preprocessor = RawDataPreprocessor(data_loader.raw_data)
-    preprocessor.transform()
-    dataset = TaskDataset(preprocessor.data.head(100))
+    dataset = TaskDataset(pd.DataFrame())
     llm = LLMPipeline(configs['parameters']['model'], dataset, 120, 64, 'cpu')
     return server, llm
 
@@ -81,3 +79,7 @@ async def infer(query: Query) -> dict:
     labels_mapping = pipeline.get_config()['id2label']
     prediction = pipeline.infer_sample(sample)
     return {'infer': labels_mapping.get(prediction)}
+
+
+if __name__ == "__main__":
+    uvicorn.run("service:app", host='127.0.0.1', port=8000, reload=True)
