@@ -36,6 +36,8 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        _raw_data: DataFrame
+
         self._raw_data = load_dataset(
             path=self._hf_name,
             name="1.0.0",
