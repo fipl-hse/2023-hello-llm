@@ -37,8 +37,9 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = load_dataset(self._hf_name, split='test', trust_remote_code=True).to_pandas()
-        if type(self._raw_data) is not DataFrame:
+        self._raw_data = load_dataset(self._hf_name, split='test',
+                                      trust_remote_code=True).to_pandas()
+        if not isinstance(self._raw_data, DataFrame):
             raise TypeError
 
 
@@ -213,8 +214,8 @@ class LLMPipeline(AbstractLLMPipeline):
         predictions = []
         for batch in dataset_loader:
             predictions.extend(self._infer_batch(batch))
-        df = pd.DataFrame({"target": self._dataset.data['target'], "predictions": predictions})
-        return df
+        df_result = pd.DataFrame({"target": self._dataset.data['target'], "predictions": predictions})
+        return df_result
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
