@@ -46,8 +46,7 @@ app_dir = os.path.dirname(__file__)
 assets_abs_file_path = os.path.join(app_dir, "assets")
 app.mount("/assets", StaticFiles(directory=assets_abs_file_path), name="assets")
 
-BASE_DIR = Path(__file__).resolve().parent
-jinja_template = Jinja2Templates(directory=str(Path(BASE_DIR, 'assets')))
+jinja_template = Jinja2Templates(directory=str(Path(app_dir, 'assets')))
 
 
 @app.get('/', response_class=HTMLResponse)
