@@ -6,8 +6,6 @@ Module with description of abstract LLM pipeline.
 from abc import ABC, abstractmethod
 from typing import Any, Protocol
 
-from torch import nn
-
 try:
     from pandas import DataFrame
 except ImportError:
@@ -15,6 +13,7 @@ except ImportError:
     DataFrame = dict  # type: ignore
 
 try:
+    from torch import nn
     from torch.utils.data.dataset import Dataset
 except ImportError:
     print('Library "torch" not installed. Failed to import.')
