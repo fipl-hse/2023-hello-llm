@@ -3,6 +3,7 @@ Web service for model inference.
 """
 
 import json
+
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
