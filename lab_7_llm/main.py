@@ -276,9 +276,9 @@ class TaskEvaluator(AbstractTaskEvaluator):
         """
         data = pd.read_csv(self._data_path).drop(columns=['Unnamed: 0'])
 
+        accuracy_metric = {}
         for metric in self._metrics:
             if metric.value == "accuracy":
-                accuracy_metric = load(metric.value).compute(references=data['target'],
-                                                             predictions=data['predictions'])
-                return dict(accuracy_metric)
-        return None
+                accuracy_metric.update(load(metric.value).compute(references=data['target'],
+                                                                  predictions=data['predictions']))
+        return accuracy_metric
