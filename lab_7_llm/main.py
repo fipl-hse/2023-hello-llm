@@ -9,11 +9,12 @@ from typing import Iterable, Sequence
 import pandas as pd
 import torch
 from datasets import load_dataset
+from evaluate import load
 from pandas import DataFrame
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from transformers import BertTokenizerFast, EncoderDecoderModel
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -36,7 +37,7 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = load_dataset(self._hf_name, split='test').to_pandas()
+        self._raw_data = load_dataset(self._hf_name, split='test', trust_remote_code=True).to_pandas()
         if type(self._raw_data) is not DataFrame:
             raise TypeError
 
@@ -150,8 +151,8 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self._dataset = dataset
-        self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
-        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        self._model = EncoderDecoderModel.from_pretrained(self._model_name)
+        self._tokenizer = BertTokenizerFast.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -173,7 +174,7 @@ class LLMPipeline(AbstractLLMPipeline):
                                    decoder_input_ids=tensor_data,
                                    verbose=False)
         model_info = {
-            "input_shape": list(input_data['input_ids'].shape),
+            "input_shape": model_statistics.summary_list[0].output_size[:2],
             "embedding_size": self._model.config.decoder.max_position_embeddings,
             "output_shape": model_statistics.summary_list[-1].output_size,
             "num_trainable_params": model_statistics.trainable_params,
@@ -197,7 +198,7 @@ class LLMPipeline(AbstractLLMPipeline):
 
         if not self._model:
             return None
-        return self._infer_batch((sample,))[0]
+        return self._infer_batch([sample])[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -227,16 +228,15 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-        predictions = []
 
-        tokens = tokenizer(sample_batch[0], max_length=120, padding=True,
-                           return_tensors='pt', truncation=True)
-        output = self._model.generate(**tokens)
-        result = tokenizer.batch_decode(output, skip_special_tokens=True)
-        predictions.extend(result)
+        inputs = self._tokenizer(sample_batch[0],
+                                 padding=True,
+                                 truncation=True,
+                                 max_length=self._max_length,
+                                 return_tensors="pt").to(self._device)
+        outputs = self._model.generate(**inputs)
 
-        return predictions
+        return [self._tokenizer.decode(output, skip_special_tokens=True) for output in outputs]
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -252,6 +252,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        super().__init__(metrics)
+        self._data_path = data_path
 
     @report_time
     def run(self) -> dict | None:
@@ -261,3 +263,22 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+
+        predictions = pd.read_csv(self._data_path)
+        scores = {}
+
+        for metric in self._metrics:
+            if metric.value == 'rouge':
+                metric = load(metric.value, seed=77)
+            else:
+                metric = load(metric.value)
+
+            result = metric.compute(references=predictions['target'],
+                                    predictions=predictions['predictions'])
+
+            if metric.name == 'rouge':
+                scores['rouge'] = result.get('rouge2')
+            else:
+                scores[metric.name] = result.get(metric.name)
+
+        return scores
