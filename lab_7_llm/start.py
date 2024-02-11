@@ -23,13 +23,9 @@ def main() -> None:
     importer.obtain()
 
     preprocessor = RawDataPreprocessor(importer.raw_data)
-    data_analysis = preprocessor.analyze()
-    data_transform = preprocessor.transform()
 
-    return data_analysis, data_transform
-
+    result = preprocessor.analyze()
     assert result is not None, "Demo does not work correctly"
-
 
 if __name__ == "__main__":
     main()
