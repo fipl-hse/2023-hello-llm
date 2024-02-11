@@ -13,7 +13,7 @@ from datasets import load_dataset
 from evaluate import load
 from pandas import DataFrame
 from torch.utils.data import DataLoader, Dataset
-from transformers import AutoTokenizer, BertForSequenceClassification, BertConfig
+from transformers import AutoTokenizer, BertConfig, BertForSequenceClassification
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
