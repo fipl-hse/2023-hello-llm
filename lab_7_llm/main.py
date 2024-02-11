@@ -6,12 +6,11 @@ Neural machine translation module.
 from pathlib import Path
 from typing import Iterable, Sequence
 
-import pandas as pd
 import torch
+import pandas as pd
+
 from datasets import load_dataset
-from evaluate import load
 from pandas import DataFrame
-from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
