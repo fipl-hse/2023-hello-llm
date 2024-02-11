@@ -45,7 +45,7 @@ class RawDataImporter(AbstractRawDataImporter):
     @property
     def get_raw_data(self) -> DataFrame:
         """
-        Get raw dataset
+        Get raw dataset.
         """
         return self._raw_data
 
