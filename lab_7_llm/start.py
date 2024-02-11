@@ -18,8 +18,8 @@ def main() -> None:
     """
     Run the translation pipeline.
     """
-    with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as settings:
-        settings = json.load(settings)
+    with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as settings_file:
+        settings = json.load(settings_file)
     raw_data_importer = RawDataImporter(settings["parameters"]["dataset"])
     raw_data_importer.obtain()
     preprocessor = RawDataPreprocessor(raw_data_importer.raw_data)
@@ -50,7 +50,7 @@ def main() -> None:
 
     evaluator = TaskEvaluator(Path(pred_path),
                               [Metrics[metric.upper()] for metric in
-                                       settings['parameters']['metrics']])
+                               settings['parameters']['metrics']])
 
     result = evaluator.run()
 
