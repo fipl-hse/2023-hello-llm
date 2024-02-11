@@ -57,7 +57,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             "dataset_number_of_samples": len(self._raw_data),
             "dataset_columns": len(self._raw_data.columns),
             "dataset_duplicates": self._raw_data.duplicated().sum(),
-            "dataset_empty_rows": self._raw_data.isnull().T.any().T.sum(),
+            "dataset_empty_rows": self._raw_data.isnull().any(axis=1).sum(),
             "dataset_sample_min_len": int(column_length.min()),
             "dataset_sample_max_len": int(column_length.max())
         }
@@ -265,6 +265,6 @@ class TaskEvaluator(AbstractTaskEvaluator):
         for metric in self._metrics:
             metric_instance = load(metric.value)
             result = metric_instance.compute(predictions=predictions, references=references)
-            results[metric.value] = result
+            results[metric.value] = result[metric.value]
 
         return results
