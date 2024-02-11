@@ -77,7 +77,13 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             drop_duplicates().reset_index(drop=True)
 
     @property
-    def data(self):
+    def data(self) -> DataFrame:
+        """
+        Property with access to preprocessed DataFrame.
+
+        Returns:
+        pandas.DataFrame: Preprocessed DataFrame
+        """
         return self._data
 
 
@@ -214,7 +220,8 @@ class LLMPipeline(AbstractLLMPipeline):
         predictions = []
         for batch in dataset_loader:
             predictions.extend(self._infer_batch(batch))
-        df_result = pd.DataFrame({"target": self._dataset.data['target'], "predictions": predictions})
+        df_result = pd.DataFrame({"target": self._dataset.data['target'],
+                                  "predictions": predictions})
         return df_result
 
     @torch.no_grad()
