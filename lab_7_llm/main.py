@@ -5,15 +5,14 @@ Neural machine translation module.
 from pathlib import Path
 from typing import Iterable, Sequence
 
+import pandas as pd
+import torch
 from datasets import load_dataset
 from evaluate import load
-from torchinfo import summary
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-
-import torch
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
-import pandas as pd
+from torchinfo import summary
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
