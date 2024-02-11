@@ -66,10 +66,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._data = (self._raw_data
-                      .rename(columns={'article': 'source', 'abstract': 'target'})
-                     # .dropna().drop_duplicates()
-                      .reset_index(drop=True))
+
 
 class TaskDataset(Dataset):
     """
