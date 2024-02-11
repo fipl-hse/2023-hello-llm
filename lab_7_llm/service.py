@@ -41,7 +41,7 @@ def init_application() -> tuple[FastAPI, LLMPipeline]:
     return server, llm_infer
 
 
-app, pipeline = init_application()[0], init_application()[1]
+app, pipeline = init_application()
 app_dir = os.path.dirname(__file__)
 assets_abs_file_path = os.path.join(app_dir, "assets")
 app.mount("/assets", StaticFiles(directory=assets_abs_file_path), name="assets")
