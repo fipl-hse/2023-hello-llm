@@ -5,8 +5,12 @@ Neural machine translation module.
 
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
+from collections import namedtuple
 
 from datasets import load_dataset
+from torch.utils.data import DataLoader
+from torchinfo import summary
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 try:
     import torch
@@ -15,16 +19,12 @@ except ImportError:
     print('Library "torch" not installed. Failed to import.')
     Dataset = dict
     torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
+
 try:
     from pandas import DataFrame
 except ImportError:
     print('Library "pandas" not installed. Failed to import.')
     DataFrame = dict  # type: ignore
-
-from torch.utils.data import DataLoader
-from torch.utils.data.dataset import Dataset
-from torchinfo import summary
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
