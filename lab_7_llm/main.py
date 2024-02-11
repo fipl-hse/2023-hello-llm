@@ -284,8 +284,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             evaluator = load(metric.value)
             predictions = pd.read_csv(self._data_path)
             evaluation = evaluator.compute(
-                predictions=predictions['predictions'].tolist(),
-                references=predictions['target'].tolist(),
+                predictions=predictions['predictions'],
+                references=predictions['target'],
                 average=None
             )
 
