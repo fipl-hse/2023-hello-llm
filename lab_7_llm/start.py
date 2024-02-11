@@ -19,8 +19,6 @@ def main() -> None:
     """
     result = None
 
-    predictions_path = f'{PROJECT_ROOT}/lab_7_llm/results_csv/predictions.csv'
-
     with open(PROJECT_ROOT / "lab_7_llm" / "settings.json", "r", encoding="utf-8") as settings_json:
         settings = json.load(settings_json)
 
@@ -42,7 +40,12 @@ def main() -> None:
 
     print('prediction for sample (', dataset[0], ')', sample_infer)
 
-    predictions = llm.infer_dataset().to_csv(predictions_path, index=False)
+    predictions = llm.infer_dataset()
+    predictions_path = PROJECT_ROOT / 'lab_7_llm' / 'dist' / 'predictions.csv'
+
+    if not predictions_path.parent.exists():
+        predictions_path.parent.mkdir()
+    predictions.to_csv(predictions_path, index_label='id')
 
     evaluator = TaskEvaluator(
         Path(predictions_path),

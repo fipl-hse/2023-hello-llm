@@ -3,7 +3,7 @@ Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Iterable, Sequence, List
 
 import pandas as pd
 import torch
@@ -123,7 +123,6 @@ class TaskDataset(Dataset):
         """
         return self._data.iloc[index]['source'], self._data.iloc[index]['target']
 
-
     @property
     def data(self) -> DataFrame:
         """
@@ -239,6 +238,7 @@ class LLMPipeline(AbstractLLMPipeline):
             list[str]: Model predictions as strings
         """
         tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        predictions = []
 
         if len(sample_batch) == 1:
             tokens = tokenizer(
@@ -247,17 +247,20 @@ class LLMPipeline(AbstractLLMPipeline):
                 truncation=True,
                 return_tensors='pt'
             )
+            output = self._model(**tokens).logits
+            predictions.extend([str(prediction.item()) for prediction in list(torch.argmax(output, dim=1))])
         else:
-            tokens = tokenizer(
-                sample_batch[0][0],
-                sample_batch[0][1],
-                padding=True,
-                truncation=True,
-                return_tensors='pt'
-            )
+            for sample in sample_batch[0]:
+                tokens = tokenizer(
+                    sample[0],
+                    padding=True,
+                    truncation=True,
+                    return_tensors='pt'
+                )
+                output = self._model(**tokens).logits
+                predictions.extend([str(prediction.item()) for prediction in list(torch.argmax(output, dim=1))])
 
-        output = self._model(**tokens).logits
-        return [str(prediction.item()) for prediction in list(torch.argmax(output, dim=1))]
+        return predictions
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
