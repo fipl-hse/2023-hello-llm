@@ -4,7 +4,6 @@ Neural machine translation starter.
 # pylint: disable= too-many-locals
 import json
 from pathlib import Path
-from pprint import pprint
 
 from config.constants import PROJECT_ROOT
 from core_utils.llm.metrics import Metrics
@@ -29,7 +28,7 @@ def main() -> None:
     raw_data.obtain()
 
     preprocessed_data = RawDataPreprocessor(raw_data.raw_data)
-    pprint(preprocessed_data.analyze())
+    print(preprocessed_data.analyze())
 
     preprocessed_data.transform()
 
@@ -37,7 +36,7 @@ def main() -> None:
 
     llm = LLMPipeline(settings["parameters"]["model"], dataset, 120, 2, "cpu")
 
-    pprint(llm.analyze_model())
+    print(llm.analyze_model())
 
     sample_infer = llm.infer_sample(dataset[0])
 
@@ -45,10 +44,11 @@ def main() -> None:
 
     predictions = llm.infer_dataset().to_csv(predictions_path, index=False)
 
-    evaluator = TaskEvaluator(data_path=Path(predictions_path), metrics=Metrics)
-    evaluator.run()
-
-    result = evaluator
+    evaluator = TaskEvaluator(
+        Path(predictions_path),
+        [Metrics[metric.upper()] for metric in settings['parameters']['metrics']]
+    )
+    result = evaluator.run()
 
     assert result is not None, "Demo does not work correctly"
 

@@ -221,7 +221,7 @@ class LLMPipeline(AbstractLLMPipeline):
             dataset_predictions.extend(self._infer_batch(batch))
 
         pd_predictions = pd.DataFrame(
-            {'target': self._dataset.data[ColumnNames.TARGET],
+            {'target': self._dataset.data[str(ColumnNames.TARGET)],
              'predictions': pd.Series(dataset_predictions)}
         )
 
@@ -243,15 +243,14 @@ class LLMPipeline(AbstractLLMPipeline):
         if len(sample_batch) == 1:
             tokens = tokenizer(
                 sample_batch[0][0],
-                sample_batch[0][1],
                 padding=True,
                 truncation=True,
                 return_tensors='pt'
             )
         else:
             tokens = tokenizer(
-                sample_batch[0],
-                sample_batch[1],
+                sample_batch[0][0],
+                sample_batch[0][1],
                 padding=True,
                 truncation=True,
                 return_tensors='pt'
@@ -276,7 +275,6 @@ class TaskEvaluator(AbstractTaskEvaluator):
         """
         super().__init__(metrics)
         self._data_path = data_path
-        self._metrics = metrics
 
     @report_time
     def run(self) -> dict | None:
