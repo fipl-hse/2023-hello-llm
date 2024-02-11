@@ -1,0 +1,99 @@
+@font-face {
+    font-family: "HelveticaNeueCyr";
+    src: local("HelveticaNeueCyr"),
+    url("fonts/HelveticaNeueCyr-Roman.woff") format("woff");
+}
+
+@font-face {
+    font-family: "HelveticaNeueCyr";
+    src: local("HelveticaNeueCyr"),
+    url("fonts/HelveticaNeueCyr-Bold.woff") format("woff");
+    font-weight: bold;
+}
+
+*{
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+img {
+    position: absolute;
+    z-index: -1;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    width: 664px;
+    font-family: "HelveticaNeueCyr";
+    color: white;
+}
+
+.header{
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.text{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+label{
+    font-size: 16px;
+}
+
+input{
+    outline: None;
+    border: None;
+    padding: 14px 18px;
+    font-family: "HelveticaNeueCyr";
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-bottom: 2px solid white;
+    color: white;
+}
+
+input::placeholder{
+    color: rgba(255, 255, 255, 0.4);
+}
+
+button{
+    width: 100px;
+    height: 42px;
+    border: 2px solid white;
+    border-radius: 50px;
+    color: white;
+    font-size: 16px;
+    background-color: transparent;
+}
+
+button:hover{
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.results{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 32px
+}
+
+.results>div{
+    width: 482px;
+    height: 47px;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 14px 18px;
+    border-bottom: 2px solid white;
+
+}
