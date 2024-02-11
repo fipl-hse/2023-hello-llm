@@ -2,7 +2,7 @@
   "parameters": {
     "model": "nandakishormpai/t5-small-machine-articles-tag-generation",
     "dataset": "ccdv/govreport-summarization",
-    "metrics": ["rouge"]
+    "metrics": ["rouge", "bleu"]
   },
   "target_score": 6
 }

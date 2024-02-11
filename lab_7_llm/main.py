@@ -292,7 +292,6 @@ class TaskEvaluator(AbstractTaskEvaluator):
         print(self._metrics)
 
         for metric in self._metrics:
-            metric = Metrics[str(metric).upper()]
             if metric is Metrics.ROUGE:
                 metric = load(metric.value, seed=77)
             else:

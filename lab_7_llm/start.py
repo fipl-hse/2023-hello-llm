@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 
 from config.constants import PROJECT_ROOT
+from core_utils.llm.metrics import Metrics
 from core_utils.llm.time_decorator import report_time
 from lab_7_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset,
                             TaskEvaluator)
@@ -31,7 +32,7 @@ def main() -> None:
     pipeline = LLMPipeline(settings['parameters']['model'],
                            dataset,
                            max_length=120,
-                           batch_size=1,
+                           batch_size=64,
                            device='cpu')
 
     model_analysis = pipeline.analyze_model()
@@ -45,7 +46,7 @@ def main() -> None:
 
     pipeline.infer_dataset().to_csv(prediction_path, index=False)
 
-    metrics = settings['parameters']['metrics']
+    metrics = [Metrics[metric.upper()] for metric in settings['parameters']['metrics']]
     evaluator = TaskEvaluator(Path(prediction_path), metrics)
 
     result = evaluator.run()
