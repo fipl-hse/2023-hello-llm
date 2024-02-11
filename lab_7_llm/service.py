@@ -83,7 +83,7 @@ async def infer(question: Query) -> dict:
         dict: dict with the results of sample inference
     """
 
-    if question.hypothesis is None or "":
+    if not question.hypothesis:
         return {'infer': 'hello, tester, stop sending this empty requests pls :)'}
     sample = question.question.split('|')
     sample_tuple = (sample[0], sample[1])
