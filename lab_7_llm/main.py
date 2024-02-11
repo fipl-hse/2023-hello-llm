@@ -222,7 +222,8 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-        embeddings_length = self._model.config.max_position_embeddings
+        model_config = self.get_config()
+        embeddings_length = model_config.max_position_embeddings
         ids = torch.ones(1, embeddings_length, dtype=torch.long)
         model_summary = self._get_summary(ids)
         input_shape = {
@@ -235,11 +236,14 @@ class LLMPipeline(AbstractLLMPipeline):
             'embedding_size': embeddings_length,
             'output_shape': model_summary.summary_list[-1].output_size,
             'num_trainable_params': model_summary.trainable_params,
-            'vocab_size': self._model.config.vocab_size,
+            'vocab_size': model_config.vocab_size,
             'size': model_summary.total_param_bytes,
-            'max_context_length': self._model.config.max_length
+            'max_context_length': model_config.max_length
         }
         return info
+
+    def get_config(self):
+        return self._model.config
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:

@@ -32,7 +32,7 @@ def main() -> None:
 
     model_analysis = pipeline.analyze_model()
 
-    sample = dataset[randint(0, len(dataset))]
+    sample = dataset[randint(0, len(dataset) - 1)]
     sample_inference = pipeline.infer_sample(sample)
 
     predictions = pipeline.infer_dataset()
