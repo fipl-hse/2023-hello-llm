@@ -45,8 +45,8 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
 
-        self._raw_data = load_dataset('d0rj/curation-corpus-ru',
-                               split='train').to_pandas()
+        self._raw_data = load_dataset(self._hf_name,
+                                      split='train').to_pandas()
         # print(f'Obtained dataset with one call: number of samples is {len(dataset)}')
 
 
@@ -148,23 +148,7 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
-        # Load model directly
 
-        # tokenizer = AutoTokenizer.from_pretrained("stevhliu/my_awesome_billsum_model")
-        # model = AutoModelForSeq2SeqLM.from_pretrained("stevhliu/my_awesome_billsum_model")
-        #
-        # sample_string = 'sample'
-        # tokens = tokenizer(sample_string, return_tensors='pt')
-        # print(tokens)
-        #
-        # torch_ones = torch.ones(1, 32128, dtype=torch.long)
-        # torch_dict = {'input_ids': torch_ones, 'attention_mask': torch_ones, 'decoder_input_ids': torch_ones}
-        # output_save = summary(model, input_data=torch_dict, verbose=False)
-        # total_param = output_save.total_params
-        # trainable_params = output_save.trainable_params
-        # summary_list = output_save['summary_list'][-1]
-        #
-        # print(total_param, trainable_params, summary_list)
 
     def analyze_model(self) -> dict:
         """
