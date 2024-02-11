@@ -9,7 +9,9 @@ from typing import Iterable, Sequence
 import pandas as pd
 import torch
 from datasets import load_dataset
+from evaluate import load
 from pandas import DataFrame
+from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
@@ -143,8 +145,12 @@ class LLMPipeline(AbstractLLMPipeline):
                          max_length,
                          batch_size,
                          device)
-        self._model: torch.nn.Module = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
+        self._model_name = model_name
+        self._max_length = max_length
+        self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
         self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        # self._model: torch.nn.Module = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
+        # self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -189,15 +195,17 @@ class LLMPipeline(AbstractLLMPipeline):
         if self._model is None or self._tokenizer is None:
             return None
 
-        tokens = self._tokenizer(sample[0],
-                                 max_length=self._model.config.max_length,
-                                 padding=True,
+        tokens = self._tokenizer(sample,
                                  truncation=True,
-                                 return_tensors='pt')
-        output = self._model.generate(**tokens, max_length=self._max_length)
-        decoded = self._tokenizer.batch_decode(output, skip_special_tokens=True)
+                                 max_length=self._max_length,
+                                 padding="max_length",
+                                 return_tensors="pt")
+        output = self._model.generate(**tokens,
+                                      max_length=self._max_length)
+        decoded = self._tokenizer.batch_decode(output,
+                                               skip_special_tokens=True)
 
-        return None if self._model is None else decoded[0][:self._max_length]
+        return decoded[0] if decoded else None
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -232,8 +240,6 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
-        super().__init__(metrics)
-        self._data_path = data_path
 
     @report_time
     def run(self) -> dict | None:
