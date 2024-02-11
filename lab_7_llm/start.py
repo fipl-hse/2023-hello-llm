@@ -3,15 +3,20 @@ Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
 from core_utils.llm.time_decorator import report_time
+from config.constants import PROJECT_ROOT
 
+from lab_7_llm.main import RawDataImporter
+
+import json
 
 @report_time
-def main() -> None:
+def main():
     """
     Run the translation pipeline.
     """
-    result = None
-    assert result is not None, "Demo does not work correctly"
+    settings = json.load(open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', "r"))
+    importer = RawDataImporter(settings['parameters']['dataset'])
+    return importer.obtain()
 
 
 if __name__ == "__main__":

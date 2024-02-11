@@ -5,6 +5,8 @@ Neural machine translation module.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
+from datasets import load_dataset
+
 
 try:
     import torch
@@ -34,10 +36,12 @@ class RawDataImporter(AbstractRawDataImporter):
     """
 
     @report_time
-    def obtain(self) -> None:
+    def obtain(self):
         """
         Import dataset.
         """
+        dataset = load_dataset("ccdv/pubmed-summarization", name='document')
+        return dataset
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -130,6 +134,7 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader.
             device (str): The device for inference.
         """
+
 
     def analyze_model(self) -> dict:
         """
