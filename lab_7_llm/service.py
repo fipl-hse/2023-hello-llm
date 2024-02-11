@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 
+import pandas as pd
 # pylint: disable=undefined-variable
 import uvicorn
 from fastapi import FastAPI, Request
@@ -13,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from config.constants import PROJECT_ROOT
-from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset
+from lab_7_llm.main import LLMPipeline, TaskDataset
 
 
 def init_application() -> tuple[FastAPI, LLMPipeline]:
@@ -28,25 +29,19 @@ def init_application() -> tuple[FastAPI, LLMPipeline]:
     """
     server = FastAPI()
 
-    with open(PROJECT_ROOT/'lab_7_llm'/'settings.json', "r", encoding='utf-8') as settings_path:
+    with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', "r", encoding='utf-8') as settings_path:
         settings = json.load(settings_path)
-    ds_obtained = RawDataImporter(settings["parameters"]["dataset"])
-    ds_obtained.obtain()
-    preprocessed_ds = RawDataPreprocessor(ds_obtained.raw_data)
-    preprocessed_ds.transform()
-    task_ds = TaskDataset(preprocessed_ds.data.head(100))
+    blank_df = pd.DataFrame([])
+    task_ds = TaskDataset(blank_df)
     llm_infer = LLMPipeline(model_name=settings["parameters"]["model"], dataset=task_ds,
-                            max_length=120, batch_size=64, device='cpu')
+                            max_length=120, batch_size=1, device='cpu')
 
     return server, llm_infer
 
 
-init_server = init_application()
-
-app, pipeline = init_server[0], init_server[1]
+app, pipeline = init_application()[0], init_application()[1]
 app_dir = os.path.dirname(__file__)
 assets_abs_file_path = os.path.join(app_dir, "assets")
-print(str(assets_abs_file_path))
 app.mount("/assets", StaticFiles(directory=assets_abs_file_path), name="assets")
 
 BASE_DIR = Path(__file__).resolve().parent

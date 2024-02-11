@@ -199,11 +199,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        if len(sample) < 2:
-            sample_to_list = sample[0].split('|')
-            sample_seq = [(sample_to_list[0],), (sample_to_list[1],)]
-        else:
-            sample_seq = [(sample[0],), (sample[1],)]
+        sample_seq = [(sample[0],), (sample[1],)]
         prediction = self._infer_batch(sample_seq)
 
         return str(prediction[0])
@@ -226,7 +222,7 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_predictions = self._infer_batch(batch)
 
             for batch_pred in batch_predictions:
-                ds_pred_list.append(batch_pred)
+                ds_pred_list.extend(batch_pred)
 
         result_df = pd.DataFrame({
             "target": self._dataset.data['target'],
@@ -291,9 +287,11 @@ class TaskEvaluator(AbstractTaskEvaluator):
             dict | None: A dictionary containing information about the calculated metric
         """
         df_to_evaluate = pd.read_csv(self._data_path)
-        acc_metric = [metric.value for metric in self._metrics if metric.value == 'accuracy'][0]
-        metric = load(acc_metric)
-        metrics_evaluation = metric.compute(references=df_to_evaluate['target'].tolist(),
-                                            predictions=df_to_evaluate['prediction'].tolist()
-                                            )
-        return dict(metrics_evaluation)
+        all_metrics_evaluation = {}
+        for metric in self._metrics:
+            metric = load(metric.value)
+            metrics_evaluation = metric.compute(references=df_to_evaluate['target'].tolist(),
+                                                predictions=df_to_evaluate['prediction'].tolist()
+                                                )
+            all_metrics_evaluation.update(dict(metrics_evaluation))
+        return all_metrics_evaluation

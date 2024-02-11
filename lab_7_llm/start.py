@@ -34,7 +34,8 @@ def main() -> None:
         os.mkdir(f'{PROJECT_ROOT}/lab_7_llm/dist')
     llm_infer.infer_dataset().to_csv(f'{PROJECT_ROOT}/lab_7_llm/dist/predictions.csv', index=False)
     result = TaskEvaluator(data_path=Path(f'{PROJECT_ROOT}/lab_7_llm/dist/predictions.csv'),
-                           metrics=Metrics)
+                           metrics=[Metrics[metric.upper()] for metric in
+                                    settings['parameters']['metrics']])
 
     result.run()
 
