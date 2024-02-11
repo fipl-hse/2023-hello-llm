@@ -60,7 +60,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         properties_dict = {"dataset_number_of_samples": self._raw_data.shape[0],
                            "dataset_columns": self._raw_data.shape[1],
-                           "dataset_empty_rows": self._raw_data.duplicated().sum(),
+                           "dataset_empty_rows": self._raw_data.drop("messages", axis=1).duplicated().sum(),
                            "dataset_duplicates": self._raw_data.isna().sum().sum()}
 
         self._raw_data = self._raw_data.dropna()
@@ -69,7 +69,6 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         properties_dict["dataset_sample_max_len"] = max(self.get_max_len("prompt"),
                                                         self.get_max_len("messages"))
 
-        print(self._raw_data.drop(["messages"], axis=1).duplicated().sort_values())
         return properties_dict
 
     def get_min_len(self, column):
