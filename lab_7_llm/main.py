@@ -197,7 +197,6 @@ class LLMPipeline(AbstractLLMPipeline):
         tokenizer = AutoTokenizer.from_pretrained(self._model_name)
 
         tokens = tokenizer(sample[0],
-                           max_length=120,
                            padding=True,
                            truncation=True,
                            return_tensors='pt')
@@ -216,19 +215,6 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
-        # data_loader = DataLoader(dataset=self._dataset,
-        #                          batch_size=self._batch_size)
-        # predictions = []
-        # for batch in data_loader:
-        #     batch_predictions = self._infer_batch(batch)
-        #     predictions.extend(batch_predictions)
-        #
-        # predictions_df = pd.DataFrame({
-        #     "target": self._dataset.data['target'],
-        #     "predictions": predictions
-        # })
-
-        # return predictions_df
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -241,22 +227,6 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-        # tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-        # predictions = []
-        #
-        # for index, sample in enumerate(sample_batch[0]):
-        #     tokens = tokenizer(sample_batch[0][index],
-        #                        max_length=120,
-        #                        padding=True,
-        #                        return_tensors='pt',
-        #                        truncation=True)
-        #     output = self._model.generate(**tokens)
-        #     result = tokenizer.batch_decode(output,
-        #                                     skip_special_tokens=True)
-        #     predictions.extend(result)
-        #
-        # return predictions
-
 class TaskEvaluator(AbstractTaskEvaluator):
     """
     A class that compares prediction quality using the specified metric.
