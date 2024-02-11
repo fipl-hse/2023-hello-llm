@@ -1,0 +1,9 @@
+pandas==2.1.4
+datasets==2.16.1
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+fastapi
+transformers
+evaluate
+torchinfo
+scikit-learn
