@@ -5,7 +5,7 @@ Neural machine translation starter.
 from core_utils.llm.time_decorator import report_time
 from config.constants import PROJECT_ROOT
 
-from lab_7_llm.main import RawDataImporter
+from lab_7_llm.main import RawDataImporter, RawDataPreprocessor
 
 import json
 
@@ -16,8 +16,14 @@ def main():
     """
     settings = json.load(open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', "r"))
     importer = RawDataImporter(settings['parameters']['dataset'])
-    return importer.obtain()
+    importer.obtain()
 
+    preprocessor = RawDataPreprocessor(importer.raw_data)
+
+    analysis = preprocessor.analyze()
+    transform = preprocessor.transform()
+
+    return analysis, transform
 
 if __name__ == "__main__":
     main()
