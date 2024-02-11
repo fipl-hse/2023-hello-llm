@@ -296,7 +296,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
             dict | None: A dictionary containing information about the calculated metric
         """
 
-        pred_df = self._read_data()
+        pred_df = pd.read_csv(self._data_path)
         result = {}
 
         for metric in self._metrics:
@@ -314,13 +314,3 @@ class TaskEvaluator(AbstractTaskEvaluator):
                 result[metric.name] = result.get(metric.name)
 
         return result
-
-    def _read_data(self) -> DataFrame:
-        """
-        Read a csv file with predictions into DataFrame.
-
-        Returns:
-            pd.DataFrame: Data with predictions
-        """
-
-        return pd.read_csv(self._data_path)
