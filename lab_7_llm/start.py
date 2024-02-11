@@ -5,7 +5,7 @@ Neural machine translation starter.
 import json
 from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import RawDataImporter, RawDataPreprocessor
+from lab_7_llm.main import RawDataImporter, RawDataPreprocessor, TaskDataset, LLMPipeline
 
 
 @report_time
@@ -19,9 +19,11 @@ def main() -> None:
     raw_dataset = RawDataImporter(settings_dict["parameters"]["dataset"])
     raw_dataset.obtain()
     processed_dataset = RawDataPreprocessor(raw_dataset.raw_data)
-    #processed_dataset.transform()
     analysis = processed_dataset.analyze()
-    print(analysis)
+    #processed_dataset.transform()
+    #dataset = TaskDataset(processed_dataset.data.head(100))
+    #pipeline = LLMPipeline(settings_dict['parameters']['model'], dataset, 512, 64, 'cpu')
+    #pipeline.analyze_model()
 
     result = 1
     assert result is not None, "Demo does not work correctly"

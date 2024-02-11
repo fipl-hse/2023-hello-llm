@@ -6,6 +6,9 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
+from torchinfo import summary
+from transformers import AutoModelForQuestionAnswering, AutoTokenizer, DebertaV2ForQuestionAnswering
+
 try:
     import torch
     from torch.utils.data.dataset import Dataset
@@ -140,6 +143,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+        self._data = data
 
     def __len__(self) -> int:
         """
@@ -148,6 +152,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -159,6 +164,8 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
+        return (self._data.iloc[index]['question'], self._data.iloc[index]['context'],
+                self._data.iloc[index]['answer'])
 
     @property
     def data(self) -> DataFrame:
@@ -168,6 +175,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
+        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
@@ -193,6 +201,16 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        super().__init__(model_name, dataset, max_length, batch_size, device)
+        '''self._model_name = model_name
+        self._dataset = dataset
+        self._max_length = max_length
+        self._batch_size = batch_size
+        self._device = device'''
+        super().__init__(model_name, dataset, max_length, batch_size, device)
+        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        self._model = AutoModelForQuestionAnswering.from_pretrained(self._model_name)
+
 
     def analyze_model(self) -> dict:
         """
@@ -201,6 +219,9 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        am_properties_dict = {
+        }
+        return am_properties_dict
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -258,17 +279,3 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
-
-
-# importer = RawDataImporter('')
-# importer.obtain()
-
-# Load model directly
-'''from transformers import AutoTokenizer, AutoModelForQuestionAnswering
-
-tokenizer = AutoTokenizer.from_pretrained("timpal0l/mdeberta-v3-base-squad2")
-model = AutoModelForQuestionAnswering.from_pretrained("timpal0l/mdeberta-v3-base-squad2")
-question = "Where do I live?"
-context = "My name is Tim and I live in Sweden."
-tokens = tokenizer(question, context, return_tensors='pt')
-print(tokens)'''
