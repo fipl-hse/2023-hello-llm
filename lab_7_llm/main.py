@@ -4,17 +4,16 @@ Neural machine translation module.
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
+from typing import Iterable, Sequence
 from collections import namedtuple
 
 from datasets import load_dataset
-from torch.utils.data import DataLoader
-from torchinfo import summary
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 try:
     import torch
     from torch.utils.data.dataset import Dataset
+    from torchinfo import summary
 except ImportError:
     print('Library "torch" not installed. Failed to import.')
     Dataset = dict
@@ -51,6 +50,7 @@ class RawDataImporter(AbstractRawDataImporter):
         self._raw_data = load_dataset(self._hf_name,
                                       split='train').to_pandas()
 
+
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     A class that analyzes and preprocesses a dataset.
@@ -81,6 +81,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         self._data = self._raw_data.rename(
             columns={'Reviews': ColumnNames.SOURCE.value,
                      'Summary': ColumnNames.TARGET.value}).reset_index(drop=True)
+
 
 class TaskDataset(Dataset):
     """
@@ -126,6 +127,7 @@ class TaskDataset(Dataset):
             pandas.DataFrame: Preprocessed DataFrame
         """
         return self._data
+
 
 class LLMPipeline(AbstractLLMPipeline):
     """
@@ -237,6 +239,8 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+
+
 class TaskEvaluator(AbstractTaskEvaluator):
     """
     A class that compares prediction quality using the specified metric.
