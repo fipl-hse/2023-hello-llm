@@ -12,6 +12,7 @@ let inferSampleFromForm = async (premise, hypothesis, result) => {
         })
     }).then(res => {return res.json()})
         .then(data => {
+            result.innerHTML = ''
             if (data['infer'] === '1') {
                 result.appendChild(document.createTextNode('Entailment'))
             } else {
