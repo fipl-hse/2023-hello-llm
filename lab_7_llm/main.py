@@ -286,7 +286,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
             evaluation = evaluator.compute(
                 predictions=predictions['predictions'].tolist(),
                 references=predictions['target'].tolist(),
-                average='weighted'
+                average=None
             )
 
             evaluations.update(evaluation)
