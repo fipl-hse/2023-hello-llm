@@ -192,7 +192,11 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        inputs = self._tokenizer(sample[0], return_tensors='pt').input_ids
+        inputs = self._tokenizer(sample[0],
+                                 max_length=self._max_length,
+                                 padding=True,
+                                 truncation=True,
+                                 return_tensors='pt').input_ids
         outputs = self._model.generate(inputs)
         return self._tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
 
