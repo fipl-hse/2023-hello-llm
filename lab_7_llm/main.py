@@ -111,8 +111,8 @@ class TaskDataset(Dataset):
             tuple[str, ...]: The item to be received
         """
 
-        return (self._data.iloc[index][ColumnNames.SOURCE],
-                self._data.iloc[index][ColumnNames.TARGET])
+        return (self._data.iloc[index]['source'],
+                self._data.iloc[index]['target'])
 
     @property
     def data(self) -> DataFrame:
@@ -129,7 +129,6 @@ class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
     """
-    _model = torch.nn.Module
 
     def __init__(
             self,
