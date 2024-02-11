@@ -113,7 +113,8 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return tuple(self._data.iloc[index]['source'],)
+        item = (self._data['source'].iloc[index],)
+        return item
 
     @property
     def data(self) -> DataFrame:
@@ -208,14 +209,12 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
-        dataset_loader = DataLoader(self._dataset, self._batch_size)
-
+        dataset_loader = DataLoader(dataset=self._dataset, batch_size=self._batch_size)
         predictions = []
-
         for batch in dataset_loader:
             predictions.extend(self._infer_batch(batch))
-
-        return pd.DataFrame({"target": self._dataset.data['target'], "predictions": predictions})
+        df = pd.DataFrame({"target": self._dataset.data['target'], "predictions": predictions})
+        return df
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -228,7 +227,6 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-
         inputs = self._tokenizer(sample_batch[0],
                                  padding=True,
                                  truncation=True,
@@ -265,20 +263,12 @@ class TaskEvaluator(AbstractTaskEvaluator):
         """
 
         predictions = pd.read_csv(self._data_path)
-        scores = {}
-
+        metric_eval = {}
         for metric in self._metrics:
-            if metric.value == 'rouge':
-                metric = load(metric.value, seed=77)
-            else:
-                metric = load(metric.value)
-
-            result = metric.compute(references=predictions['target'],
-                                    predictions=predictions['predictions'])
-
+            metric = load(metric.value)
+            result = metric.compute(references=predictions['target'].tolist(),
+                                    predictions=predictions['predictions'].tolist())
             if metric.name == 'rouge':
-                scores['rouge'] = result.get('rouge2')
-            else:
-                scores[metric.name] = result.get(metric.name)
-
-        return scores
+                metric_eval['rouge'] = result.get('rougeL')
+            metric_eval.update(dict(metric_eval))
+        return metric_eval
