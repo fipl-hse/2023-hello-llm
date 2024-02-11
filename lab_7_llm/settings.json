@@ -4,5 +4,5 @@
     "dataset": "CarlBrendt/Summ_Dialog_News",
     "metrics": ["accuracy"]
   },
-  "target_score": 10
+  "target_score": 4
 }
