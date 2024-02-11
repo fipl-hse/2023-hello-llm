@@ -4,13 +4,13 @@ Neural machine translation starter.
 # pylint: disable=too-many-locals
 import json
 import os
+from pathlib import Path
 
 from config.constants import PROJECT_ROOT
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.time_decorator import report_time
 from lab_7_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset,
                             TaskEvaluator)
-
 
 
 @report_time
@@ -48,8 +48,8 @@ def main() -> None:
 
     pipeline2.infer_dataset().to_csv(pred_path, index=False)
 
-    evaluator = TaskEvaluator(data_path=pred_path, metrics=[Metrics[metric.upper()] for metric in
-                                                            settings['parameters']['metrics']])
+    evaluator = TaskEvaluator(data_path=Path(pred_path), metrics=[Metrics[metric.upper()] for metric in
+                                                                  settings['parameters']['metrics']])
 
     result = evaluator.run()
 
