@@ -13,7 +13,7 @@ from datasets import load_dataset
 from evaluate import load
 from pandas import DataFrame
 from torch.utils.data import DataLoader, Dataset
-from transformers import AutoTokenizer, BertForSequenceClassification
+from transformers import AutoTokenizer, BertForSequenceClassification, BertConfig
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -242,7 +242,13 @@ class LLMPipeline(AbstractLLMPipeline):
         }
         return info
 
-    def get_config(self):
+    def get_config(self) -> BertConfig:
+        """
+        Get model config
+
+        Returns:
+            BertConfig: model's configurations
+        """
         return self._model.config
 
     @report_time

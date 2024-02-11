@@ -78,7 +78,7 @@ async def infer(query: Query) -> dict:
     Returns:
         dict: a dictionary with a prediction.
     """
-    sample = (query.question.split('|'))
+    sample = query.question.split('|')
     labels_mapping = pipeline.get_config().id2label
     if len(sample) == 1:
         sample_tuple = (sample[0], sample[0])
