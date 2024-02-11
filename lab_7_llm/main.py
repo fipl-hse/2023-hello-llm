@@ -4,7 +4,9 @@ Neural machine translation module.
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
+from typing import Iterable, Sequence
+
+from datasets import load_dataset
 
 try:
     import torch
@@ -20,6 +22,7 @@ except ImportError:
     print('Library "pandas" not installed. Failed to import.')
     DataFrame = dict  # type: ignore
 
+import pandas as pd
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
@@ -41,6 +44,10 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        self._raw_data = load_dataset(
+            'ccdv/pubmed-summarization',
+            name='document',
+            split='train').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -55,6 +62,13 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        dataset_properties = {'dataset_number_of_samples': len(self._raw_data),
+                              'dataset_columns': len(self._raw_data.columns),
+                              'dataset_duplicates': len(self._raw_data[self._raw_data.duplicated()]),
+                              'dataset_empty_rows': len(self._raw_data[self._raw_data.isna().any(axis=1)]),
+                              'dataset_sample_min_len': len(min(self._raw_data['article'], key=len)),
+                              'dataset_sample_max_len': len(max(self._raw_data['article'], key=len))}
+        return dataset_properties
 
     @report_time
     def transform(self) -> None:
