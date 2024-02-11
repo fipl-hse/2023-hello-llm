@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
 from datasets import load_dataset
+from torchinfo import summary
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 try:
     import torch
@@ -25,7 +27,7 @@ except ImportError:
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -71,6 +73,12 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        self._data = (
+            self._raw_data.drop(['title', 'date', 'url'], axis=1)
+            .rename(columns={'article_content': ColumnNames.SOURCE.value,
+                             'summary': ColumnNames.TARGET.value})
+            .reset_index(drop=True)
+        )
 
 
 class TaskDataset(Dataset):
@@ -85,6 +93,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+        self._data = data
 
     def __len__(self) -> int:
         """
@@ -93,6 +102,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -104,6 +114,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
+        return (self._data.iloc[index][ColumnNames.SOURCE.value],)
 
     @property
     def data(self) -> DataFrame:
@@ -113,6 +124,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
+        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
@@ -138,6 +150,9 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        super().__init__(model_name, dataset, max_length, batch_size, device)
+        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self._model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -146,6 +161,25 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        config = self._model.config
+        embeddings_length = config.encoder.max_position_embeddings
+        input_ids = torch.ones(1, embeddings_length, dtype=torch.long)
+
+        model_summary = summary(
+            self._model,
+            input_data={'input_ids': input_ids, 'decoder_input_ids': input_ids},
+            device=self._device,
+            verbose=0
+        )
+        return {
+            'input_shape': [1, embeddings_length],
+            'embedding_size': embeddings_length,
+            'output_shape': model_summary.summary_list[-1].output_size,
+            'num_trainable_params': model_summary.trainable_params,
+            'vocab_size': config.encoder.vocab_size,
+            'size': model_summary.total_param_bytes,
+            'max_context_length': config.max_length
+        }
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -158,6 +192,9 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        inputs = self._tokenizer(sample[0], return_tensors='pt').input_ids
+        outputs = self._model.generate(inputs)
+        return self._tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
