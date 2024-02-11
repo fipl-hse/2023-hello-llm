@@ -82,8 +82,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Apply preprocessing transformations to the raw dataset.
         """
 
-        self._data = (self._raw_data.rename(columns={"label": ColumnNames.TARGET,
-                                                     "comment_text": ColumnNames.SOURCE})
+        self._data = (self._raw_data.rename(columns={"label": str(ColumnNames.TARGET),
+                                                     "comment_text": str(ColumnNames.SOURCE)})
                       .drop('id', axis=1)
                       .reset_index(drop=True))
 
@@ -121,7 +121,8 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data.iloc[index][ColumnNames.SOURCE], self._data.iloc[index][ColumnNames.TARGET]
+        return self._data.iloc[index]['source'], self._data.iloc[index]['target']
+
 
     @property
     def data(self) -> DataFrame:
