@@ -1,22 +1,26 @@
 'use strict'
 
 let inferSampleFromForm = async (premise, hypothesis, result) => {
-    let sample = premise.value.concat('|', hypothesis.value)
     await fetch('/infer', {
         method: 'POST',
         headers: {
             'Content-type': 'application/json'
         },
         body: JSON.stringify({
-            question: sample
+            question: {
+                premise: premise.value,
+                hypothesis: hypothesis.value
+            }
         })
     }).then(res => {return res.json()})
         .then(data => {
             result.innerHTML = ''
             if (data['infer'] === '1') {
                 result.appendChild(document.createTextNode('Entailment'))
-            } else {
+            } else if (data['infer'] === '0') {
                 result.appendChild(document.createTextNode('Not entailment'))
+            } else {
+                result.appendChild(document.createTextNode('Something went wrong :('))
             }
         })
 }
@@ -30,7 +34,8 @@ window.onload = function() {
     const btn = document.getElementById('btn_submit');
     const premise = document.getElementById('premise');
     const hypothesis = document.getElementById('hypothesis');
-    const showResults = document.getElementById('result')
+    const showResults = document.getElementById('result');
+
     disableButton(
         btn,
         premise,
