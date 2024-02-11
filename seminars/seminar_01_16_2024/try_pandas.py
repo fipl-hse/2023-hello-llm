@@ -2,7 +2,6 @@
 Pandas listing.
 """
 from pathlib import Path
-from datasets import load_dataset
 
 try:
     from pandas import read_csv
@@ -15,12 +14,10 @@ def main() -> None:
     """
     Entrypoint for the listing.
     """
-    #data_path = Path(__file__).parent / 'assets' / 'danetqa_example.csv'
+    data_path = Path(__file__).parent / 'assets' / 'danetqa_example.csv'
 
     # 1. Load from file - in lab it is in memory from dataset.to_pandas()
-    #raw_data_df = read_csv(data_path, encoding='utf-8')
-    dataset = load_dataset("IlyaGusev/gazeta", trust_remote_code=True)
-    raw_data_df = dataset
+    raw_data_df = read_csv(data_path, encoding='utf-8')
 
     # 2. Get number of samples
     num_samples = len(raw_data_df)
