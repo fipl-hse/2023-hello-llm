@@ -165,9 +165,15 @@ class LLMPipeline(AbstractLLMPipeline):
 
         Returns:
             dict: Properties of a model
+
+        Raises:
+            TypeError: In case of self._model being None
         """
+        if self._model is None:
+            raise TypeError("self._model is None!")
+
         noise = torch.ones(1, self._model.config.max_length, dtype=torch.long)
-        model_info = summary(self._model,  # type: ignore
+        model_info = summary(self._model,
                              input_data=noise,
                              decoder_input_ids=noise,
                              device=self._device,

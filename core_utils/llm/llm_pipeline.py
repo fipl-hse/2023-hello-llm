@@ -6,6 +6,8 @@ Module with description of abstract LLM pipeline.
 from abc import ABC, abstractmethod
 from typing import Any, Protocol
 
+from torch import nn
+
 try:
     from pandas import DataFrame
 except ImportError:
@@ -54,7 +56,7 @@ class AbstractLLMPipeline(ABC):
     """
 
     #: Model
-    _model: HFModelLike | None
+    _model: nn.Module | None
 
     def __init__(self, model_name: str, dataset: Dataset, max_length: int,
                  batch_size: int, device: str = 'cpu') -> None:
