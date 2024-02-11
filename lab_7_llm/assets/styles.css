@@ -89,6 +89,7 @@ button{
 
 button:hover{
     background-color: var(--back_color);
+    cursor: pointer;
 }
 
 .results{

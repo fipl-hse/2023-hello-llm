@@ -71,13 +71,12 @@ async def infer(query: Query) -> dict:
     """
     Infer the query in web-site
     """
-    sample = query.question.split("|")
-
     label_mapping = {"0": "entailment",
                      "1": "contradiction",
                      "2": "neutral"}
 
-    prediction = pipeline.infer_sample(sample + sample if '|' not in sample else sample)
+    prediction = pipeline.infer_sample(query.question + query.question if '|' not in query.question
+                                       else query.question.split("|"))
 
     return {"infer": label_mapping.get(prediction)}
 
