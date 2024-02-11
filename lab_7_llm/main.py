@@ -3,7 +3,7 @@ Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from pathlib import Path
-from typing import Iterable, Sequence, List
+from typing import Iterable, Sequence
 
 import pandas as pd
 import torch
@@ -248,7 +248,8 @@ class LLMPipeline(AbstractLLMPipeline):
                 return_tensors='pt'
             )
             output = self._model(**tokens).logits
-            predictions.extend([str(prediction.item()) for prediction in list(torch.argmax(output, dim=1))])
+            predictions.extend([str(prediction.item())
+                                for prediction in list(torch.argmax(output, dim=1))])
         else:
             for sample in sample_batch[0]:
                 tokens = tokenizer(
@@ -258,7 +259,8 @@ class LLMPipeline(AbstractLLMPipeline):
                     return_tensors='pt'
                 )
                 output = self._model(**tokens).logits
-                predictions.extend([str(prediction.item()) for prediction in list(torch.argmax(output, dim=1))])
+                predictions.extend([str(prediction.item())
+                                    for prediction in list(torch.argmax(output, dim=1))])
 
         return predictions
 
