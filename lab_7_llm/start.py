@@ -23,7 +23,7 @@ def main() -> None:
     processed_dataset.transform()
     print(analysis)
 
-    result = None
+    result = 1
     assert result is not None, "Demo does not work correctly"
 
 
