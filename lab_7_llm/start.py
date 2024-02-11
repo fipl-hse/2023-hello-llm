@@ -23,6 +23,9 @@ def main() -> None:
     importer.obtain()
 
     # mark6
+    if importer.raw_data is None:
+        raise TypeError("importer.raw_data is None")
+
     preprocessor = RawDataPreprocessor(raw_data=importer.raw_data)
     preprocessor.analyze()
     preprocessor.transform()
