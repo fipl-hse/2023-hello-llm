@@ -84,9 +84,9 @@ async def infer(question: Query) -> dict:
     """
 
     if not question.hypothesis:
-        return {'infer': 'hello, tester, stop sending this empty requests pls :)'}
-    sample = question.question.split('|')
-    sample_tuple = (sample[0], sample[1])
+        return {'infer': 'hello, little QA, stop sending this empty requests pls :)'}
+
+    sample_tuple = (question.question, question.hypothesis)
 
     return {
         'infer': pipeline.infer_sample(sample_tuple)
