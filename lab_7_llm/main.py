@@ -3,14 +3,13 @@ Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 
-from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
 import pandas as pd
 import torch
-from evaluate import load
 from datasets import load_dataset
+from evaluate import load
 from pandas import DataFrame
 from torch.utils.data import DataLoader, Dataset
 from torchinfo import summary
@@ -112,7 +111,8 @@ class TaskDataset(Dataset):
             tuple[str, ...]: The item to be received
         """
 
-        return self._data.iloc[index][ColumnNames.SOURCE], self._data.iloc[index][ColumnNames.TARGET]
+        return (self._data.iloc[index][ColumnNames.SOURCE],
+                self._data.iloc[index][ColumnNames.TARGET])
 
     @property
     def data(self) -> DataFrame:
@@ -197,8 +197,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         if not self._model:
             return None
-        else:
-            return self._infer_batch((sample,))[0]
+        return self._infer_batch((sample,))[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -215,7 +214,8 @@ class LLMPipeline(AbstractLLMPipeline):
         for batch in dataset_loader:
             predictions.extend(self._infer_batch(batch))
 
-        return pd.DataFrame({"target": self._dataset.data[ColumnNames.TARGET], "predictions": predictions})
+        return pd.DataFrame({"target": self._dataset.data[ColumnNames.TARGET],
+                             "predictions": predictions})
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
