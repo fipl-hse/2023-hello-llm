@@ -33,8 +33,7 @@ def init_application() -> tuple[FastAPI, LLMPipeline]:
 
     with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', "r", encoding='utf-8') as settings_path:
         settings = json.load(settings_path)
-    blank_df = pd.DataFrame([])
-    task_ds = TaskDataset(blank_df)
+    task_ds = TaskDataset(pd.DataFrame())
     llm_infer = LLMPipeline(model_name=settings["parameters"]["model"], dataset=task_ds,
                             max_length=120, batch_size=1, device='cpu')
 
