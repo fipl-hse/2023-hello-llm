@@ -23,8 +23,8 @@ def main():
     analysis = preprocessor.analyze()
     transform = preprocessor.transform()
 
-    #result = analysis
-    #assert result is not None, "Demo does not work correctly"
+    result = analysis, transform
+    assert result is not None, "Demo does not work correctly"
 
 if __name__ == "__main__":
     main()
