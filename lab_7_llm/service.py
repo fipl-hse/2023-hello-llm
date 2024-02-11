@@ -1,9 +1,9 @@
 """
 Web service for model inference.
 """
+
 import json
 import uvicorn
-
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -67,7 +67,7 @@ async def root(request: Request) -> HTMLResponse:
 
 
 @app.post("/infer")
-async def root(query: Query) -> dict:
+async def infer(query: Query) -> dict:
     """
     Infer endpoint of application.
     """
