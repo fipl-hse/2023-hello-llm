@@ -190,14 +190,14 @@ class LLMPipeline(AbstractLLMPipeline):
             return None
 
         tokens = self._tokenizer(sample[0],
-                                 max_length=self._max_length,
+                                 max_length=self._model.config.max_length,
                                  padding=True,
                                  truncation=True,
                                  return_tensors='pt')
         output = self._model.generate(**tokens)
         decoded = self._tokenizer.batch_decode(output, skip_special_tokens=True)
 
-        return decoded[0] if decoded else None
+        return None if self._model is None else decoded[0][:self._max_length]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
