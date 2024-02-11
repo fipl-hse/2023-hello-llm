@@ -12,6 +12,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
+from pydantic.dataclasses import dataclass
 
 from config.constants import PROJECT_ROOT
 from lab_7_llm.main import LLMPipeline, TaskDataset
@@ -61,6 +63,34 @@ async def root(request: Request) -> HTMLResponse:
         name="index.html",
         request=request
     )
+
+
+@dataclass
+class Query(BaseModel):
+    """
+    Class that initializes the question to infer, gets it from fetchAPI
+    """
+    question: str
+
+
+@app.post('/infer')
+async def infer(question: Query) -> dict:
+    """
+
+    Args:
+        question: Query class instance with string to infer
+
+    Returns:
+        dict: dict with the results of sample inference
+    """
+    sample = question.question.split('|')
+    try:
+        sample_tuple = (sample[0], sample[1])
+    except IndexError:
+        sample_tuple = (sample[0], sample[0])
+    return {
+        'infer': pipeline.infer_sample(sample_tuple)
+    }
 
 
 if __name__ == "__main__":

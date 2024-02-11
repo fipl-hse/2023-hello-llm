@@ -34,6 +34,7 @@ form {
     display: flex;
     flex-direction: column;
     gap: 30px;
+    margin-bottom: 30px;
     & div {
         display: flex;
         flex-direction: column;
@@ -73,6 +74,12 @@ form {
         &:hover {
             cursor: pointer;
             backdrop-filter: blur(20px) opacity(1);
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            border: 1px solid darkgray;
+            color: darkgray;
         }
     }
 }
