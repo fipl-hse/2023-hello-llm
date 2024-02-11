@@ -3,7 +3,7 @@ Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Iterable, Iterator, Sequence
 
 from datasets import load_dataset
 
@@ -18,8 +18,9 @@ try:
     from pandas import DataFrame
 except ImportError:
     print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict
+    DataFrame = dict  # type: ignore
 
+from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
@@ -30,7 +31,6 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
-
 
 class RawDataImporter(AbstractRawDataImporter):
     """
@@ -197,6 +197,7 @@ class LLMPipeline(AbstractLLMPipeline):
         tokenizer = AutoTokenizer.from_pretrained(self._model_name)
 
         tokens = tokenizer(sample[0],
+                           max_length=self._max_length,
                            padding=True,
                            truncation=True,
                            return_tensors='pt')
