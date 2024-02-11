@@ -27,7 +27,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
-    _raw_data = DataFrame
+    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -130,6 +130,7 @@ class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
     """
+    _model: torch.nn.Module
 
     def __init__(
             self,
@@ -228,6 +229,8 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+        predictions = []
+
         if isinstance(sample_batch, tuple):
             tokens = self._tokenizer(
                 str(sample_batch[0][0]),
@@ -242,7 +245,6 @@ class LLMPipeline(AbstractLLMPipeline):
                 truncation=True,
                 return_tensors='pt'
             )
-        predictions = []
         for prediction in list(torch.argmax(self._model(**tokens).logits, dim=1)):
             predictions.append(str(prediction.item()))
 
