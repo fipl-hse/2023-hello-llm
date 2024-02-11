@@ -22,7 +22,7 @@ def main() -> None:
     importer = RawDataImporter(settings['parameters']['dataset'])
     importer.obtain()
 
-    preprocessor = RawDataPreprocessor(importer.raw_data)
+    preprocessor = RawDataPreprocessor(importer.get_raw_data)
     preprocessor.analyze()
     preprocessor.transform()
 
