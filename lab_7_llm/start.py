@@ -3,11 +3,10 @@ Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
 import json
-from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
 from core_utils.llm.metrics import Metrics
-from lab_7_llm.main import LLMPipeline, RawDataImporter, \
-    RawDataPreprocessor, TaskDataset, TaskEvaluator
+from config.constants import PROJECT_ROOT
+from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset, TaskEvaluator
 
 
 @report_time
@@ -15,7 +14,6 @@ def main() -> None:
     """
     Run the translation pipeline.
     """
-
     with open(PROJECT_ROOT/'lab_7_llm'/'settings.json', 'r', encoding='utf-8') as f:
         settings = json.load(f)
 
@@ -27,12 +25,11 @@ def main() -> None:
     preprocessor.transform()
 
     dataset = TaskDataset(preprocessor.data.head(100))
-
     pipeline = LLMPipeline(settings['parameters']['model'],
                            dataset,
-                           batch_size=2,
-                           max_length=120,
-                           device='cpu')
+                           120,
+                           2,
+                           'cpu')
     pipeline.analyze_model()
     pipeline.infer_sample(dataset[0])
     result = pipeline.infer_dataset()
@@ -41,11 +38,11 @@ def main() -> None:
     if not res_path.exists():
         res_path.mkdir()
     result.to_csv(res_path/'predictions.csv', index=False)
-
     result = TaskEvaluator(data_path=res_path/'predictions.csv',
-                           metrics=Metrics).run()
+                           metrics=[Metrics[metric.upper()] for metric in
+                                    settings['parameters']['metrics']])
 
-    print(result)
+    print(result.run())
 
     assert result is not None, "Demo does not work correctly"
 
