@@ -13,8 +13,6 @@ def main():
     """
     Run the translation pipeline.
     """
-    # result = None
-    # assert result is not None, "Demo does not work correctly"
 
     with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as file:
         settings = json.load(file)

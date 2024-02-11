@@ -4,7 +4,7 @@ Neural machine translation module.
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
+from typing import Iterable, Sequence
 
 from datasets import load_dataset
 
@@ -47,7 +47,6 @@ class RawDataImporter(AbstractRawDataImporter):
 
         self._raw_data = load_dataset(self._hf_name,
                                       split='train').to_pandas()
-        # print(f'Obtained dataset with one call: number of samples is {len(dataset)}')
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
