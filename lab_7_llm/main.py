@@ -21,6 +21,7 @@ from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, Co
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
+
 class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
@@ -142,9 +143,8 @@ class LLMPipeline(AbstractLLMPipeline):
                          max_length,
                          batch_size,
                          device)
-        self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
-        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name,
-                                                        model_max_length=self._max_length)
+        self._model: torch.nn.Module = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
+        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -186,19 +186,18 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        # tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        if self._model is None or self._tokenizer is None:
+            return None
 
         tokens = self._tokenizer(sample[0],
                                  max_length=self._max_length,
                                  padding=True,
                                  truncation=True,
                                  return_tensors='pt')
-
         output = self._model.generate(**tokens)
-        decoded = self._tokenizer.batch_decode(output,
-                                               skip_special_tokens=True)
+        decoded = self._tokenizer.batch_decode(output, skip_special_tokens=True)
 
-        return None if self._model is None else decoded[0]
+        return decoded[0] if decoded else None
 
     @report_time
     def infer_dataset(self) -> DataFrame:
