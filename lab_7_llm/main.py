@@ -2,15 +2,18 @@
 Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
-from collections import namedtuple
+
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
-from datasets import load_dataset
+from typing import Iterable, Sequence
+
 import pandas as pd
 import torch
-from torch.utils.data.dataset import Dataset
-from torch.utils.data import DataLoader, Dataset
+from datasets import load_dataset
 from pandas import DataFrame
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import Dataset
+from torchinfo import summary
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -18,8 +21,6 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
-from torchinfo import summary
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 
 class RawDataImporter(AbstractRawDataImporter):
@@ -38,6 +39,7 @@ class RawDataImporter(AbstractRawDataImporter):
         self._raw_data = load_dataset(self._hf_name, split='test').to_pandas()
         if type(self._raw_data) is not DataFrame:
             raise TypeError
+
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
@@ -63,8 +65,6 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         dataset_analysis['dataset_sample_max_len'] = len(max(self._raw_data['report'], key=len))
 
         return dataset_analysis
-
-
 
     @report_time
     def transform(self) -> None:

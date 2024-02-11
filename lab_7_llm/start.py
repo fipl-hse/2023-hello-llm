@@ -1,13 +1,14 @@
 """
 Neural machine translation starter.
 """
-# pylint: disable= too-many-locals
-from core_utils.llm.time_decorator import report_time
-from config.constants import PROJECT_ROOT
-from lab_7_llm.main import RawDataImporter, RawDataPreprocessor, TaskDataset, LLMPipeline
-from torch.utils.data import DataLoader, Dataset
-import pandas as pd
+
 import json
+
+from config.constants import PROJECT_ROOT
+from core_utils.llm.time_decorator import report_time
+
+from lab_7_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset)
+
 
 @report_time
 def main() -> None:
@@ -21,7 +22,7 @@ def main() -> None:
     preprocessor = RawDataPreprocessor(govreport.raw_data)
     preprocessor.transform()
     result = preprocessor.analyze()
-    dataset = TaskDataset(preprocessor._data.head(100))
+    dataset = TaskDataset(preprocessor.data.head(100))
     pipeline = LLMPipeline(settings['parameters']['model'],
                            dataset,
                            max_length=120,
@@ -31,9 +32,6 @@ def main() -> None:
     pipeline.analyze_model()
     pipeline.infer_sample(dataset[0])
 
-    """dataset_loader = DataLoader(dataset, batch_size=4)
-    pipeline = LLMPipeline(settings['parameters']['model'], dataset, 100, 100, 'cpu')
-    pipeline.analyze_model()"""
     assert result is not None, "Demo does not work correctly"
 
 
