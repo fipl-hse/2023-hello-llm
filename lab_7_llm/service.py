@@ -80,7 +80,6 @@ async def infer(query: Query) -> dict:
         dict: a dictionary with a prediction.
     """
     labels_mapping = pipeline.get_config().id2label
-    print(query)
     if not query.hypothesis or not query.question:
         return {'infer': 'Unable to process input. Please, fill both text fields.'}
     sample = query.question, query.hypothesis
