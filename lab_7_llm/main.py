@@ -285,7 +285,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             metric = load(metric.value)
 
             evaluation = metric.compute(references=pred_df['target'],
-                                        predictions=pred_df['predictions'])
+                                        predictions=pred_df['predictions'],
+                                        average=None)
 
             evaluations[metric.name] = evaluations.get(metric.name)
 
