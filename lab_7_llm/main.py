@@ -112,7 +112,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data.iloc[index][ColumnNames.SOURCE],
+        return self._data.iloc[index][ColumnNames.SOURCE]
  #       return self._data['source'].iloc[index]
 #        return self._data.iloc[index]['source']
 

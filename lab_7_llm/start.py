@@ -2,11 +2,12 @@
 Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
-from core_utils.llm.time_decorator import report_time
-from config.constants import PROJECT_ROOT
-from core_utils.llm.metrics import Metrics
-from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset, TaskEvaluator
 import json
+from config.constants import PROJECT_ROOT
+from core_utils.llm.time_decorator import report_time
+from core_utils.llm.metrics import Metrics
+from lab_7_llm.main import LLMPipeline, RawDataImporter, \
+    RawDataPreprocessor, TaskDataset, TaskEvaluator
 
 
 @report_time
@@ -27,7 +28,11 @@ def main() -> None:
 
     dataset = TaskDataset(preprocessor.data.head(100))
 
-    pipeline = LLMPipeline(settings['parameters']['model'], dataset, batch_size=2, max_length=120, device='cpu')
+    pipeline = LLMPipeline(settings['parameters']['model'],
+                           dataset,
+                           batch_size=2,
+                           max_length=120,
+                           device='cpu')
     pipeline.analyze_model()
     pipeline.infer_sample(dataset[0])
     result = pipeline.infer_dataset()
