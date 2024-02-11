@@ -66,25 +66,23 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         }
         self._raw_data = self._raw_data.dropna()
         properties_dict["dataset_sample_min_len"] = min(len(min(self._raw_data["prompt"], key=len)),
-                                                        self.get_min_len())
+                                                        self.get_min_len(0), self.get_min_len(1))
         properties_dict["dataset_sample_max_len"] = max(len(max(self._raw_data["prompt"], key=len)),
-                                                        self.get_max_len())
+                                                        self.get_max_len(0), self.get_max_len(1))
         return properties_dict
 
-    def get_min_len(self):
-        min_len = (len(self._raw_data["messages"][0][0]["content"])
-                   + len(self._raw_data["messages"][0][1]["content"]))
+    def get_min_len(self, index):
+        min_len = len(self._raw_data["messages"][0][index]["content"])
         for row in self._raw_data["messages"]:
-            if len(row[0]["content"]) + len(row[1]["content"]) < min_len:
-                min_len = len(row[0]["content"]) + len(row[1]["content"])
+            if len(row[index]["content"]) < min_len:
+                min_len = len(row[index]["content"])
         return min_len
 
-    def get_max_len(self):
-        max_len = (len(self._raw_data["messages"][0][0]["content"])
-                   + len(self._raw_data["messages"][0][1]["content"]))
+    def get_max_len(self, index):
+        max_len = len(self._raw_data["messages"][0][index]["content"])
         for row in self._raw_data["messages"]:
-            if len(row[0]["content"]) + len(row[1]["content"]) > max_len:
-                max_len = len(row[0]["content"]) + len(row[1]["content"])
+            if len(row[index]["content"]) > max_len:
+                max_len = len(row[index]["content"])
         return max_len
 
     @report_time
