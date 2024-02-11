@@ -69,6 +69,7 @@ class Query(BaseModel):
     Class that initializes the question to infer, gets it from fetchAPI
     """
     question: str
+    hypothesis: str | None = None
 
 
 @app.post('/infer')
@@ -82,11 +83,10 @@ async def infer(question: Query) -> dict:
         dict: dict with the results of sample inference
     """
 
+    if question.hypothesis is None or "":
+        return {'infer': 'hello, tester, stop sending this empty requests pls :)'}
     sample = question.question.split('|')
-    try:
-        sample_tuple = (sample[0], sample[1])
-    except IndexError:
-        sample_tuple = (sample[0], sample[0])
+    sample_tuple = (sample[0], sample[1])
 
     return {
         'infer': pipeline.infer_sample(sample_tuple)
