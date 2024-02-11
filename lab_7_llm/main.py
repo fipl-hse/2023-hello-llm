@@ -2,25 +2,14 @@
 Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
+from typing import Iterable, Sequence
 
+import pandas as pd
+import torch
 from datasets import load_dataset
-
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
-
-from torch.utils.data import DataLoader
+from pandas import DataFrame
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
@@ -28,7 +17,7 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -36,6 +25,8 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
+    _raw_data: DataFrame
+
     @report_time
     def obtain(self) -> None:
         """
@@ -74,9 +65,9 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._data = (self._raw_data
-                      .rename(columns={'Reviews': 'source', 'Summary': 'target'})
-                      .reset_index(drop=True))
+        self._data = self._raw_data.rename(
+            columns={'Reviews': ColumnNames.SOURCE.value,
+                     'Summary': ColumnNames.TARGET.value}).reset_index(drop=True)
 
 class TaskDataset(Dataset):
     """
@@ -90,7 +81,6 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
-        super().__init__()
         self._data = data
 
     def __len__(self) -> int:
@@ -153,6 +143,8 @@ class LLMPipeline(AbstractLLMPipeline):
                          batch_size,
                          device)
         self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
+        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name,
+                                                        model_max_length=self._max_length)
 
     def analyze_model(self) -> dict:
         """
@@ -194,17 +186,17 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        # tokenizer = AutoTokenizer.from_pretrained(self._model_name)
 
-        tokens = tokenizer(sample[0],
-                           max_length=self._max_length,
-                           padding=True,
-                           truncation=True,
-                           return_tensors='pt')
+        tokens = self._tokenizer(sample[0],
+                                 max_length=self._max_length,
+                                 padding=True,
+                                 truncation=True,
+                                 return_tensors='pt')
 
         output = self._model.generate(**tokens)
-        decoded = tokenizer.batch_decode(output,
-                                         skip_special_tokens=True)
+        decoded = self._tokenizer.batch_decode(output,
+                                               skip_special_tokens=True)
 
         return None if self._model is None else decoded[0]
 
@@ -241,6 +233,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        super().__init__(metrics)
+        self._data_path = data_path
 
     @report_time
     def run(self) -> dict | None:
