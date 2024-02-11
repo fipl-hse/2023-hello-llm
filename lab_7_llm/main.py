@@ -5,7 +5,6 @@ Neural machine translation module.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
-
 from datasets import load_dataset
 
 try:
