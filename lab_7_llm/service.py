@@ -62,6 +62,7 @@ class Query:
     """
     A model reqeust dataclass.
     """
+
     question: str
 
 

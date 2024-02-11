@@ -51,7 +51,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             dict: Dataset key properties
         """
 
-        column_length = self._raw_data["ru"].astype(str).str.len()
+        processed_data = self._raw_data.dropna().reset_index(drop=True)
+        column_length = processed_data["ru"].astype(str).str.len()
 
         analytics = {
             "dataset_number_of_samples": len(self._raw_data),
