@@ -1,7 +1,7 @@
 """
 Neural summarization starter.
 """
-# pylint: disable= too-many-locals
+# pylint: disable=too-many-locals
 import json
 import os
 from pathlib import Path
