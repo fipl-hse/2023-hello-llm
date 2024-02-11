@@ -74,7 +74,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Apply preprocessing transformations to the raw dataset.
         """
         self._data = self._raw_data.rename(columns={'report': 'source', 'summary': 'target'}).\
-            drop_duplicates().reset_index(drop=True)
+            drop_duplicates().reset_index()
 
     @property
     def data(self) -> DataFrame:
@@ -177,7 +177,7 @@ class LLMPipeline(AbstractLLMPipeline):
                       "token_type_ids": tensor_data,
                       "attention_mask": tensor_data}
 
-        model_statistics = summary(model=self._model,
+        model_statistics = summary(self._model,
                                    input_data=input_data,
                                    decoder_input_ids=tensor_data,
                                    verbose=False)

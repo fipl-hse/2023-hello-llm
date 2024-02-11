@@ -20,15 +20,15 @@ def main() -> None:
     """
     with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as settings:
         settings = json.load(settings)
-    govreport = RawDataImporter(hf_name=settings["parameters"]["dataset"])
+    govreport = RawDataImporter(settings["parameters"]["dataset"])
     govreport.obtain()
     preprocessor = RawDataPreprocessor(govreport.raw_data)
     preprocessor.analyze()
     preprocessor.transform()
 
     dataset = TaskDataset(preprocessor.data.head(10))
-    pipeline = LLMPipeline(model_name=settings['parameters']['model'],
-                           dataset=dataset,
+    pipeline = LLMPipeline(settings['parameters']['model'],
+                           dataset,
                            max_length=120,
                            batch_size=1,
                            device='cpu')
@@ -40,16 +40,17 @@ def main() -> None:
         os.mkdir(f'{PROJECT_ROOT}/lab_7_llm/dist')
     pred_path = f'{PROJECT_ROOT}/lab_7_llm/dist/predictions.csv'
 
-    pipeline2 = LLMPipeline(model_name=settings["parameters"]["model"],
-                            dataset=dataset,
+    pipeline2 = LLMPipeline(settings["parameters"]["model"],
+                            dataset,
                             max_length=120,
                             batch_size=64,
                             device="cpu")
 
     pipeline2.infer_dataset().to_csv(pred_path, index=False)
 
-    evaluator = TaskEvaluator(data_path=Path(pred_path), metrics=[Metrics[metric.upper()] for metric in
-                                                                  settings['parameters']['metrics']])
+    evaluator = TaskEvaluator(Path(pred_path),
+                              [Metrics[metric.upper()] for metric in
+                                       settings['parameters']['metrics']])
 
     result = evaluator.run()
 
