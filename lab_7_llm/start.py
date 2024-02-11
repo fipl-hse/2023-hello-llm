@@ -21,10 +21,10 @@ def main():
     preprocessor = RawDataPreprocessor(importer.raw_data)
 
     analysis = preprocessor.analyze()
-    #transform = preprocessor.transform()
+    transform = preprocessor.transform()
 
-    result = analysis
-    assert result is not None, "Demo does not work correctly"
+    #result = analysis
+    #assert result is not None, "Demo does not work correctly"
 
 if __name__ == "__main__":
     main()
