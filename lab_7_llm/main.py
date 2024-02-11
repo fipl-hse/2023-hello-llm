@@ -39,7 +39,7 @@ class RawDataImporter(AbstractRawDataImporter):
         """
         Import dataset.
         """
-        self._raw_data = load_dataset("ccdv/pubmed-summarization",
+        self._raw_data = load_dataset(self._hf_name,
                                name='document', split='train').to_pandas()
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -141,7 +141,6 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader.
             device (str): The device for inference.
         """
-
 
     def analyze_model(self) -> dict:
         """

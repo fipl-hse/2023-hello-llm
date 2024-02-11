@@ -13,9 +13,6 @@ def main():
     """
     Run the translation pipeline.
     """
-    # result = None
-    # assert result is not None, "Demo does not work correctly"
-
     with open(PROJECT_ROOT / 'lab_7_llm' / 'settings.json', 'r', encoding='utf-8') as file:
         settings = json.load(file)
     importer = RawDataImporter(settings['parameters']['dataset'])
@@ -26,7 +23,8 @@ def main():
     analysis = preprocessor.analyze()
     transform = preprocessor.transform()
 
-    return analysis, transform
+    result = None
+    assert result is not None, "Demo does not work correctly"
 
 if __name__ == "__main__":
     main()
