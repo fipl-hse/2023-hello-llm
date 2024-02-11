@@ -170,7 +170,6 @@ class LLMPipeline(AbstractLLMPipeline):
 
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
-        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -254,17 +253,18 @@ class LLMPipeline(AbstractLLMPipeline):
             list[str]: Model predictions as strings
         """
 
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
         predictions = []
 
-        tokens = self._tokenizer(sample_batch[0],
-                                 max_length=self._max_length,
-                                 padding=True,
-                                 return_tensors='pt',
-                                 truncation=True)
+        tokens = tokenizer(sample_batch[0],
+                           max_length=self._max_length,
+                           padding=True,
+                           return_tensors='pt',
+                           truncation=True)
         output = self._model.generate(**tokens,
                                       max_new_tokens=self._max_length)
-        result = self._tokenizer.batch_decode(output,
-                                              skip_special_tokens=True)
+        result = tokenizer.batch_decode(output,
+                                        skip_special_tokens=True)
         predictions.extend(result)
 
         return predictions
@@ -296,10 +296,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             dict | None: A dictionary containing information about the calculated metric
         """
 
-        pred_df = pd.read_csv(self._data_path)
+        pred_df = self._read_data()
         result = {}
-
-        print(self._metrics)
 
         for metric in self._metrics:
             if metric is Metrics.ROUGE:
@@ -316,3 +314,14 @@ class TaskEvaluator(AbstractTaskEvaluator):
                 result[metric.name] = result.get(metric.name)
 
         return result
+
+    @report_time
+    def _read_data(self) -> DataFrame:
+        """
+        Read a csv file with predictions into DataFrame.
+
+        Returns:
+            pd.DataFrame: Data with predictions
+        """
+
+        return pd.read_csv(self._data_path)
