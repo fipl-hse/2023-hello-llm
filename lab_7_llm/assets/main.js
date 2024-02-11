@@ -1,20 +1,18 @@
 let inferSample = async (premise, hypothesis, result) => {
-    await fetch('/infer', {
+    const response = await fetch('/infer', {
         method: 'POST',
         headers: {
-            'Content-type': 'application/json'
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({
             question: premise.value,
             hypothesis: hypothesis.value
         })
-    }).then(res => {return res.json()})
-        .then(data => {
-            result.innerHTML = ''
-            result.appendChild(document.createTextNode(data['infer'].toUpperCase()))
-        })
-}
-
+    });
+    const data = await response.json();
+    result.innerHTML = '';
+    result.appendChild(document.createTextNode(data['infer'].toUpperCase()));
+};
 
 window.onload = function() {
     let btn = document.getElementById('submit');
