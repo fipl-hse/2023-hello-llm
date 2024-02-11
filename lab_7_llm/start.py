@@ -23,7 +23,7 @@ def main():
     analysis = preprocessor.analyze()
     #transform = preprocessor.transform()
 
-    result = 1
+    result = analysis
     assert result is not None, "Demo does not work correctly"
 
 if __name__ == "__main__":
