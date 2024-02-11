@@ -315,7 +315,6 @@ class TaskEvaluator(AbstractTaskEvaluator):
 
         return result
 
-    @report_time
     def _read_data(self) -> DataFrame:
         """
         Read a csv file with predictions into DataFrame.
