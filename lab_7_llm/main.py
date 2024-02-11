@@ -121,7 +121,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data.iloc[index]['source'], self._data.iloc[index]['target']
+        return (self._data.iloc[index]['source'],)
 
     @property
     def data(self) -> DataFrame:
@@ -240,9 +240,9 @@ class LLMPipeline(AbstractLLMPipeline):
         tokenizer = AutoTokenizer.from_pretrained(self._model_name)
         predictions = []
 
-        if len(sample_batch) == 1:
+        for sample in sample_batch[0]:
             tokens = tokenizer(
-                sample_batch[0][0],
+                sample,
                 padding=True,
                 truncation=True,
                 return_tensors='pt'
@@ -250,17 +250,6 @@ class LLMPipeline(AbstractLLMPipeline):
             output = self._model(**tokens).logits
             predictions.extend([str(prediction.item())
                                 for prediction in list(torch.argmax(output, dim=1))])
-        else:
-            for sample in sample_batch[0]:
-                tokens = tokenizer(
-                    sample[0],
-                    padding=True,
-                    truncation=True,
-                    return_tensors='pt'
-                )
-                output = self._model(**tokens).logits
-                predictions.extend([str(prediction.item())
-                                    for prediction in list(torch.argmax(output, dim=1))])
 
         return predictions
 
@@ -296,7 +285,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             predictions = pd.read_csv(self._data_path)
             evaluation = evaluator.compute(
                 predictions=predictions['predictions'].tolist(),
-                references=predictions['target'].tolist()
+                references=predictions['target'].tolist(),
+                average='weighted'
             )
 
             evaluations.update(evaluation)
