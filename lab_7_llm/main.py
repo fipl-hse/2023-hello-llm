@@ -2,6 +2,7 @@
 Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+import numpy as np
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
@@ -58,37 +59,33 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        self._raw_data = self._raw_data.replace('', np.nan)
         properties_dict = {
             "dataset_number_of_samples": self._raw_data.shape[0],
             "dataset_columns": self._raw_data.shape[1],
             "dataset_duplicates": self._raw_data.drop(["messages"], axis=1).duplicated().sum(),
-            "dataset_empty_rows": self._raw_data.isna().sum().sum()
+            "dataset_empty_rows": self._raw_data.isnull().sum().sum() + self._raw_data.isna().sum().sum()
         }
         self._raw_data = self._raw_data.dropna()
-        properties_dict["dataset_sample_min_len"] = min(len(min(self._raw_data["prompt"], key=len)),
-                                                        self.get_min_len())
-        properties_dict["dataset_sample_max_len"] = max(len(max(self._raw_data["prompt"], key=len)),
-                                                        self.get_max_len())
+        properties_dict["dataset_sample_min_len"] = min(self.get_min_len("prompt"),
+                                                        self.get_min_len("messages"))
+        properties_dict["dataset_sample_max_len"] = max(self.get_max_len("prompt"),
+                                                        self.get_max_len("messages"))
         return properties_dict
 
-    def get_min_len(self):
-        min_len = (len(self._raw_data["messages"][0][0]["content"])
-                   + len(self._raw_data["messages"][0][1]["content"]))
+    def get_min_len(self, column):
+        min_len = len(f'{self._raw_data[column][0]}')
         index = -1
-        for row in self._raw_data["messages"]:
-            index += 1
-            if len(row[0]["content"]) + len(row[1]["content"]) < min_len:
-                min_len = len(row[0]["content"]) + len(row[1]["content"])
+        for cell in self._raw_data[column]:
+            if 0 < len(f'{cell}') < min_len:
+                min_len = len(f'{cell}')
         return min_len
 
-    def get_max_len(self):
-        max_len = (len(self._raw_data["messages"][0][0]["content"])
-                   + len(self._raw_data["messages"][0][1]["content"]))
-        index = -1
-        for row in self._raw_data["messages"]:
-            index += 1
-            if len(row[0]["content"]) + len(row[1]["content"]) > max_len:
-                max_len = len(row[0]["content"]) + len(row[1]["content"])
+    def get_max_len(self, column):
+        max_len = len(f'{self._raw_data[column][0]}')
+        for cell in self._raw_data[column]:
+            if len(f'{cell}') > max_len:
+                max_len = len(f'{cell}')
         return max_len
 
 
