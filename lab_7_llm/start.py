@@ -19,8 +19,8 @@ def main() -> None:
     raw_dataset = RawDataImporter(settings_dict["parameters"]["dataset"])
     raw_dataset.obtain()
     processed_dataset = RawDataPreprocessor(raw_dataset.raw_data)
+    #processed_dataset.transform()
     analysis = processed_dataset.analyze()
-    processed_dataset.transform()
     print(analysis)
 
     result = 1
