@@ -26,6 +26,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
+    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -115,7 +116,7 @@ class TaskDataset(Dataset):
             tuple[str, ...]: The item to be received
         """
 
-        return self._data[ColumnNames.SOURCE].iloc[index]
+        return (self._data.iloc[index][ColumnNames.SOURCE],)
 
     @property
     def data(self) -> DataFrame:
@@ -133,6 +134,7 @@ class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
     """
+    _model: torch.nn.Module
 
     def __init__(
             self,
@@ -159,7 +161,6 @@ class LLMPipeline(AbstractLLMPipeline):
         self._dataset = dataset
         self._max_length = max_length
         self._batch_size = batch_size
-        self._device = device
 
     def analyze_model(self) -> dict:
         """
@@ -275,7 +276,6 @@ class TaskEvaluator(AbstractTaskEvaluator):
 
         super().__init__(metrics)
         self._data_path = data_path
-        self._metrics = metrics
 
     @report_time
     def run(self) -> dict | None:
