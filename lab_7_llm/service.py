@@ -16,7 +16,6 @@ def init_application() -> tuple[FastAPI, LLMPipeline]:
     #doctest: +SKIP
     Initialize core application.
 
-
     Run: uvicorn reference_service.server:app --reload
 
     Returns:
