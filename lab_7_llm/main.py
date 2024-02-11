@@ -278,17 +278,15 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        pred_df = pd.read_csv(self._data_path)
         evaluations = {}
 
         for metric in self._metrics:
-            evaluator = load(metric.value)
-            predictions = pd.read_csv(self._data_path)
-            evaluation = evaluator.compute(
-                predictions=predictions['predictions'],
-                references=predictions['target'],
-                average=None
-            )
+            metric = load(metric.value)
 
-            evaluations.update(evaluation)
+            evaluation = metric.compute(references=pred_df['target'],
+                                        predictions=pred_df['predictions'])
+
+            evaluations[metric.name] = evaluations.get(metric.name)
 
         return evaluations
