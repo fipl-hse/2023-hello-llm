@@ -1,7 +1,8 @@
 """
-Check docstrings for conformance to the Google-style-docstrings
+Check docstrings for conformance to the Google-style-docstrings.
 """
 
+import subprocess
 import sys
 from pathlib import Path
 
@@ -10,68 +11,125 @@ from config.constants import PROJECT_CONFIG_PATH, PROJECT_ROOT
 from config.project_config import ProjectConfig
 
 
-def main(labs_list: list[Path]) -> None:
+def get_files() -> list:
     """
-    Check docstrings.
+    Get paths to files in config and core_utils packages.
+
+    Returns:
+        list: File paths
+    """
+    directories = ['config', 'core_utils']
+    file_paths = [file for directory in directories
+                  for file in Path(PROJECT_ROOT / directory).glob('**/*.py')
+                  if file.name != '__init__.py']
+    return file_paths
+
+
+def check_with_pydoctest(path_to_file: Path, path_to_config: Path) \
+        -> subprocess.CompletedProcess:
+    """
+    Check docstrings in file with pydoctest module.
 
     Args:
-        labs_list (list[Path]): Paths to labs
+        path_to_file (Path): Path to file
+        path_to_config (Path): Path to pydoctest config
+
+    Returns:
+        subprocess.CompletedProcess: Program execution values
+    """
+    pydoctest_args = [
+        '--config',
+        str(path_to_config),
+        '--file',
+        str(path_to_file)
+    ]
+    return _run_console_tool('pydoctest', pydoctest_args, debug=True)
+
+
+def check_with_pydocstyle(path_to_file: Path) -> subprocess.CompletedProcess:
+    """
+    Check docstrings in file with pydocstyle module.
+
+    Args:
+        path_to_file (Path): Path to file
+
+    Returns:
+        subprocess.CompletedProcess: Program execution values
+    """
+    pydocstyle_args = [
+        '-m',
+        'pydocstyle',
+        str(path_to_file)
+    ]
+    return _run_console_tool(str(choose_python_exe()), pydocstyle_args, debug=True)
+
+
+def check_file(path_to_file: Path) -> str:
+    """
+    Check docstrings in file for conformance to the Google-style-docstrings.
+
+    Args:
+        path_to_file (Path): Path to file
+
+    Returns:
+        str: Errors in file
+    """
+    errors = ''
+    all_errors = ''
+    pydoctest_config = PROJECT_ROOT / 'config' / 'stage_1_style_tests' / 'pydoctest.json'
+    pydoctest_checks = check_with_pydoctest(path_to_file, pydoctest_config)
+    if pydoctest_checks.returncode == 0:
+        print(f'All docstrings in {path_to_file} conform to Google-style'
+              f'according to Pydoctest.\n')
+    else:
+        errors += f'Pydoctest errors:\n{pydoctest_checks.stdout}'
+
+    pydocstyle_checks = check_with_pydocstyle(path_to_file)
+    if pydocstyle_checks.returncode == 0:
+        print(f'All docstrings in {path_to_file} conform to Google-style'
+              f'according to Pydocstyle.\n')
+    else:
+        errors += f'Pydocstyle errors:\n{pydocstyle_checks.stdout}'
+
+    if errors:
+        all_errors += (f'\nDocstrings in {path_to_file} do not conform to Google-style.\n'
+                       f'ERRORS:\n{errors}\n')
+    return all_errors
+
+
+def main() -> None:
+    """
+    Check docstrings for lab, config and core_utils packages.
     """
     all_errors = []
-    pydoctest_config = PROJECT_ROOT / 'config' / 'stage_1_style_tests' / 'pydoctest.json'
+    check_is_good = True
+    project_config = ProjectConfig(PROJECT_CONFIG_PATH)
+    labs_list = project_config.get_labs_paths()
+    files_list = get_files()
 
+    # check docstrings in config and core_utils
+    for file in files_list:
+        print(f'\nChecking {file}')
+        all_errors.append(check_file(file))
+
+    # check docstrings in labs
     for lab_path in labs_list:
-        lab_errors = ''
         main_path = lab_path / 'main.py'
 
         if not main_path.exists():
-            print(f'\nIgnoring {main_path}: it does not exist')
+            print(f'\nIgnoring {main_path}: it does not exist.')
             continue
         print(f'\nChecking {main_path}')
 
-        pydoctest_args = [
-            '--config',
-            str(pydoctest_config),
-            '--file',
-            str(main_path)
-        ]
-        res_process = _run_console_tool('pydoctest', pydoctest_args, debug=True)
-        if res_process.returncode == 0:
-            print(f'All docstrings in {main_path} conform to Google-style according to Pydoctest\n')
-        else:
-            lab_errors += f'Pydoctest errors:\n{res_process.stdout}'
+        all_errors.append(check_file(main_path))
 
-        pydocstyle_args = [
-            '-m',
-            'pydocstyle',
-            str(main_path)
-        ]
-        res_process = _run_console_tool(str(choose_python_exe()), pydocstyle_args, debug=True)
-        if res_process.returncode == 0:
-            print(
-                f'All docstrings in {main_path} conform to Google-style according to Pydocstyle\n')
-        else:
-            lab_errors += f'Pydocstyle errors:\n{res_process.stdout}'
-
-        if lab_errors:
-            all_errors.append(f'\nDocstrings in {main_path} do not conform to Google-style.\n'
-                              f'ERRORS:\n{lab_errors}\n')
-
-    if all_errors:
+    if not all(el == '' for el in all_errors):
+        check_is_good = False
         print('\n'.join(all_errors))
-        print('\nThe docstring check was not successful! Check the logs above.')
+        print('\nThe docstring check was not successful!')
 
-        log_file_path = PROJECT_ROOT.joinpath('docstring_check.log')
-        with open(file=log_file_path, mode='w', encoding='utf-8') as log_file:
-            log_file.write('\n'.join(all_errors))
-        print(f'Full check log could be found in: {log_file_path}.\n')
-
-        print('The error explanations for\n'
-              'Pydocstyle: http://www.pydocstyle.org/en/stable/error_codes.html')
-
-    sys.exit(bool(all_errors))
+    sys.exit(not check_is_good)
 
 
 if __name__ == '__main__':
-    project_config = ProjectConfig(PROJECT_CONFIG_PATH)
-    main(labs_list=project_config.get_labs_paths())
+    main()
