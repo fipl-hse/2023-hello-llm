@@ -38,10 +38,6 @@ class RawDataImporter(AbstractRawDataImporter):
         """
         self._raw_data = load_dataset(self._hf_name, name='default', split='test').to_pandas()
 
-    @property
-    def raw_data(self) -> pd.DataFrame:
-        return self._raw_data
-
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
