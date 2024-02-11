@@ -94,12 +94,16 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
 
         self._data = self._raw_data[(self._raw_data.category == 'Closed QA')]
-        self._data = self._data.drop(['prompt_id', 'category'], axis=1)
-        #self._data = self._data.drop_duplicates()
         self._data = self._data.rename(columns={'prompt': 'questions'}, inplace=False)
+        self._data[['context', 'answer']] = pd.DataFrame(self._data['messages'].to_list(), index=self._data.index)
+        self._data[['answer', 'answer3']] = pd.DataFrame(self._data['answer'].apply(pd.Series),
+                                                         index=self._data.index)
+        self._data[['context', 'context3']] = pd.DataFrame(self._data['context'].apply(pd.Series),
+                                                           index=self._data.index)
+        self._data = self._data.drop(['prompt_id', 'category', 'messages', 'answer3', 'context3'], axis=1)
         self._data = self._data.dropna()
-        print(self._data.shape)
-        print(min(self._data["prompt"], key=len))
+        self._data = self._data.drop_duplicates()
+        self._data = self._data.reset_index(drop=True)
 
 
 class TaskDataset(Dataset):
