@@ -1,16 +1,14 @@
 'use strict'
 
 let inferSampleFromForm = async (premise, hypothesis, result) => {
+    let sample = premise.value.concat('|', hypothesis.value)
     await fetch('/infer', {
         method: 'POST',
         headers: {
             'Content-type': 'application/json'
         },
         body: JSON.stringify({
-            question: {
-                premise: premise.value,
-                hypothesis: hypothesis.value
-            }
+            question: sample
         })
     }).then(res => {return res.json()})
         .then(data => {
