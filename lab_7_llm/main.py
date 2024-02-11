@@ -50,6 +50,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     A class that analyzes and preprocesses a dataset.
     """
+
     @report_time
     def analyze(self) -> dict:
         """
@@ -60,22 +61,43 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         properties_dict = {"dataset_number_of_samples": self._raw_data.shape[0],
                            "dataset_columns": self._raw_data.shape[1],
-                           "dataset_empty_rows": self._raw_data.drop("messages", axis=1).duplicated().sum(),
-                           "dataset_duplicates": self._raw_data.isna().sum().sum()}
+                           "dataset_empty_rows": self.search_empty_cells(),
+                           "dataset_duplicates": self.search_duplicates()}
 
         self._raw_data = self._raw_data.dropna()
         properties_dict["dataset_sample_min_len"] = min(self.get_min_len("prompt"),
                                                         self.get_min_len("messages"))
         properties_dict["dataset_sample_max_len"] = max(self.get_max_len("prompt"),
                                                         self.get_max_len("messages"))
-
+        self.search_duplicates()
         return properties_dict
+
+    ## I'm so done with this thing, but, unlike, .isna(), it works >_<
+    def search_empty_cells(self):
+        empty_counter = 0
+        empty_list = []
+        for column in ['prompt', 'messages', 'prompt_id', 'category']:
+            for cell in self._raw_data[column]:
+                if 0 == len(f'{cell}'):
+                    empty_counter += 1
+        return empty_counter
+
+    def search_duplicates(self):
+        duplicates_counter = 0
+        for column in ['prompt', 'messages', 'prompt_id']:
+            cell_list = []
+            for cell in self._raw_data[column]:
+                cell_list.append(f'{cell}')
+            duplicates_counter += (len(cell_list) - len(set(cell_list)))
+        if duplicates_counter/3 >= 1:
+            return duplicates_counter
+        else:
+            return 0
 
     def get_min_len(self, column):
         min_len = len(f'{self._raw_data[column][0]}')
         index = -1
         for cell in self._raw_data[column]:
-
             if 0 < len(f'{cell}') < min_len:
                 min_len = len(f'{cell}')
         return min_len
@@ -86,7 +108,6 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             if len(f'{cell}') > max_len:
                 max_len = len(f'{cell}')
         return max_len
-
 
     @report_time
     def transform(self) -> None:
@@ -239,8 +260,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
         """
 
 
-#importer = RawDataImporter('')
-#importer.obtain()
+# importer = RawDataImporter('')
+# importer.obtain()
 
 # Load model directly
 '''from transformers import AutoTokenizer, AutoModelForQuestionAnswering
