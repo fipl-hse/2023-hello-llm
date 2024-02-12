@@ -74,10 +74,10 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Apply preprocessing transformations to the raw dataset.
         """
         self._data = (self._raw_data
-            .drop(labels="id", axis=1)
-            .rename(columns={"article": "source", "highlights": "target"})
-            .dropna().drop_duplicates()
-            .reset_index(drop=True))
+                      .drop(labels="id", axis=1)
+                      .rename(columns={"article": "source", "highlights": "target"})
+                      .dropna().drop_duplicates()
+                      .reset_index(drop=True))
         self._data["source"] = self._data["source"].str.replace(r"\(CNN\)", "", regex=True)
 
 
@@ -151,6 +151,7 @@ class LLMPipeline(AbstractLLMPipeline):
             device (str): The device for inference
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
+        self.tokenizer = AutoTokenizer.from_pretrained(self._model_name)
         self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
@@ -196,15 +197,13 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         if not self._model:
             return None
-        else:
-            tokenizer = AutoTokenizer.from_pretrained(self._model_name)
 
-            tokens = tokenizer(sample[0], max_length=120, padding=True,
-                               return_tensors='pt', truncation=True)
-            output = self._model.generate(**tokens, max_length=self._max_length)
-            result = tokenizer.batch_decode(output, skip_special_tokens=True)
+        tokens = self.tokenizer(sample[0], max_length=120, padding=True,
+                           return_tensors='pt', truncation=True)
+        output = self._model.generate(**tokens, max_length=self._max_length)
+        result = self.tokenizer.batch_decode(output, skip_special_tokens=True)
 
-            return result[0]
+        return result[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
