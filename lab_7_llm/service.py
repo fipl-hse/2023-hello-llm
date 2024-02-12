@@ -62,7 +62,7 @@ async def root(request: Request) -> HTMLResponse:
     """
     Endpoint to demonstrate the case when no dynamic data is loaded.
     """
-    templates = Jinja2Templates(directory='assets')
+    templates = Jinja2Templates(directory=PROJECT_ROOT / 'lab_7_llm' / 'assets')
     return templates.TemplateResponse('index.html', {'request': request})
 
 
