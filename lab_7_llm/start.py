@@ -30,7 +30,7 @@ def main() -> None:
     pipeline = LLMPipeline(settings['parameters']['model'],
                            dataset,
                            max_length=120,
-                           batch_size=1,
+                           batch_size=64,
                            device='cpu')
 
     pipeline.analyze_model()
@@ -40,13 +40,7 @@ def main() -> None:
         os.mkdir(f'{PROJECT_ROOT}/lab_7_llm/dist')
     pred_path = f'{PROJECT_ROOT}/lab_7_llm/dist/predictions.csv'
 
-    pipeline2 = LLMPipeline(settings["parameters"]["model"],
-                            dataset,
-                            max_length=120,
-                            batch_size=64,
-                            device="cpu")
-
-    pipeline2.infer_dataset().to_csv(pred_path, index=False)
+    pipeline.infer_dataset().to_csv(pred_path, index=False)
 
     evaluator = TaskEvaluator(Path(pred_path),
                               [Metrics[metric.upper()] for metric in
