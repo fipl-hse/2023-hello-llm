@@ -1,7 +1,7 @@
 'use strict'
 
 let inferSampleFromForm = async (premise, hypothesis, result) => {
-    await fetch('/infer', {
+    let response = await fetch('/infer', {
         method: 'POST',
         headers: {
             'Content-type': 'application/json'
@@ -10,17 +10,20 @@ let inferSampleFromForm = async (premise, hypothesis, result) => {
             question: premise.value,
             hypothesis: hypothesis.value
         })
-    }).then(res => {return res.json()})
-        .then(data => {
-            result.innerHTML = ''
-            if (data['infer'] === '1') {
-                result.appendChild(document.createTextNode('Entailment'))
-            } else if (data['infer'] === '0') {
-                result.appendChild(document.createTextNode('Not entailment'))
-            } else {
-                result.appendChild(document.createTextNode('Something went wrong :('))
-            }
-        })
+    })
+    if (response.ok) {
+        let infer_res = await response.json();
+        result.innerHTML = '';
+        if (infer_res['infer'] === '1') {
+            result.appendChild(document.createTextNode('Entailment'))
+        } else if (infer_res['infer'] === '0') {
+            result.appendChild(document.createTextNode('Not entailment'))
+        }
+    } else {
+        result.appendChild(document.createTextNode('Something went wrong: ' + response.status))
+    }
+
+
 }
 
 let disableButton = (btn, premise, hypothesis) => {
