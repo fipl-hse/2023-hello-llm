@@ -141,6 +141,7 @@ class LLMPipeline(AbstractLLMPipeline):
             device (str): The device for inference
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
+        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
         self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
@@ -222,13 +223,12 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
         predictions = []
 
-        tokens = tokenizer(sample_batch[0], max_length=120, padding=True,
-                           return_tensors='pt', truncation=True)
+        tokens = self._tokenizer(sample_batch[0], max_length=120, padding=True,
+                                 return_tensors='pt', truncation=True)
         output = self._model.generate(**tokens)
-        result = tokenizer.batch_decode(output, skip_special_tokens=True)
+        result = self._tokenizer.batch_decode(output, skip_special_tokens=True)
         predictions.extend(result)
 
         return predictions
