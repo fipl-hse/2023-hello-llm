@@ -51,6 +51,7 @@ def main() -> None:
         [Metrics[metric.upper()] for metric in settings['parameters']['metrics']]
     )
     result = evaluator.run()
+    print(result)
 
     assert result is not None, "Demo does not work correctly"
 

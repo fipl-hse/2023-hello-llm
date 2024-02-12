@@ -243,6 +243,7 @@ class LLMPipeline(AbstractLLMPipeline):
         for sample in sample_batch[0]:
             tokens = self._tokenizer(
                 sample,
+                max_length=self._max_length,
                 padding=True,
                 truncation=True,
                 return_tensors='pt'
