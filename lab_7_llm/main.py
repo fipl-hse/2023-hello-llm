@@ -243,7 +243,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Initialize an instance of Evaluator.
 
         Args:
-            data_path (path.Path): Path to predictions
+            data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
         super().__init__(metrics)
@@ -264,13 +264,15 @@ class TaskEvaluator(AbstractTaskEvaluator):
             metric = Metrics[str(metric).upper()]
             if metric is Metrics.ROUGE:
                 metric = load(metric.value, seed=77)
-                metric_scores['rouge'] = metric.compute(
-                    references=predictions['target'],
-                    predictions=predictions['prediction']).get('rougeL')
             else:
                 metric = load(metric.value)
-                metric_scores[metric.name] = metric.compute(
-                    references=predictions['target'],
-                    predictions=predictions['prediction']).get(metric.name)
+            scores = metric.compute(
+                references=predictions['target'],
+                predictions=predictions['prediction'])
+
+            if metric.name == 'rouge':
+                metric_scores['rouge'] = scores.get('rougeL')
+            else:
+                metric_scores[metric.name] = scores.get(metric.name)
 
         return metric_scores
