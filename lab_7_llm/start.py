@@ -37,7 +37,6 @@ def main() -> None:
     print(llm.analyze_model())
 
     sample_infer = llm.infer_sample(dataset[0])
-
     print('prediction for sample (', dataset[0], ')', sample_infer)
 
     predictions = llm.infer_dataset()
