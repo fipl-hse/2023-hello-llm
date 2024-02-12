@@ -284,7 +284,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
             metric = load(metric.value)
             evaluation = metric.compute(references=to_eval_df['target'].tolist(),
                                         predictions=to_eval_df['predictions'].tolist(),
-                                        average=None
+                                        average='micro'
                                         )
             evaluations.update(dict(evaluation))
 
