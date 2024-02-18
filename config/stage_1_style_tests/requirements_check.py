@@ -1,6 +1,7 @@
 """
-Checks dependencies
+Check dependencies.
 """
+
 import re
 import sys
 from pathlib import Path
@@ -10,14 +11,23 @@ from config.constants import PROJECT_ROOT
 
 def get_paths() -> list[Path]:
     """
-    Returns list of paths to non-python files
+    Get paths to non-python files.
+
+    Returns:
+        list[Path]: Paths to non-python files
     """
     return list(PROJECT_ROOT.rglob('requirements*.txt'))
 
 
 def get_requirements(path: Path) -> list:
     """
-    Returns a list of dependencies
+    Get dependencies.
+
+    Args:
+        path (Path): Path to non-python file
+
+    Returns:
+        list: Dependencies
     """
     with path.open(encoding='utf-8') as f:
         lines = f.readlines()
@@ -26,7 +36,10 @@ def get_requirements(path: Path) -> list:
 
 def compile_pattern() -> re.Pattern:
     """
-    Returns the compiled pattern
+    Compile pattern.
+
+    Returns:
+        re.Pattern: Compiled pattern
     """
     return re.compile(r'((\w+(-\w+|\[\w+\])*==\d+(\.\d+)+)'
                       r'|((-r|--extra-index-url)\s.*))', re.MULTILINE)
@@ -34,7 +47,15 @@ def compile_pattern() -> re.Pattern:
 
 def check_dependencies(lines: list, compiled_pattern: re.Pattern, path: Path) -> bool:
     """
-    Checks that dependencies confirm to the template
+    Check that dependencies confirm to the template.
+
+    Args:
+        lines (list): Dependencies
+        compiled_pattern (re.Pattern): Compiled pattern
+        path (Path): Path to file with dependencies
+
+    Returns:
+        bool: Do dependencies confirm to the template or not
     """
     expected = [
         i
@@ -62,7 +83,7 @@ def check_dependencies(lines: list, compiled_pattern: re.Pattern, path: Path) ->
 
 def main() -> None:
     """
-    Calls functions
+    Call functions.
     """
     paths = get_paths()
     compiled_pattern = compile_pattern()

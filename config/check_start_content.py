@@ -1,5 +1,5 @@
 """
-Some simple checks for start.py lab files
+Some simple checks for start.py lab files.
 """
 
 import argparse
@@ -8,7 +8,13 @@ import sys
 
 def check_assert_line(content: str) -> bool:
     """
-    main check
+    Check assert line.
+
+    Args:
+        content (str): Content
+
+    Returns:
+        bool: Is expected in content or not
     """
     expected = 'assert result'
     expected_alternative = 'assert RESULT'

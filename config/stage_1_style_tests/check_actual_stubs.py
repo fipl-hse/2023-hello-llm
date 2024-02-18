@@ -1,7 +1,7 @@
 """
-Checks the relevance of stubs
+Check the relevance of stubs.
 """
-
+# pylint: disable=too-many-locals
 import sys
 from pathlib import Path
 
@@ -13,7 +13,13 @@ from config.project_config import ProjectConfig
 
 def get_code(code_path: Path) -> str:
     """
-    Gets clear code from file
+    Get clear code from file.
+
+    Args:
+        code_path (Path): Path to file with code
+
+    Returns:
+        str: Clear code
     """
     with code_path.open(encoding='utf-8') as file:
         code_text = file.read()
@@ -22,7 +28,10 @@ def get_code(code_path: Path) -> str:
 
 def clear_examples(lab_path: Path) -> None:
     """
-    Cleans temp files
+    Clean temp files.
+
+    Args:
+        lab_path (Path): Path to temp files
     """
     example_main_stub_path = lab_path / 'example_main_stub.py'
     example_start_stub_path = lab_path / 'example_start_stub.py'
@@ -32,12 +41,13 @@ def clear_examples(lab_path: Path) -> None:
 
 def main() -> None:
     """
-    Checks the relevance of stubs
+    Check the relevance of stubs.
     """
     project_config = ProjectConfig(PROJECT_CONFIG_PATH)
     labs_paths = project_config.get_labs_paths()
     code_is_equal = True
     for lab_path in labs_paths:
+        print(f'Processing {lab_path}...')
         main_stub_path = lab_path / 'main_stub.py'
         start_stub_path = lab_path / 'start_stub.py'
 
@@ -71,6 +81,14 @@ def main() -> None:
         if formatted_start != start_stub_code:
             code_is_equal = False
             print(f'You have different start and start_stub in {lab_path}')
+
+        if lab_path.name == 'lab_8_llm':
+            lab_7_main = get_code(lab_path / 'main.py')
+            lab_8_main = get_code(lab_path.parent / 'lab_7_llm' / 'main.py')
+
+            if lab_7_main != lab_8_main:
+                code_is_equal = False
+                print('You have different main for Lab 7 and Lab 8!')
 
         clear_examples(lab_path)
     if code_is_equal:

@@ -5,8 +5,6 @@ if [[ "$1" == "smoke" ]]; then
   DIRS_TO_CHECK=(
     "config"
     "seminars"
-    "core_utils"
-    "lab_7_llm"
   )
 else
   DIRS_TO_CHECK=(
@@ -14,6 +12,7 @@ else
     "seminars"
     "core_utils"
     "lab_7_llm"
+    "lab_8_llm"
   )
 fi
 
@@ -25,5 +24,6 @@ python -m flake8 "${DIRS_TO_CHECK[@]}"
 
 if [[ "$1" != "smoke" ]]; then
   python -m pytest -m "mark10 and lab_7_llm"
+  python -m pytest -m "mark10 and lab_8_llm"
 fi
 
