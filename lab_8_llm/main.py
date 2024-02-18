@@ -1,7 +1,9 @@
 """
-Neural machine translation module.
+Laboratory work.
+
+Working with Large Language Models.
 """
-# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
@@ -13,10 +15,6 @@ except ImportError:
     print('Library "torch" not installed. Failed to import.')
     Dataset = dict
     torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-import pandas as pd
-from datasets import load_dataset
-from torch.utils.data.dataset import Dataset
 
 try:
     from pandas import DataFrame
@@ -45,13 +43,12 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = load_dataset(self._hf_name, name='default', split='test').to_pandas()
+
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     A class that analyzes and preprocesses a dataset.
     """
-
 
     def analyze(self) -> dict:
         """
@@ -61,25 +58,11 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             dict: Dataset key properties
         """
 
-        analyse_dataset = {'dataset_columns': self._raw_data.shape[1],
-                           'dataset_duplicates': self._raw_data.duplicated().sum(),
-                           'dataset_empty_rows': self._raw_data.isna().sum().sum(),
-                           'dataset_number_of_samples': len(self._raw_data),
-                           'dataset_sample_min_len': len(min(self._raw_data['text'], key=len)),
-                           'dataset_sample_max_len': len(max(self._raw_data['text'], key=len)),
-                           }
-        return analyse_dataset
-
     @report_time
     def transform(self) -> None:
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._data = self._raw_data.rename(
-            columns={'text': 'source',
-                     'summary': 'target'}).reset_index(drop=True)
-        self._data = self._raw_data.drop(
-            columns=['title', 'date','url']).reset_index(drop=True)
 
 
 class TaskDataset(Dataset):
@@ -212,5 +195,3 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
-
-
