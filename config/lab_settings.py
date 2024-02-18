@@ -21,6 +21,18 @@ class ParametersModel:
 
 
 @dataclass
+class InferenceParams:
+    """
+    Inference parameters.
+    """
+    num_samples: int
+    max_length: int
+    batch_size: int
+    predictions_path: Path
+    device: str
+
+
+@dataclass
 class LabSettingsModel:
     """
     DTO for storing labs settings.
