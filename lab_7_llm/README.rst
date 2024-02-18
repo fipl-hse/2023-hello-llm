@@ -1,3 +1,5 @@
+.. _lab_7_llm/README:
+
 Laboratory work №7. Large Language Models no. 1
 ===============================================
 
@@ -497,7 +499,7 @@ use:
     * ``max_length`` = 120;
     * ``device`` = 'cpu'.
 
-.. note:: For generation task use ``max_length`` = 512.
+.. note:: For generation closed QA task use ``max_length`` = 512.
 
 Stage 4.4. Infer dataset
 """"""""""""""""""""""""
@@ -539,7 +541,7 @@ first you need to implement method
 which allows to infer a single batch.
 
 .. note:: There are going to be a few peculiarities
-         when implementing method for generation task.
+         when implementing method for generation closed QA task.
          You can find them in :ref:`generation-label`.
 
 .. important:: You have to rewrite ``infer_sample()`` and ``infer_dataset()`` methods
