@@ -1,7 +1,7 @@
 """
 Collect and store model analytics.
 """
-# pylint: disable=import-error
+# pylint: disable=import-error, assignment-from-no-return, duplicate-code
 from pathlib import Path
 from typing import Any
 

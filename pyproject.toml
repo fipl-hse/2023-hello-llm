@@ -77,6 +77,8 @@ module = [
     'core_utils.llm.llm_pipeline',
     'lab_7_llm.service',
     'lab_7_llm.main',
+    'lab_8_llm.service',
+    'lab_8_llm.main',
 ]
 disable_error_code = [
     'no-any-unimported'
@@ -85,6 +87,7 @@ disable_error_code = [
 [[tool.mypy.overrides]]
 module = [
     'config.get_datasets_analytics',
+    'config.get_inference_analytics',
     'config.get_references',
     'seminars.seminar_02_06_2024.try_fastapi',
 ]
