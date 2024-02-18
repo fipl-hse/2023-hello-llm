@@ -659,5 +659,26 @@
         ],
         "size": 1111308296,
         "vocab_size": 251000
+    },
+    "IlyaGusev/rubertconv_toxic_clf": {
+        "embedding_size": 512,
+        "input_shape": {
+            "attention_mask": [
+                1,
+                512
+            ],
+            "input_ids": [
+                1,
+                512
+            ]
+        },
+        "max_context_length": 20,
+        "num_trainable_params": 177854978,
+        "output_shape": [
+            1,
+            2
+        ],
+        "size": 711419912,
+        "vocab_size": 119547
     }
 }

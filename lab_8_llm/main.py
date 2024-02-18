@@ -1,7 +1,9 @@
 """
-Neural machine translation module.
+Laboratory work.
+
+Working with Large Language Models.
 """
-# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
@@ -148,7 +150,6 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-    m
 
     @report_time
     def infer_dataset(self) -> DataFrame:
