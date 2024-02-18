@@ -24,6 +24,9 @@ Models
 | `XSY/albert-base-v2-imdb-calssification <https://hugging            | EN   |
 | face.co/XSY/albert-base-v2-imdb-calssification>`__                  |      |
 +---------------------------------------------------------------------+------+
+| `IlyaGusev/rubertconv_toxic_clf <https://hugging                    | EN   |
+| face.co/IlyaGusev/rubertconv_toxic_clf>`__                          |      |
++---------------------------------------------------------------------+------+
 | `aiknowyou/it-emotion-analyzer <https://hugging                     | RU   |
 | face.co/aiknowyou/it-emotion-analyzer>`__                           |      |
 +---------------------------------------------------------------------+------+
@@ -59,12 +62,13 @@ Datasets
 
       1. Select ``simplified`` subset.
       2. Drop columns ``id`` and ``text``.
-      3. Rename columns ``labels`` to ``target``.
-      4. Rename column ``ru_text`` to ``source``.
-      5. Group emotions and change numbers to words.
-      6. Delete duplicates in ``target``.
-      7. Clean column ``source``.
-      8. Reset indexes.
+      3. Convert column ``labels`` to tuple.
+      4. Rename columns ``labels`` to ``target``.
+      5. Rename column ``ru_text`` to ``source``.
+      6. Group emotions and change numbers to words.
+      7. Delete duplicates in ``target``.
+      8. Clean column ``source``.
+      9. Reset indexes.
 
 3. `papluca/language-identification <https://huggingface.co/datasets/papluca/language-identification>`__
 
@@ -176,6 +180,29 @@ Datasets
       4. Remove irrelevant rows in dataset.
       5. Delete duplicates in dataset.
       6. Reset indexes.
+
+13. `Arsive/toxicity_classification_jigsaw <https://huggingface.co/datasets/Arsive/toxicity_classification_jigsaw>`__
+
+   1. **Lang**: EN
+   2. **Rows**: 6490
+   3. **Preprocess**:
+
+      1. Drop column ``id``, ``severe_toxic``, ``obscene``,
+         ``threat``, ``insult``, ``identity_hate``.
+      2. Rename column ``toxic`` to ``target``.
+      3. Rename column ``comment_text`` to ``source``.
+      4. Reset indexes.
+
+14. `s-nlp/en_paradetox_toxicity <https://huggingface.co/datasets/s-nlp/en_paradetox_toxicity>`__
+
+   1. **Lang**: EN
+   2. **Rows**: 26507
+   3. **Preprocess**:
+
+      1. Select ``train`` subset.
+      2. Rename column ``toxic`` to ``target``.
+      3. Rename column ``comment`` to ``source``.
+      4. Reset indexes.
 
 Metrics
 -------
