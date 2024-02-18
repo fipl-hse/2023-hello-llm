@@ -61,9 +61,10 @@ Datasets CLOSED QA
       1. Select ``train_sft`` split.
       2. Choose category ``Closed QA``.
       3. Choose columns ``prompt``, ``messages``.
-      4. Rename column ``prompt`` to ``question``.
-      5. Reset indexes.
-      6. Process column ``messages`` with raw text into two columns ``context`` and ``answer``.
+      4. Convert column ``messages`` to string, using f-string.
+      5. Rename column ``prompt`` to ``question``.
+      6. Reset indexes.
+      7. Process column ``messages`` with raw text into two columns ``context`` and ``answer``.
 
 4. `sberquad <https://huggingface.co/datasets/sberquad>`__
 
