@@ -18,9 +18,11 @@ pyspelling==2.9
 pytest==7.4.4
 regex==2023.12.25
 resplendent==0.3.5
+simplejson==3.19.2
 sphinx-rtd-theme==2.0.0
 sphinx==7.2.6
 sphinx_design==0.5.0
 tqdm==4.66.1
 typed-argument-parser==1.9.0
+types-simplejson==3.19.0.2
 types-tqdm==4.66.0.5

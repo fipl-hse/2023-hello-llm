@@ -28,7 +28,10 @@ from reference_lab_classification.main import (AgNewsDataImporter, AgNewsPreproc
                                                RuNonDetoxifiedDataImporter,
                                                RuNonDetoxifiedPreprocessor, RuParadetoxDataImporter,
                                                RuParadetoxPreprocessor, WikiToxicDataImporter,
-                                               WikiToxicRawDataPreprocessor)
+                                               WikiToxicRawDataPreprocessor,
+                                               ToxicityDataPreprocessor,
+                                               ParadetoxDataPreprocessor, ToxicityDataImporter,
+                                               ParadetoxDataImporter)
 from reference_lab_generation.main import (ClinicalNotesRawDataImporter,  # isort:skip
                                            ClinicalNotesRawDataPreprocessor,
                                            DollyClosedRawDataImporter,
@@ -41,8 +44,8 @@ from reference_lab_nli.main import (DatasetTypes, GlueDataImporter,  # isort:ski
                                     NliRusDataImporter, NliRusTranslatedDataPreprocessor,
                                     QnliDataPreprocessor, RussianSuperGlueDataImporte,
                                     XnliDataImporter)
-from reference_lab_nmt.helpers import (EnDeRawDataPreprocessor, RuEnRawDataImporter,  # isort:skip
-                                       RuEnRawDataPreprocessor, RuEsRawDataPreprocessor)
+from reference_lab_nmt.main import (RuEnRawDataImporter, RuEnRawDataPreprocessor,  # isort:skip
+                                    RuEsRawDataPreprocessor, EnDeRawDataPreprocessor)
 from reference_lab_open_qa.main import (AlpacaRawDataPreprocessor,  # isort:skip
                                         DatabricksRawDataPreprocessor,
                                         DollyOpenQARawDataImporter, DollyOpenQARawDataPreprocessor,
@@ -148,6 +151,10 @@ def main() -> None:
             importer = QARawDataImporter(dataset_name)
         elif dataset_name == 'lionelchg/dolly_open_qa':
             importer = DollyOpenQARawDataImporter(dataset_name)
+        elif dataset_name == 'Arsive/toxicity_classification_jigsaw':
+            importer = ToxicityDataImporter(dataset_name)
+        elif dataset_name == 's-nlp/en_paradetox_toxicity':
+            importer = ParadetoxDataImporter(dataset_name)
         else:
             importer = RawDataImporter(dataset_name)
 
@@ -231,6 +238,10 @@ def main() -> None:
             preprocessor = AlpacaRawDataPreprocessor(importer.raw_data)
         elif dataset_name == 'lionelchg/dolly_open_qa':
             preprocessor = DollyOpenQARawDataPreprocessor(importer.raw_data)
+        elif dataset_name == 'Arsive/toxicity_classification_jigsaw':
+            preprocessor = ToxicityDataPreprocessor(importer.raw_data)
+        elif dataset_name == 's-nlp/en_paradetox_toxicity':
+            preprocessor = ParadetoxDataPreprocessor(importer.raw_data)
         else:
             preprocessor = RawDataPreprocessor(importer.raw_data)
         try:
