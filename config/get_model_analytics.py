@@ -1,11 +1,11 @@
 """
 Collect and store model analytics.
 """
-
 # pylint: disable=import-error
-import json
 from pathlib import Path
 from typing import Any
+
+import simplejson as json
 
 try:
     from pandas import DataFrame
@@ -13,7 +13,7 @@ except ImportError:
     print('Library "pandas" not installed. Failed to import.')
     DataFrame = dict  # type: ignore
 
-from reference_lab_nmt.main import LLMPipeline, TaskDataset  # type: ignore
+from lab_7_llm.main import LLMPipeline, TaskDataset  # type: ignore
 
 
 def get_references(path: Path) -> Any:
@@ -44,7 +44,8 @@ def save_reference(path: Path, refs: dict) -> None:
             file,
             indent=4,
             ensure_ascii=False,
-            sort_keys=True
+            sort_keys=True,
+            use_decimal=True
         )
     with open(path, mode='a', encoding='utf-8') as file:
         file.write('\n')

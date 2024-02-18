@@ -9,11 +9,15 @@ from pydantic.dataclasses import dataclass
 
 from config.get_model_analytics import get_references, save_reference
 
-from reference_lab_classification.main import ClassificationLLMPipeline  # isort:skip
-from reference_lab_generation.main import GenerationLLMPipeline  # isort:skip
-from reference_lab_nli.main import NLILLMPipeline  # isort:skip
-from reference_lab_nmt.main import LLMPipeline, TaskDataset  # isort:skip
-from reference_lab_open_qa.main import OpenQALLMPipeline  # isort:skip
+from reference_lab_classification.main import (  # isort:skip
+    ClassificationLLMPipeline)
+from reference_lab_generation.main import (  # isort:skip
+    GenerationLLMPipeline)
+from reference_lab_nli.main import (  # isort:skip
+    NLILLMPipeline)
+from lab_7_llm.main import LLMPipeline, TaskDataset  # isort:skip
+from reference_lab_open_qa.main import (  # isort:skip
+    OpenQALLMPipeline)
 
 
 @dataclass
@@ -130,7 +134,8 @@ def get_task(model: str, inference_params: InferenceParams, samples: list) -> di
         'aiknowyou/it-emotion-analyzer',
         'blanchefort/rubert-base-cased-sentiment-rusentiment',
         'tatiana-merz/turkic-cyrillic-classifier',
-        's-nlp/russian_toxicity_classifier'
+        's-nlp/russian_toxicity_classifier',
+        'IlyaGusev/rubertconv_toxic_clf'
     ]
 
     nli_model = [

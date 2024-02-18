@@ -11,6 +11,7 @@ markers = [
     "reference_lab_generation: tests for generation task",
     "reference_lab_open_qa: tests for open generative Q&A task",
     "lab_7_llm: tests for lab 7",
+    "lab_8_llm: tests for lab 8",
 ]
 norecursedirs = [
     "venv*"
@@ -84,7 +85,6 @@ disable_error_code = [
 [[tool.mypy.overrides]]
 module = [
     'config.get_datasets_analytics',
-    'config.get_inference_analytics',
     'config.get_references',
     'seminars.seminar_02_06_2024.try_fastapi',
 ]
@@ -133,9 +133,11 @@ src_paths = [
     "reference_lab_nmt",
     "reference_lab_nli",
     "reference_lab_generation",
+    "reference_lab_open_qa",
     "core_utils",
     "config",
-    "lab_7_llm"
+    "lab_7_llm",
+    "lab_8_llm"
 ]
 
 [tool.doc8]
