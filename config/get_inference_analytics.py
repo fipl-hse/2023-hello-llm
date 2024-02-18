@@ -9,15 +9,11 @@ from pydantic.dataclasses import dataclass
 
 from config.get_model_analytics import get_references, save_reference
 
-from reference_lab_classification.main import (  # isort:skip
-    ClassificationLLMPipeline)
-from reference_lab_generation.main import (  # isort:skip
-    GenerationLLMPipeline)
-from reference_lab_nli.main import (  # isort:skip
-    NLILLMPipeline)
 from lab_7_llm.main import LLMPipeline, TaskDataset  # isort:skip
-from reference_lab_open_qa.main import (  # isort:skip
-    OpenQALLMPipeline)
+from reference_lab_classification.main import ClassificationLLMPipeline  # isort:skip
+from reference_lab_generation.main import GenerationLLMPipeline  # isort:skip
+from reference_lab_nli.main import NLILLMPipeline  # isort:skip
+from reference_lab_open_qa.main import OpenQALLMPipeline  # isort:skip
 
 
 @dataclass
