@@ -138,5 +138,10 @@
         "Where is my home?[TEST SEP]My house is in Nizhny Novgorod": "Nizhny Novgorod",
         "Who is the best programmer?[TEST SEP]I am the best programmer": "I",
         "Who teaches the programming course?[TEST SEP]Alexander Vladimirovich Demidovsky is a teacher of the course.": "Alexander Vladimirovich Demidovsky"
+    },
+    "IlyaGusev/rubertconv_toxic_clf": {
+        "Micronesians are being ill treated.": "1",
+        "The news that is being created by cnn and other news agencies is outrageous.": "0",
+        "what a useless clown this man is .": "0"
     }
 }
