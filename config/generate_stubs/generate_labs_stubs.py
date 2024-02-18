@@ -44,6 +44,7 @@ def generate_all_stubs(project_config: ProjectConfig) -> None:
         for module_path in module_paths:
             if not module_path.exists():
                 continue
+            print(f'\t\t{module_path}')
             _generate_stubs_single_module(module_path)
 
 
