@@ -7,9 +7,8 @@ Working with Large Language Models.
 from pathlib import Path
 from typing import Iterable, Sequence
 
+import pandas as pd
 import torch
-import pandas
-
 from datasets import load_dataset
 from evaluate import load
 from pandas import DataFrame, read_csv
