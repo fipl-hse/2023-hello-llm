@@ -1,8 +1,8 @@
 {
   "parameters": {
-    "model": "",
-    "dataset": "",
-    "metrics": []
+    "model": "EleutherAI/gpt-neo-125m",
+    "dataset": "truthful_qa",
+    "metrics": ["BLEU", "ROGUE"]
   },
-  "target_score": 0
+  "target_score": 4
 }
