@@ -214,7 +214,7 @@ class LLMPipeline(AbstractLLMPipeline):
                 return_tensors='pt'
         )
         output = self._model(**tokens)
-        return torch.argmax(output.logits).item()
+        return str(torch.argmax(output.logits).item())
 
     @report_time
     def infer_dataset(self) -> pd.DataFrame:
