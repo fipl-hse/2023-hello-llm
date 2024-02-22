@@ -221,6 +221,18 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        dataset_loader = DataLoader(dataset=self._dataset,
+                                    batch_size=self._batch_size)
+
+        predictions = []
+
+        for batch_data in dataset_loader:
+            predictions.extend(self._infer_batch(batch_data))
+
+        return DataFrame({
+            "target": self._dataset.data["target"],
+            "predictions": predictions
+        })
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -265,6 +277,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        self._data_path = data_path
+        self._metrics = metrics
 
     @report_time
     def run(self) -> dict | None:
@@ -274,3 +288,13 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        predictions_df = read_csv(self._data_path)
+
+        results = {}
+        for metric in self._metrics:
+            metric_instance = load(metric.value)
+            result = metric_instance.compute(predictions=predictions_df["predictions"].tolist(),
+                                             references=predictions_df["target"].tolist())
+            results[metric.value] = result[metric.value]
+
+        return results
