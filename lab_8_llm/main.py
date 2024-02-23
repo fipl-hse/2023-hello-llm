@@ -75,6 +75,13 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        self._data = self._raw_data.drop(columns=[
+            'type',
+            'category',
+            'correct_answers',
+            'incorrect_answers',
+            'source'
+        ]).rename(columns={'best_answer': ColumnNames.TARGET.value})
 
 
 class TaskDataset(Dataset):
