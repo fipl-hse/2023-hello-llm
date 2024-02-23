@@ -59,6 +59,16 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        lengths = self._raw_data.dropna()['question'].apply(lambda x: len(x))
+
+        return {
+            'dataset_number_of_samples': len(self._raw_data),
+            'dataset_columns': len(self._raw_data.columns),
+            'dataset_duplicates': len(self._raw_data[self._raw_data['question'].duplicated()]),
+            'dataset_empty_rows': len(self._raw_data[self._raw_data.isna().any(axis=1)]),
+            'dataset_sample_min_len': lengths.min().min(),
+            'dataset_sample_max_len': lengths.max().max()
+        }
 
     @report_time
     def transform(self) -> None:
