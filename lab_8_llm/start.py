@@ -21,7 +21,8 @@ def main() -> None:
     settings = LabSettings(PROJECT_ROOT / 'lab_8_llm' / 'settings.json')
     importer = RawDataImporter(settings.parameters.dataset)
     preprocessor = RawDataPreprocessor(importer.raw_data)
-    result = preprocessor
+    dataset = TaskDataset(preprocessor.data.head(100))
+    result = dataset
     assert result is not None, "Demo does not work correctly"
 
 
