@@ -8,6 +8,8 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
+from datasets import load_dataset
+
 try:
     import torch
     from torch.utils.data.dataset import Dataset
@@ -43,6 +45,14 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        raw_dataset = load_dataset(self._hf_name,
+                                   name='generation',
+                                   split='validation').to_pandas()
+        self._raw_data = raw_dataset
+
+    @property
+    def raw_data(self) -> DataFrame:
+        return self._raw_data
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -57,6 +67,17 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        drop_empty_rows = self._raw_data.dropna().reset_index(drop=True)
+
+        analyze_dict = {
+            "dataset_number_of_samples": self._raw_data.shape[0],
+            "dataset_columns": self._raw_data.shape[1],
+            "dataset_duplicates": self._raw_data.duplicated(subset=['question']).sum(),
+            "dataset_empty_rows": len(self._raw_data[self._raw_data.isna().any(axis=1)]),
+            "dataset_sample_min_len": drop_empty_rows['question'].str.len().min(),
+            "dataset_sample_max_len": drop_empty_rows['question'].str.len().max()
+        }
+        return analyze_dict
 
     @report_time
     def transform(self) -> None:
