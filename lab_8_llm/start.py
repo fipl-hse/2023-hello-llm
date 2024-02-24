@@ -22,7 +22,8 @@ def main() -> None:
     importer = RawDataImporter(settings.parameters.dataset)
     preprocessor = RawDataPreprocessor(importer.raw_data)
     dataset = TaskDataset(preprocessor.data.head(100))
-    result = dataset
+    pipeline = LLMPipeline(settings.parameters.model, dataset, 120, 1, 'cpu')
+    result = pipeline
     assert result is not None, "Demo does not work correctly"
 
 

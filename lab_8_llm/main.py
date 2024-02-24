@@ -15,7 +15,7 @@ from datasets import load_dataset
 from evaluate import load
 from pandas import DataFrame
 from torch.utils.data import DataLoader, Dataset
-from transformers import AutoTokenizer, BertConfig, BertForSequenceClassification
+from transformers import GPT2TokenizerFast, GPTNeoForCausalLM
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -153,6 +153,13 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        self._model_name = model_name
+        self._model = GPTNeoForCausalLM.from_pretrained(model_name)
+        self._dataset = dataset
+        self._device = device
+        self._tokenizer = GPT2TokenizerFast.from_pretrained(model_name)
+        self._batch_size = batch_size
+        self._max_length = max_length
 
     def analyze_model(self) -> dict:
         """
