@@ -24,6 +24,7 @@ apple
 are
 arg
 args
+arsive
 asclepius
 ask
 assess
@@ -80,6 +81,7 @@ choice
 class
 classdef
 classify
+clf
 cli
 clone
 code
@@ -445,6 +447,7 @@ range
 raw
 rawdataimporter
 rawdatapreprocessor
+readme
 ref
 referenceanalysisscores
 referenceanalysisscorestype
@@ -463,6 +466,7 @@ rougel
 rst
 ru
 rubert
+rubertconv
 rudetoxifier
 rugpt
 run
