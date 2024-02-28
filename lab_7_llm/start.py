@@ -34,7 +34,7 @@ def main() -> None:
     pipeline = LLMPipeline(settings['parameters']['model'], dataset,
                            max_length=120, batch_size=1, device='cpu')
     pipeline.analyze_model()
-    pipeline.infer_sample([dataset[randint(0, len(dataset))]])
+    pipeline.infer_sample([dataset[0]])
 
     pred_path = Path(PROJECT_ROOT / 'lab_7_llm' / 'dist' / 'predictions.csv')
 

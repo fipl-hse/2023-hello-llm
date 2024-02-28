@@ -116,8 +116,7 @@ class TaskDataset(Dataset):
             tuple[str, ...]: The item to be received
         """
 
-        return (self._data.iloc[index]['source'],
-                self._data.iloc[index]['target'])
+        return self._data.iloc[index]['source']
 
     @property
     def data(self) -> DataFrame:
@@ -200,6 +199,8 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        print('infer_sample input:\n', sample)
+
         if not self._model:
             return None
         return self._infer_batch((sample,))[0]
@@ -217,7 +218,7 @@ class LLMPipeline(AbstractLLMPipeline):
         dataset_loader = DataLoader(self._dataset, self._batch_size)
 
         for batch in dataset_loader:
-            predictions.extend(self._infer_batch(batch))
+            predictions.extend(self._infer_batch((batch,))[0])
 
         return pd.DataFrame({"target": self._dataset.data['target'],
                              "predictions": predictions})
@@ -235,20 +236,22 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         predictions = []
 
-        if isinstance(sample_batch, tuple):
-            tokens = self._tokenizer(
+        print('infer_batch input:\n', sample_batch)
+
+        # if isinstance(sample_batch, tuple):
+        tokens = self._tokenizer(
                 str(sample_batch[0][0]),
                 padding=True,
                 truncation=True,
                 return_tensors='pt'
             )
-        else:
+        '''else:
             tokens = self._tokenizer(
                 sample_batch[0],
                 padding=True,
                 truncation=True,
                 return_tensors='pt'
-            )
+            )'''
         for prediction in list(torch.argmax(self._model(**tokens).logits, dim=1)):
             predictions.append(str(prediction.item()))
 
