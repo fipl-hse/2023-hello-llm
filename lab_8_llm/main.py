@@ -10,6 +10,8 @@ from datasets import load_dataset
 
 from pathlib import Path
 from typing import Iterable, Sequence
+from torchinfo import summary
+from transformers import AutoModelForSeq2SeqLM, T5TokenizerFast
 
 try:
     import torch
@@ -97,6 +99,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+        self._data = data
 
     def __len__(self) -> int:
         """
@@ -105,6 +108,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -116,6 +120,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
+        return self._data["source"].iloc[index]
 
     @property
     def data(self) -> DataFrame:
@@ -125,6 +130,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
+        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
@@ -150,6 +156,9 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        super().__init__(model_name, dataset, max_length, batch_size, device)
+        self.tokenizer = T5TokenizerFast.from_pretrained(self._model_name)
+        self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -158,6 +167,28 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        tensor_data = torch.ones(1,
+                                 self._model.config.n_positions,
+                                 dtype=torch.long)
+
+        input_data = {"input_ids": tensor_data,
+                      "attention_mask": tensor_data}
+
+        model_statistics = summary(self._model,
+                                   input_data=input_data,
+                                   decoder_input_ids=tensor_data,
+                                   verbose=False)
+
+        model_info = {
+            "input_shape": list(input_data['input_ids'].shape),
+            "embedding_size": self._model.config.n_positions,
+            "output_shape": model_statistics.summary_list[-1].output_size,
+            "num_trainable_params": model_statistics.trainable_params,
+            "vocab_size": self._model.config.vocab_size,
+            "size": model_statistics.total_param_bytes,
+            "max_context_length": self._model.config.max_length
+        }
+        return model_info
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -170,6 +201,15 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        if not self._model:
+            return None
+
+        tokens = self.tokenizer(sample[0], max_length=120, padding=True,
+                           return_tensors='pt', truncation=True)
+        output = self._model.generate(**tokens, max_length=self._max_length)
+        result = self.tokenizer.decode(*output, skip_special_tokens=True)
+
+        return result
 
     @report_time
     def infer_dataset(self) -> DataFrame:
