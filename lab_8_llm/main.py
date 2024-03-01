@@ -5,7 +5,10 @@ Working with Large Language Models.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
 from collections import namedtuple
+<<<<<<< HEAD
 from datasets import load_dataset
+=======
+>>>>>>> ddb96a0fabdf4786c4f85f952fbba93c1002219a
 from pathlib import Path
 from typing import Iterable, Sequence
 
@@ -44,10 +47,13 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+<<<<<<< HEAD
         self._raw_data = load_dataset(
             path=self._hf_name,
             split="train"
         ).to_pandas()
+=======
+>>>>>>> ddb96a0fabdf4786c4f85f952fbba93c1002219a
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -62,6 +68,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+<<<<<<< HEAD
         return {
             "dataset_number_of_samples": self._raw_data.shape[0],
             "dataset_columns": self._raw_data.shape[1],
@@ -70,17 +77,22 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             "dataset_sample_min_len": len(min(self._raw_data['article_content'], key=len)),
             "dataset_sample_max_len": len(max(self._raw_data['article_content'], key=len))
         }
+=======
+>>>>>>> ddb96a0fabdf4786c4f85f952fbba93c1002219a
 
     @report_time
     def transform(self) -> None:
         """
         Apply preprocessing transformations to the raw dataset.
         """
+<<<<<<< HEAD
         self._data = (self._raw_data
                       .drop(["title", "date", "url"], axis=1)
                       .rename(columns={"article_content": "source", "summary": "target"})
                       .dropna().drop_duplicates()
                       .reset_index(drop=True))
+=======
+>>>>>>> ddb96a0fabdf4786c4f85f952fbba93c1002219a
 
 
 class TaskDataset(Dataset):
