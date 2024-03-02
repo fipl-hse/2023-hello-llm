@@ -8,24 +8,16 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
+import pandas as pd
+import torch
+from datasets import load_dataset
+from pandas import DataFrame
+from torch.utils.data.dataset import Dataset
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -44,6 +36,26 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
 
+        self._raw_data = load_dataset(
+            self._hf_name,
+            name='split',
+            split='validation'
+        ).to_pandas()
+
+        if not isinstance(self._raw_data, DataFrame):
+            raise TypeError
+
+    @property
+    def raw_data(self) -> DataFrame:
+        """
+        Property with access to downloaded dataset.
+
+        Returns:
+            pandas.DataFrame: Downloaded dataset
+        """
+
+        return self._raw_data
+
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
@@ -58,11 +70,28 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             dict: Dataset key properties
         """
 
+        pro_dict = {
+            'dataset_columns': self._raw_data.shape[1],
+            'dataset_duplicates': self._raw_data.duplicated().sum(),
+            'dataset_empty_rows': self._raw_data.isna().any(axis=1).sum(),
+            'dataset_number_of_samples': self._raw_data.shape[0],
+        }
+
+        self._raw_data = self._raw_data.dropna()
+
+        pro_dict['dataset_sample_min_len'] = len(min(self._raw_data['text'], key=len))
+        pro_dict['dataset_sample_max_len'] = len(max(self._raw_data['text'], key=len))
+
+        return pro_dict
+
     @report_time
     def transform(self) -> None:
         """
         Apply preprocessing transformations to the raw dataset.
         """
+
+        self._data = self._raw_data.rename(columns={'text': ColumnNames.SOURCE,
+                                                    'label': ColumnNames.TARGET}).reset_index().reset_index(drop=True)
 
 
 class TaskDataset(Dataset):
