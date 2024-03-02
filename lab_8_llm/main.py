@@ -1,13 +1,12 @@
 """
-Neural machine translation module.
+Laboratory work.
+
+Working with Large Language Models.
 """
-# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
-
-from torchinfo import summary
-from transformers import AutoModelForQuestionAnswering, AutoTokenizer, DebertaV2ForQuestionAnswering
 
 try:
     import torch
@@ -29,8 +28,6 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
-from datasets import load_dataset
-import pandas as pd
 
 
 class RawDataImporter(AbstractRawDataImporter):
@@ -46,7 +43,6 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = load_dataset("HuggingFaceH4/no_robots", split='train_sft').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -54,7 +50,6 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
     A class that analyzes and preprocesses a dataset.
     """
 
-    @report_time
     def analyze(self) -> dict:
         """
         Analyze a dataset.
@@ -62,73 +57,12 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
-        properties_dict = {"dataset_number_of_samples": self._raw_data.shape[0],
-                           "dataset_columns": self._raw_data.shape[1],
-                           "dataset_empty_rows": self.search_empty_cells(),
-                           "dataset_duplicates": self.search_duplicates()}
-
-        self._raw_data = self._raw_data.dropna()
-        properties_dict["dataset_sample_min_len"] = min(self.get_min_len("prompt"),
-                                                        self.get_min_len("messages"))
-        properties_dict["dataset_sample_max_len"] = max(self.get_max_len("prompt"),
-                                                        self.get_max_len("messages"))
-        self.search_duplicates()
-        return properties_dict
-
-    ## I'm so done with this thing, but, unlike, .isna(), it works >_<
-    def search_empty_cells(self):
-        empty_counter = 0
-        empty_list = []
-        for column in ['prompt', 'messages', 'prompt_id', 'category']:
-            for cell in self._raw_data[column]:
-                if 0 == len(f'{cell}'):
-                    empty_counter += 1
-        return empty_counter
-
-    def search_duplicates(self):
-        duplicates_counter = 0
-        for column in ['prompt', 'messages', 'prompt_id']:
-            cell_list = []
-            for cell in self._raw_data[column]:
-                cell_list.append(f'{cell}')
-            duplicates_counter += (len(cell_list) - len(set(cell_list)))
-        if duplicates_counter/3 >= 1:
-            return duplicates_counter
-        else:
-            return 0
-
-    def get_min_len(self, column):
-        min_len = len(f'{self._raw_data[column][0]}')
-        index = -1
-        for cell in self._raw_data[column]:
-            if 0 < len(f'{cell}') < min_len:
-                min_len = len(f'{cell}')
-        return min_len
-
-    def get_max_len(self, column):
-        max_len = len(f'{self._raw_data[column][0]}')
-        for cell in self._raw_data[column]:
-            if len(f'{cell}') > max_len:
-                max_len = len(f'{cell}')
-        return max_len
 
     @report_time
     def transform(self) -> None:
         """
         Apply preprocessing transformations to the raw dataset.
         """
-
-        self._data = self._raw_data[(self._raw_data.category == 'Closed QA')]
-        self._data = self._data.rename(columns={'prompt': 'questions'}, inplace=False)
-        self._data[['context', 'answer']] = pd.DataFrame(self._data['messages'].to_list(), index=self._data.index)
-        self._data[['answer', 'answer3']] = pd.DataFrame(self._data['answer'].apply(pd.Series),
-                                                         index=self._data.index)
-        self._data[['context', 'context3']] = pd.DataFrame(self._data['context'].apply(pd.Series),
-                                                           index=self._data.index)
-        self._data = self._data.drop(['prompt_id', 'category', 'messages', 'answer3', 'context3'], axis=1)
-        self._data = self._data.dropna()
-        self._data = self._data.drop_duplicates()
-        self._data = self._data.reset_index(drop=True)
 
 
 class TaskDataset(Dataset):
@@ -143,7 +77,6 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
-        self._data = data
 
     def __len__(self) -> int:
         """
@@ -152,7 +85,6 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
-        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -164,8 +96,6 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return (self._data.iloc[index]['question'], self._data.iloc[index]['context'],
-                self._data.iloc[index]['answer'])
 
     @property
     def data(self) -> DataFrame:
@@ -175,7 +105,6 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
-        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
@@ -201,16 +130,6 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
-        super().__init__(model_name, dataset, max_length, batch_size, device)
-        '''self._model_name = model_name
-        self._dataset = dataset
-        self._max_length = max_length
-        self._batch_size = batch_size
-        self._device = device'''
-        super().__init__(model_name, dataset, max_length, batch_size, device)
-        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-        self._model = AutoModelForQuestionAnswering.from_pretrained(self._model_name)
-
 
     def analyze_model(self) -> dict:
         """
@@ -219,9 +138,6 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-        am_properties_dict = {
-        }
-        return am_properties_dict
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
