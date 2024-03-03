@@ -10,7 +10,7 @@ from typing import Iterable, Sequence
 import numpy as np
 import pandas as pd
 import torch
-import torchinfo
+from torchinfo import summary
 from datasets import load_dataset
 from evaluate import load
 from pandas import DataFrame
@@ -168,6 +168,20 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        config = self._model.config
+        simulation = torch.ones(1, config.max_position_embeddings, dtype=torch.long)
+        info = summary(self._model, input_data=simulation, device=self._device, verbose=0)
+
+        return {
+            'input_shape': {'attention_mask': list(info.input_size),
+                            'input_ids': list(info.input_size)},
+            'embedding_size': config.max_position_embeddings,
+            'output_shape': info.summary_list[-1].output_size,
+            'num_trainable_params': info.trainable_params,
+            'vocab_size': config.vocab_size,
+            'size': info.total_param_bytes,
+            'max_context_length': config.max_length
+        }
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:

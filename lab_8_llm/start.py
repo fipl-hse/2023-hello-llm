@@ -26,6 +26,7 @@ def main() -> None:
     preprocessor.transform()
     dataset = TaskDataset(preprocessor.data.head(100))
     pipeline = LLMPipeline(settings.parameters.model, dataset, 120, 1, 'cpu')
+    pipeline.analyze_model()
     result = pipeline
     assert result is not None, "Demo does not work correctly"
 
