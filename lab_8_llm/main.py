@@ -5,13 +5,13 @@ Working with Large Language Models.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
 from collections import namedtuple
-
-from datasets import load_dataset
-
 from pathlib import Path
 from typing import Iterable, Sequence
+
+from datasets import load_dataset
 from torchinfo import summary
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+
 
 try:
     import torch
@@ -168,7 +168,7 @@ class LLMPipeline(AbstractLLMPipeline):
             dict: Properties of a model
         """
         tensor_data = torch.ones(1,
-                                 self._model.config.n_positions,
+                                 self._model.config.d_model,
                                  dtype=torch.long)
 
         input_data = {"input_ids": tensor_data,
@@ -181,7 +181,7 @@ class LLMPipeline(AbstractLLMPipeline):
 
         model_info = {
             "input_shape": list(input_data['input_ids'].shape),
-            "embedding_size": self._model.config.n_positions,
+            "embedding_size": self._model.config.d_model,
             "output_shape": model_statistics.summary_list[-1].output_size,
             "num_trainable_params": model_statistics.trainable_params,
             "vocab_size": self._model.config.vocab_size,
