@@ -1,0 +1,8 @@
+{
+  "parameters": {
+    "model": "cointegrated/rubert-base-cased-nli-threeway",
+    "dataset": "xnli",
+    "metrics": ["accuracy"]
+  },
+  "target_score": 10
+}
