@@ -1,8 +1,8 @@
 {
   "parameters": {
-    "model": "",
-    "dataset": "",
+    "model": "VMware/electra-small-mrqa",
+    "dataset": "lionelchg/dolly_closed_qa",
     "metrics": []
   },
-  "target_score": 0
+  "target_score": 6
 }
