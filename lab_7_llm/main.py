@@ -4,7 +4,7 @@ Neural machine translation module.
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
 from collections import namedtuple
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
+from typing import Iterable, Sequence
 
 from datasets import load_dataset
 
@@ -22,7 +22,6 @@ except ImportError:
     print('Library "pandas" not installed. Failed to import.')
     DataFrame = dict  # type: ignore
 
-from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
@@ -65,7 +64,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             dict: Dataset key properties
         """
         analyzed = {'dataset_number_of_samples': len(self._raw_data),
-                    'dataset_columns': self._raw_data.shape[1],
+                    'dataset_columns': len(self._raw_data.columns),
                     'dataset_duplicates': self._raw_data.duplicated().sum(),
                     'dataset_empty_rows': self._raw_data.isna().sum().sum(),
                     'dataset_sample_min_len': len(min(self._raw_data['article'], key=len)),
@@ -201,7 +200,8 @@ class LLMPipeline(AbstractLLMPipeline):
             str | None: A prediction
         """
         tokens = self._tokenizer(sample[0], max_length=120, padding=True,
-                           return_tensors='pt', truncation=True)
+                                 return_tensors='pt', truncation=True)
+        print(tokens.keys())
 
         output = self._model.generate(**tokens)
         result = self._tokenizer.batch_decode(output, skip_special_tokens=True)

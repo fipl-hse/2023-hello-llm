@@ -21,7 +21,9 @@ def main() -> None:
 
     preprocessor = RawDataPreprocessor(importer.raw_data)
 
-    preprocessor.analyze()
+    data_analysis = preprocessor.analyze()
+    print(data_analysis)
+
     preprocessor.transform()
 
     dataset = TaskDataset(preprocessor.data.head(100))
@@ -33,6 +35,8 @@ def main() -> None:
     print(model_analysis)
 
     result = pipeline.infer_sample(dataset[0])
+    print('Sample:', dataset[0])
+    print('Result:', result)
 
     assert result is not None, "Demo does not work correctly"
 
