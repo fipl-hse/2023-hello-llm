@@ -81,6 +81,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         self._data = (self._raw_data[['instruction', 'context', 'response']]
                       .rename(columns={'instruction': ColumnNames.QUESTION.value,
+                                       'context': ColumnNames.SOURCE.value,
                                        'response': ColumnNames.TARGET.value})
                       .reset_index(drop=True))
 
@@ -156,7 +157,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self._model = AutoModelForQuestionAnswering.from_pretrained(self._model_name)
-        #self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -201,6 +202,18 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        tokens = self._tokenizer(sample[0], sample[1], max_length=120, padding=True,
+                                 return_tensors='pt', truncation=True)
+        with torch.no_grad():
+            outputs = self._model(**tokens)
+
+        answer_start_index = outputs.start_logits.argmax()
+        answer_end_index = outputs.end_logits.argmax()
+
+        predict_answer_tokens = tokens.input_ids[0, answer_start_index: answer_end_index + 1]
+        result = self._tokenizer.decode(predict_answer_tokens)
+
+        return result
 
     @report_time
     def infer_dataset(self) -> DataFrame:
