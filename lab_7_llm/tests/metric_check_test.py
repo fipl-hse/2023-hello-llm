@@ -56,7 +56,7 @@ def run_metrics_check(
 
 class MetricCheckTest(unittest.TestCase):
     """
-    Tests e2e scenario
+    Tests tokenize function
     """
 
     @pytest.mark.lab_7_llm
@@ -64,6 +64,6 @@ class MetricCheckTest(unittest.TestCase):
     @pytest.mark.mark10
     def test_e2e_ideal(self):
         """
-        Ideal metrics check scenario
+        Ideal tokenize scenario
         """
         self.assertIsNone(run_metrics_check(Path(__file__).parent.parent, main))
