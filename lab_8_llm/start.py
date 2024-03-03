@@ -9,7 +9,7 @@ from config.constants import PROJECT_ROOT
 from config.lab_settings import LabSettings
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset,
+from lab_8_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset,
                             TaskEvaluator)
 
 
@@ -20,7 +20,10 @@ def main() -> None:
     """
     settings = LabSettings(PROJECT_ROOT / 'lab_8_llm' / 'settings.json')
     importer = RawDataImporter(settings.parameters.dataset)
+    importer.obtain()
     preprocessor = RawDataPreprocessor(importer.raw_data)
+    preprocessor.analyze()
+    preprocessor.transform()
     dataset = TaskDataset(preprocessor.data.head(100))
     pipeline = LLMPipeline(settings.parameters.model, dataset, 120, 1, 'cpu')
     result = pipeline
