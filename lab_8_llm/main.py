@@ -168,6 +168,9 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        if self._model is None:
+            return {}
+
         config = self._model.config
         simulation = torch.ones(1, config.max_position_embeddings, dtype=torch.long)
         info = summary(self._model, input_data=simulation, device=self._device, verbose=0)
@@ -194,6 +197,8 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        return None if self._model is None else self._infer_batch((sample,))[0]
+
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -203,6 +208,18 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        predictions = []
+        dataloader = DataLoader(self._dataset, batch_size=self._batch_size)
+
+        for batch in dataloader:
+            predictions.extend(self._infer_batch(batch))
+
+        return DataFrame(
+            {
+                'target': self._dataset.data[ColumnNames.TARGET.value].tolist(),
+                'predictions': predictions
+            }
+        )
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -215,6 +232,14 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+        tokens = self._tokenizer(
+            sample_batch[0],
+            padding=True,
+            truncation=True,
+            return_tensors='pt'
+        )
+        outputs = self._model.generate(**tokens, max_length=self._max_length)
+        return self._tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
 
 class TaskEvaluator(AbstractTaskEvaluator):

@@ -21,12 +21,25 @@ def main() -> None:
     settings = LabSettings(PROJECT_ROOT / 'lab_8_llm' / 'settings.json')
     importer = RawDataImporter(settings.parameters.dataset)
     importer.obtain()
+
     preprocessor = RawDataPreprocessor(importer.raw_data)
     preprocessor.analyze()
     preprocessor.transform()
+
     dataset = TaskDataset(preprocessor.data.head(100))
-    pipeline = LLMPipeline(settings.parameters.model, dataset, 120, 1, 'cpu')
+
+    pipeline = LLMPipeline(settings.parameters.model, dataset, 120, 64, 'cpu')
     pipeline.analyze_model()
+
+    pipeline.infer_sample(dataset[randint(0, len(dataset) - 1)])
+
+    df_pred = pipeline.infer_dataset()
+    save_path = PROJECT_ROOT / 'lab_8_llm' / 'dist'
+    if not save_path.exists():
+        save_path.mkdir(exist_ok=True)
+
+    df_pred.to_csv(save_path / 'predictions.csv', index=False, encoding='utf-8')
+
     result = pipeline
     assert result is not None, "Demo does not work correctly"
 
