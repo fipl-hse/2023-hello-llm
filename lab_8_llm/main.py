@@ -28,6 +28,8 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
+from datasets import load_dataset
+import pandas as pd
 
 
 class RawDataImporter(AbstractRawDataImporter):
@@ -43,6 +45,7 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        self._raw_data = load_dataset("jtatman/databricks-dolly-8k-qa-open-close", split='train').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -57,12 +60,30 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        properties_dict = {"dataset_number_of_samples": self._raw_data.shape[0],
+                           "dataset_columns": self._raw_data.shape[1],
+                           "dataset_empty_rows": len(self._raw_data.isna()),
+                           "dataset_duplicates": self._raw_data.duplicated().sum()}
+
+        self._raw_data = self._raw_data.dropna()
+        properties_dict["dataset_sample_min_len"] = min(self._raw_data['instruction'].str.len().min(),
+                                                        self._raw_data['response'].str.len().min())
+        properties_dict["dataset_sample_max_len"] = max(self._raw_data['instruction'].str.len().max(),
+                                                        self._raw_data['response'].str.len().max())
+        return properties_dict
 
     @report_time
     def transform(self) -> None:
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        self._data = self._raw_data[(self._raw_data.category == 'open_qa')]
+        self._data = self._data.rename(columns={'instruction': 'questions'}, inplace=False)
+        self._data = self._data.rename(columns={'response': 'target'}, inplace=False)
+        self._data = self._data.drop(['context', 'category', '__index_level_0__'], axis=1)
+        self._data = self._data.dropna()
+        self._data = self._data.drop_duplicates()
+        self._data = self._data.reset_index(drop=True)
 
 
 class TaskDataset(Dataset):
