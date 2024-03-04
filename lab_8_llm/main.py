@@ -1,12 +1,15 @@
 """
 Laboratory work.
-
 Working with Large Language Models.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
+
+from datasets import load_dataset
+from torchinfo import summary
+from transformers import BertForSequenceClassification, BertTokenizer
 
 try:
     import torch
@@ -25,7 +28,7 @@ except ImportError:
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -34,6 +37,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
+    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -43,6 +47,15 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        self._raw_data = load_dataset(self._hf_name,
+                                      split='train').to_pandas()
+
+    @property
+    def get_raw_data(self) -> DataFrame:
+        """
+        Get raw dataset.
+        """
+        return self._raw_data
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -58,11 +71,25 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             dict: Dataset key properties
         """
 
+        dataset_properties = {'dataset_columns': self._raw_data.shape[1],
+                              'dataset_duplicates': self._raw_data.duplicated().sum(),
+                              'dataset_empty_rows': self._raw_data.isna().sum().sum(),
+                              'dataset_number_of_samples': self._raw_data.shape[0],
+                              'dataset_sample_max_len': self._raw_data['neutral'].str.len().max(),
+                              'dataset_sample_min_len': self._raw_data['neutral'].str.len().min()}
+        return dataset_properties
+
     @report_time
     def transform(self) -> None:
         """
         Apply preprocessing transformations to the raw dataset.
         """
+
+        self._data = self._raw_data.drop_duplicates().rename(
+            columns={'neutral': ColumnNames.SOURCE.value,
+                     'toxic': ColumnNames.TARGET.value}).reset_index(drop=True)
+        self._data[ColumnNames.TARGET.value] = self._data[ColumnNames.TARGET.value].replace(
+            'false', 0).replace('true', 1)
 
 
 class TaskDataset(Dataset):
@@ -77,6 +104,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+        self._data = data
 
     def __len__(self) -> int:
         """
@@ -85,6 +113,8 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -96,6 +126,8 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
+        item_by_index = (self._data['source'].iloc[index],)
+        return item_by_index
 
     @property
     def data(self) -> DataFrame:
@@ -105,6 +137,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
+        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
@@ -130,6 +163,10 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        super().__init__(model_name, dataset, max_length, batch_size, device)
+        self._model: torch.nn.Module = BertForSequenceClassification.from_pretrained(self._model_name)
+        self._tokenizer = BertTokenizer.from_pretrained(self._model_name,
+                                                        model_max_length=self._max_length)
 
     def analyze_model(self) -> dict:
         """
@@ -138,6 +175,25 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        torch_data = torch.ones(1, self._model.config.max_position_embeddings,
+                                dtype=torch.long)
+        input_data = {'input_ids': torch_data, 'attention_mask': torch_data}
+        summary_result = summary(self._model,
+                                 input_data=input_data,
+                                 device='cpu',
+                                 verbose=0)
+
+        model_properties = {'embedding_size': self._model.config.max_position_embeddings,
+                            'input_shape': {'attention_mask': list(
+                                summary_result.input_size['attention_mask']),
+                                'input_ids': list(summary_result.input_size['input_ids'])},
+                            'max_context_length': self._model.config.max_length,
+                            'num_trainable_params': summary_result.trainable_params,
+                            'output_shape': summary_result.summary_list[-1].output_size,
+                            'size': summary_result.total_param_bytes,
+                            'vocab_size': self._model.config.vocab_size}
+
+        return model_properties
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -150,6 +206,13 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        tokens = self._tokenizer(sample, max_length=120,
+                                 padding=True,
+                                 truncation=True,
+                                 return_tensors='pt')
+        output = self._model(**tokens)
+        predictions = str(torch.argmax(output.logits).item())
+        return predictions
 
     @report_time
     def infer_dataset(self) -> DataFrame:
