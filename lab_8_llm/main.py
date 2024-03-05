@@ -4,14 +4,15 @@ Laboratory work.
 Working with Large Language Models.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
-from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
 import pandas as pd
 import torch
 from datasets import load_dataset
+from evaluate import load
 from pandas import DataFrame
+from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -68,9 +69,10 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._data = self._raw_data.drop(columns=['input', 'text']).rename(
-            {'instruction': 'question',
-             'output': 'target'})
+        self._data = self._raw_data.drop(columns=[
+            'input',
+            'text']).rename(columns={'instruction': 'question',
+                                     'output': 'target'})
 
 
 class TaskDataset(Dataset):
@@ -149,6 +151,7 @@ class LLMPipeline(AbstractLLMPipeline):
         self._device = device
         self._model = AutoModelForCausalLM.from_pretrained(self._model_name)
         self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        self._tokenizer.pad_token = self._tokenizer.eos_token
 
     def analyze_model(self) -> dict:
         """
@@ -188,6 +191,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        return self._infer_batch((sample,))[0] if self._model is not None else None
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -197,6 +201,14 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        loader = DataLoader(self._dataset, batch_size=self._batch_size)
+        prediction = []
+
+        for batch in loader:
+            prediction.extend(self._infer_batch(batch))
+
+        self._dataset.data["predictions"] = prediction
+        return pd.DataFrame(self._dataset.data[["target", "predictions"]])
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -209,6 +221,16 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+
+        tokens = self._tokenizer(sample_batch[0],
+                                 padding=True,
+                                 truncation=True,
+                                 return_tensors='pt')
+
+        output = self._model.generate(**tokens, max_length=self._max_length)
+        predictions = self._tokenizer.batch_decode(output, skip_special_tokens=True)
+
+        return [prediction[len(sample_batch[0][i]) + 1:] for i, prediction in enumerate(predictions)]
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -224,6 +246,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        super().__init__(metrics)
+        self._data_path = data_path
 
     @report_time
     def run(self) -> dict | None:
@@ -233,3 +257,15 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        data = pd.read_csv(self._data_path).drop(columns=['Unnamed: 0'])
+
+        metrics = {}
+        for metric in self._metrics:
+            if metric.value == "bleu":
+                metrics.update(load(metric.value).compute(references=data['target'],
+                                                          predictions=data['predictions']))
+            elif metric.value == "rouge":
+                metrics.update(load(metric.value).compute(references=data['target'],
+                                                          predictions=data['predictions']))
+        return metrics
+

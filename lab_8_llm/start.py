@@ -30,6 +30,18 @@ def main() -> None:
         batch_size=64,
         max_length=120,
         device='cpu')
+
+    analysis = pipe.analyze_model()
+    print(analysis)
+    print(pipe.infer_sample(task_dataset[0]))
+
+    predictions = pipe.infer_dataset()
+    path = PROJECT_ROOT / 'lab_8_llm' / 'dist'
+    if not path.exists():
+        path.mkdir()
+    predictions.to_csv(path / 'predictions.csv')
+    result = predictions
+
     assert result is not None, "Demo does not work correctly"
 
 
