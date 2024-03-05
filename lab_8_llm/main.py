@@ -8,6 +8,9 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
+import pandas as pd
+from torch.utils.data import DataLoader
+from evaluate import load
 from datasets import load_dataset
 from torchinfo import summary
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
@@ -29,7 +32,7 @@ except ImportError:
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -202,13 +205,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         if not self._model:
             return None
-
-        tokens = self.tokenizer(sample[0], max_length=120, padding=True,
-                                return_tensors='pt', truncation=True)
-        output = self._model.generate(**tokens, max_length=self._max_length)
-        result = self.tokenizer.batch_decode(output, skip_special_tokens=True)
-
-        return result[0]
+        return self._infer_batch((sample,))[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -218,6 +215,19 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        data_loader = DataLoader(dataset=self._dataset,
+                                 batch_size=self._batch_size)
+
+        predictions = []
+
+        for batch in data_loader:
+            predictions.extend(self._infer_batch(batch))
+
+        df_predict = pd.DataFrame({
+            "target": self._dataset.data[ColumnNames.TARGET.value],
+            "predictions": predictions})
+
+        return df_predict
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -230,6 +240,16 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        predictions = []
+
+        tokens = tokenizer(sample_batch[0], max_length=120, padding=True,
+                           return_tensors='pt', truncation=True)
+        output = self._model.generate(**tokens)
+        result = tokenizer.batch_decode(output, skip_special_tokens=True)
+        predictions.extend(result)
+
+        return predictions
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -245,6 +265,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        super().__init__(metrics)
+        self._data_path = data_path
 
     @report_time
     def run(self) -> dict | None:
@@ -254,3 +276,21 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        predictions = pd.read_csv(self._data_path)
+        scores = {}
+
+        for metric in self._metrics:
+            if metric.value == 'rouge':
+                metric = load(metric.value, seed=77)
+            else:
+                metric = load(metric.value)
+
+            result = metric.compute(references=predictions['target'],
+                                    predictions=predictions['predictions'])
+
+            if metric.name == 'rouge':
+                scores['rouge'] = result.get('rougeL')
+            else:
+                scores[metric.name] = result.get(metric.name)
+
+        return scores
