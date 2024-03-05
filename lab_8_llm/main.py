@@ -111,7 +111,9 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data["source"].iloc[index]
+        sample = (self._data.iloc[index]['source'],)
+
+        return sample
 
     @property
     def data(self) -> DataFrame:
@@ -165,7 +167,7 @@ class LLMPipeline(AbstractLLMPipeline):
         input_data = {"input_ids": tensor_data,
                       "attention_mask": tensor_data}
 
-        model_statistics = summary(self._model,
+        model_statistics = summary(model=self._model,
                                    input_data=input_data,
                                    decoder_input_ids=tensor_data,
                                    verbose=False)
