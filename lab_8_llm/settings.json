@@ -1,8 +1,8 @@
 {
   "parameters": {
-    "model": "",
-    "dataset": "",
-    "metrics": []
+    "model": "VMware/electra-small-mrqa",
+    "dataset": "starmpcc/Asclepius-Synthetic-Clinical-Notes",
+    "metrics": ["squad"]
   },
-  "target_score": 0
+  "target_score": 4
 }
