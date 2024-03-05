@@ -73,7 +73,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         self._data = (self._raw_data
                       .drop(["title", "date", "url"], axis=1)
-                      .rename(columns={"article_content": "source", "summary": "target"})
+                      .rename(columns={"article_content": ColumnNames.SOURCE.value, "summary": ColumnNames.TARGET.value})
                       .dropna().drop_duplicates()
                       .reset_index(drop=True))
 
