@@ -4,37 +4,23 @@ Laboratory work.
 Working with Large Language Models.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
-from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
 import pandas as pd
+import torch
 from datasets import load_dataset
 from evaluate import load
+from pandas import DataFrame
 from torch.utils.data import DataLoader
+from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import BertForSequenceClassification, AutoTokenizer
-
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
-
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -43,6 +29,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
+    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -155,6 +142,7 @@ class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
     """
+    _model: torch.nn.Module
 
     def __init__(
             self,
@@ -298,7 +286,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             metric = load(metric.value)
 
             result = metric.compute(references=predictions['target'].to_list(),
-                                    predictions=predictions['predictions'].to_list(), average="micro")
+                                    predictions=predictions['predictions'].to_list(),
+                                    average="micro")
 
             scores[metric.name] = result.get(metric.name)
 
