@@ -22,6 +22,8 @@ def main() -> None:
     preprocessor = RawDataPreprocessor(loader.raw_data)
 
     preprocessor.analyze()
+    print(preprocessor.analyze())
+
     preprocessor.transform()
 
     dataset = TaskDataset(preprocessor.data.head(100))

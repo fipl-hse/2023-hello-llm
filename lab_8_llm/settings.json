@@ -1,7 +1,7 @@
 {
   "parameters": {
-    "model": "",
-    "dataset": "",
+    "model": "timpal0l/mdeberta-v3-base-squad2",
+    "dataset": "RussianNLP/wikiomnia",
     "metrics": []
   },
   "target_score": 0

@@ -155,6 +155,7 @@ class LLMPipeline(AbstractLLMPipeline):
                          max_length,
                          batch_size,
                          device)
+
         self._model_name = model_name
         self._max_length = max_length
         self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
@@ -171,8 +172,7 @@ class LLMPipeline(AbstractLLMPipeline):
                                  self._model.config.n_positions,
                                  dtype=torch.long)
 
-        input_data = {'attention_mask': tensor_data,
-                      'input_ids': tensor_data,
+        input_data = {'input_ids': tensor_data,
                       'decoder_input_ids': tensor_data}
 
         analytics = summary(self._model,
@@ -208,12 +208,11 @@ class LLMPipeline(AbstractLLMPipeline):
                                  max_length=self._max_length,
                                  padding="max_length",
                                  return_tensors="pt")
+
         output = self._model.generate(**tokens,
                                       max_length=self._max_length)
-        decoded = self._tokenizer.batch_decode(output,
-                                               skip_special_tokens=True)
-
-        return decoded[0] if decoded else None
+        decoded = self._tokenizer.decode(output[0], skip_special_tokens=True)
+        return decoded if decoded else None
 
     @report_time
     def infer_dataset(self) -> DataFrame:
