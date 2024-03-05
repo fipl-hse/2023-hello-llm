@@ -4,5 +4,5 @@
     "dataset": "RussianNLP/wikiomnia",
     "metrics": []
   },
-  "target_score": 0
+  "target_score": 6
 }
