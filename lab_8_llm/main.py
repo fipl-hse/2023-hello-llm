@@ -9,21 +9,12 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 import pandas as pd
+import torch
 from datasets import load_dataset
-
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
+from pandas import DataFrame
+from torch.utils.data.dataset import Dataset
+from torchinfo import summary
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -46,11 +37,7 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = (load_dataset(self._hf_name, split='train')).to_pandas()
-
-    @property
-    def raw_data(self) -> DataFrame:
-        return self._raw_data
+        self._raw_data = load_dataset(self._hf_name, split='train').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -71,7 +58,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         return {'dataset_number_of_samples': self._raw_data.shape[0],
                 'dataset_columns': self._raw_data.shape[1],
                 'dataset_duplicates': self._raw_data.duplicated().sum(),
-                'dataset_empty_rows': self._raw_data.isna().sum().sum(),
+                'dataset_empty_rows': self._raw_data.replace("", pd.NA).isna().sum().sum(),
                 'dataset_sample_min_len': len(min(without_empty_rows["instruction"], key=len)),
                 'dataset_sample_max_len': len(max(without_empty_rows["instruction"], key=len)),
                 }
@@ -81,6 +68,9 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        self._data = self._raw_data.drop(columns=['input', 'text']).rename(
+            {'instruction': 'question',
+             'output': 'target'})
 
 
 class TaskDataset(Dataset):
@@ -95,6 +85,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+        self._data = data
 
     def __len__(self) -> int:
         """
@@ -103,6 +94,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -114,6 +106,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
+        return self._data.iloc[index]['question'], self._data.iloc[index]['target']
 
     @property
     def data(self) -> DataFrame:
@@ -123,6 +116,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
+        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
@@ -148,6 +142,13 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        self._model_name = model_name
+        self._dataset = dataset
+        self._max_length = max_length
+        self._batch_size = batch_size
+        self._device = device
+        self._model = AutoModelForCausalLM.from_pretrained(self._model_name)
+        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -156,6 +157,25 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        tensor_data = torch.ones(1,
+                                 self._model.config.max_position_embeddings,
+                                 dtype=torch.long)
+        input_data = {"input_ids": tensor_data,
+                      "attention_mask": tensor_data}
+        model_statistics = summary(self._model,
+                                   input_data=input_data,
+                                   verbose=False)
+        size, num_trainable_params, last_layer = (model_statistics.total_param_bytes,
+                                                  model_statistics.trainable_params,
+                                                  model_statistics.summary_list[-1].output_size)
+        return {"input_shape": {"input_ids": [tensor_data.shape[0], tensor_data.shape[1]],
+                                "attention_mask": [tensor_data.shape[0], tensor_data.shape[1]]},
+                "embedding_size": self._model.config.max_position_embeddings,
+                "output_shape": last_layer,
+                "num_trainable_params": num_trainable_params,
+                "vocab_size": self._model.config.vocab_size,
+                "size": size,
+                "max_context_length": self._model.config.max_length}
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
