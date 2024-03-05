@@ -37,8 +37,8 @@ def main() -> None:
 
     pipeline.infer_sample(dataset[0])
 
-    if not os.path.exists(f'{PROJECT_ROOT}/lab_8_llm/dist'):
-        os.mkdir(f'{PROJECT_ROOT}/lab_8_llm/dist')
+    if not os.path.exists(PROJECT_ROOT / 'lab_8_llm' / 'dist'):
+        os.mkdir(PROJECT_ROOT / 'lab_8_llm' / 'dist')
 
     prediction_path = PROJECT_ROOT / 'lab_8_llm' / 'dist' / 'predictions.csv'
 
