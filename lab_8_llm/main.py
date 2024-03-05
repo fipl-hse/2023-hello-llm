@@ -75,6 +75,14 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        self._data = self._raw_data.loc[
+            self._raw_data['task'] == 'Question Answering'
+            ].loc[
+                :, ['note', 'question', 'answer']
+                ].rename(columns={
+                    'note': 'context', 
+                    'answer': 'target'
+                })
 
 
 class TaskDataset(Dataset):
