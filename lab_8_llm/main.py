@@ -15,7 +15,7 @@ from pandas import DataFrame
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
-from transformers import BertForSequenceClassification, AutoTokenizer
+from transformers import AutoTokenizer, BertForSequenceClassification
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -43,6 +43,10 @@ class RawDataImporter(AbstractRawDataImporter):
 
         if not isinstance(self._raw_data, DataFrame):
             raise TypeError
+
+    @property
+    def raw_data(self) -> DataFrame:
+        return self._raw_data
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
