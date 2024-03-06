@@ -1,5 +1,5 @@
 """
-Neural machine translation starter.
+Neural summarization starter.
 """
 # pylint: disable= too-many-locals
 import json
