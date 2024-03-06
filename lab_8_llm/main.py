@@ -278,15 +278,16 @@ class TaskEvaluator(AbstractTaskEvaluator):
         """
         to_eval_df = pd.read_csv(self._data_path)
         evaluations = {}
-        for metric in self._metrics:
-            metric = load(metric)
-            evaluation = metric.compute(references=to_eval_df['target'].tolist(),
-                                        predictions=to_eval_df['predictions'].tolist(),
-                                        )
-            if metric == "rouge":
-                tmp = {"rougeL":evaluation["rougeL"]}
-                evaluation = tmp
 
-            evaluations.update(dict(evaluation))
+        for metric in self._metrics:
+            if metric.value == "bleu":
+                bleu_score = load(metric.value).compute(references=data['target'],
+                                                        predictions=data['predictions'])
+                evaluations.update({"bleu": bleu_score.get("bleu")})
+
+            elif metric.value == "rouge":
+                rouge_score = load(metric.value).compute(references=data['target'],
+                                                         predictions=data['predictions'])
+                evaluations.update({"rouge": rouge_score.get("rougeL")})
 
         return evaluations
