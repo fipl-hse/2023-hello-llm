@@ -29,7 +29,7 @@ def main() -> None:
 
     preprocessed_data.transform()
 
-    dataset = TaskDataset(preprocessed_data.data.head(2))
+    dataset = TaskDataset(preprocessed_data.data.head(100))
 
     llm = LLMPipeline(settings["parameters"]["model"], dataset, 120, 1, "cpu")
 
