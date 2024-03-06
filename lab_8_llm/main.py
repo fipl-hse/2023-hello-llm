@@ -28,6 +28,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
+    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -41,7 +42,7 @@ class RawDataImporter(AbstractRawDataImporter):
                                       split='train').to_pandas()
 
     @property
-    def raw_data(self):
+    def raw_data(self) -> DataFrame:
         """
         Property for original dataset in a table format.
 
@@ -245,7 +246,8 @@ class LLMPipeline(AbstractLLMPipeline):
         outputs = self._model.generate(**tokens, max_length=self._max_length)
         pred_batch = self._tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
-        pred_batch[0] = pred_batch[0][len(sample_batch[0]):]
+        if sample_batch[0] in pred_batch[0]:
+            pred_batch[0] = pred_batch[0][len(sample_batch[0]):].strip()
 
         return pred_batch
 
