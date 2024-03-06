@@ -163,10 +163,6 @@ class LLMPipeline(AbstractLLMPipeline):
         self._tokenizer = AutoTokenizer.from_pretrained(model_name)
         self._model = GPTNeoXForCausalLM.from_pretrained(self._model_name)
 
-        if self._tokenizer.pad_token is None:
-            self._tokenizer.add_special_tokens({'pad_token': '[PAD]'})
-            self._model.resize_token_embeddings(len(self._tokenizer))
-
     def analyze_model(self) -> dict:
         """
         Analyze model computing properties.
@@ -246,7 +242,8 @@ class LLMPipeline(AbstractLLMPipeline):
             return_tensors='pt'
         )
 
-        outputs = self._model.generate(**tokens, max_length=self._max_length)
+        outputs = self._model.generate(**tokens, max_length=self._max_length,
+                                       pad_token_id=self._tokenizer.eos_token_id)
 
         return list(self._tokenizer.batch_decode(outputs, skip_special_tokens=True))
 
