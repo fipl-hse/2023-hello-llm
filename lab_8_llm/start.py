@@ -1,12 +1,16 @@
 """
-Neural machine translation starter.
+Neural classification starter.
 """
 # pylint: disable= too-many-locals
 import json
+import os
+from pathlib import Path
 
 from config.constants import PROJECT_ROOT
+from core_utils.llm.metrics import Metrics
 from core_utils.llm.time_decorator import report_time
-from lab_8_llm.main import RawDataImporter, RawDataPreprocessor
+from lab_8_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset,
+                            TaskEvaluator)
 
 
 @report_time
@@ -21,8 +25,32 @@ def main() -> None:
     data_importer.obtain()
 
     preprocessor = RawDataPreprocessor(data_importer.raw_data)
+    preprocessor.analyze()
+    preprocessor.transform()
 
-    result = preprocessor.analyze()
+    dataset = TaskDataset(preprocessor.data.head(100))
+
+    pipeline = LLMPipeline(settings['parameters']['model'],
+                           dataset,
+                           max_length=120,
+                           batch_size=64,
+                           device='cpu')
+
+    model_analysis = pipeline.analyze_model()
+    print(model_analysis)
+
+    pipeline.infer_sample(dataset[0])
+
+    if not os.path.exists(f'{PROJECT_ROOT}/lab_8_llm/dist'):
+        os.mkdir(f'{PROJECT_ROOT}/lab_8_llm/dist')
+    prediction_path = f'{PROJECT_ROOT}/lab_8_llm/dist/predictions.csv'
+
+    pipeline.infer_dataset().to_csv(prediction_path, index=False)
+
+    metrics = [Metrics[metric.upper()] for metric in settings['parameters']['metrics']]
+    evaluator = TaskEvaluator(Path(prediction_path), metrics)
+
+    result = evaluator.run()
 
     assert result is not None, "Demo does not work correctly"
 
