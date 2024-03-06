@@ -6,7 +6,7 @@ pandas==2.2.0rc0
 pydantic==2.5.3
 pytest==7.4.4
 scikit-learn==1.2.2
-torch==2.1.1+cu121
+torch==2.1.1
 torchinfo==1.8.0
 tqdm==4.66.1
 transformers==4.35.2
