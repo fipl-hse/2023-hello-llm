@@ -28,7 +28,6 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
-    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -42,7 +41,7 @@ class RawDataImporter(AbstractRawDataImporter):
                                       split='train').to_pandas()
 
     @property
-    def raw_data(self) -> DataFrame:
+    def raw_data(self):
         """
         Property for original dataset in a table format.
 
@@ -200,7 +199,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        return None if self._model is None else self._infer_batch((sample,))[0]
+        return None if self._model is None else self._infer_batch((sample,))
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -214,7 +213,7 @@ class LLMPipeline(AbstractLLMPipeline):
         dataloader = DataLoader(self._dataset, batch_size=self._batch_size)
 
         for batch in dataloader:
-            predictions.extend(self._infer_batch(batch))
+            predictions.extend(self._infer_batch(batch[0]))
 
         return DataFrame(
             {
@@ -244,8 +243,11 @@ class LLMPipeline(AbstractLLMPipeline):
         )
 
         outputs = self._model.generate(**tokens, max_length=self._max_length)
+        pred_batch = self._tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
-        return list(self._tokenizer.batch_decode(outputs, skip_special_tokens=True))
+        pred_batch[0] = pred_batch[0][len(sample_batch[0]):]
+
+        return pred_batch
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -279,6 +281,9 @@ class TaskEvaluator(AbstractTaskEvaluator):
             evaluation = metric.compute(references=to_eval_df['target'].tolist(),
                                         predictions=to_eval_df['predictions'].tolist(),
                                         )
+            if metric == "rouge":
+                evaluation = {"rougeL":evaluation["rougeL"]}
+
             evaluations.update(dict(evaluation))
 
         return evaluations
