@@ -67,6 +67,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             "dataset_sample_max_len": len(max(self._raw_data['article_content'], key=len))
         }
         return analyze_dataset
+
     @report_time
     def transform(self) -> None:
         """
