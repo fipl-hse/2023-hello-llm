@@ -24,6 +24,7 @@ def main() -> None:
     # pipeline = LLMPipeline(settings_dict['parameters']['model'], dataset, 512, 64, 'cpu')
     # pipeline.analyze_model()
     print(analysis)
+    # print(raw_dataset.raw_data.head(10))
 
     result = 1
     assert result is not None, "Demo does not work correctly"

@@ -62,14 +62,18 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         properties_dict = {"dataset_number_of_samples": self._raw_data.shape[0],
                            "dataset_columns": self._raw_data.shape[1],
-                           "dataset_empty_rows": len(self._raw_data.isna()),
+                           "dataset_empty_rows": self._raw_data.isin(['']).sum().sum(),
                            "dataset_duplicates": self._raw_data.duplicated().sum()}
 
-        self._raw_data = self._raw_data.dropna()
-        properties_dict["dataset_sample_min_len"] = min(self._raw_data['instruction'].str.len().min(),
-                                                        self._raw_data['response'].str.len().min())
-        properties_dict["dataset_sample_max_len"] = max(self._raw_data['instruction'].str.len().max(),
-                                                        self._raw_data['response'].str.len().max())
+        self._raw_data = self._raw_data[self._raw_data.context != '']
+        properties_dict["dataset_sample_min_len"] = self._raw_data['instruction'].str.len().min()
+        properties_dict["dataset_sample_max_len"] = self._raw_data['instruction'].str.len().max()
+
+        '''properties_dict["dataset_sample_min_len"] = (
+            self._raw_data[(self._raw_data.category == 'open_qa')]['instruction'].str.len().min())
+        properties_dict["dataset_sample_max_len"] = (
+            self._raw_data[(self._raw_data.category == 'open_qa')]['response'].str.len().max())'''
+
         return properties_dict
 
     @report_time
