@@ -157,7 +157,7 @@ class LLMPipeline(AbstractLLMPipeline):
         self._model = GPTNeoForCausalLM.from_pretrained(model_name)
         self._dataset = dataset
         self._device = device
-        self._tokenizer = GPT2TokenizerFast.from_pretrained(model_name)
+        self._tokenizer = GPT2TokenizerFast.from_pretrained(model_name, padding_side='left')
         self._tokenizer.pad_token = self._tokenizer.eos_token
         self._batch_size = batch_size
         self._max_length = max_length
@@ -200,7 +200,6 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         return None if self._model is None else self._infer_batch((sample,))[0]
 
-
     @report_time
     def infer_dataset(self) -> DataFrame:
         """
@@ -240,7 +239,10 @@ class LLMPipeline(AbstractLLMPipeline):
             return_tensors='pt'
         )
         outputs = self._model.generate(**tokens, max_length=self._max_length)
-        return self._tokenizer.batch_decode(outputs, skip_special_tokens=True)
+        generated_texts = self._tokenizer.batch_decode(outputs, skip_special_tokens=True)
+        return [
+            text.removeprefix(f'{sample_batch[0][i]}\n') for i, text in enumerate(generated_texts)
+        ]
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
