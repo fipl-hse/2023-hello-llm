@@ -10,11 +10,11 @@ from typing import Iterable, Sequence
 import numpy as np
 import pandas as pd
 import torch
-from torchinfo import summary
 from datasets import load_dataset
 from evaluate import load
 from pandas import DataFrame
 from torch.utils.data import DataLoader, Dataset
+from torchinfo import summary
 from transformers import GPT2TokenizerFast, GPTNeoForCausalLM
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
@@ -158,6 +158,7 @@ class LLMPipeline(AbstractLLMPipeline):
         self._dataset = dataset
         self._device = device
         self._tokenizer = GPT2TokenizerFast.from_pretrained(model_name)
+        self._tokenizer.pad_token = self._tokenizer.eos_token
         self._batch_size = batch_size
         self._max_length = max_length
 
