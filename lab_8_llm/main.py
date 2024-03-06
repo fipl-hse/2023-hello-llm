@@ -262,10 +262,14 @@ class TaskEvaluator(AbstractTaskEvaluator):
         metrics = {}
         for metric in self._metrics:
             if metric.value == "bleu":
-                metrics.update(load(metric.value).compute(references=data['target'],
-                                                          predictions=data['predictions']))
+                bleu_score = load(metric.value).compute(references=data['target'],
+                                                        predictions=data['predictions'])
+                metrics.update({"bleu": bleu_score.get("bleu")})
+
             elif metric.value == "rouge":
-                metrics.update(load(metric.value).compute(references=data['target'],
-                                                          predictions=data['predictions']))
+                rouge_score = load(metric.value).compute(references=data['target'],
+                                                         predictions=data['predictions'])
+                metrics.update({"rouge": rouge_score.get("rougeL")})
+
         return metrics
 
