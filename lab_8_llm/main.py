@@ -7,13 +7,13 @@ Working with Large Language Models.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
-from torchinfo import summary
-from transformers import AutoTokenizer, AutoModelForQuestionAnswering, DebertaV2ForQuestionAnswering
 
 from datasets import load_dataset
+from transformers import AutoTokenizer, AutoModelForQuestionAnswering
 
 try:
     import torch
+    from torchinfo import summary
     from torch.utils.data.dataset import Dataset
 except ImportError:
     print('Library "torch" not installed. Failed to import.')
@@ -29,7 +29,7 @@ except ImportError:
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -228,7 +228,6 @@ class LLMPipeline(AbstractLLMPipeline):
         result = self._tokenizer.decode(predict_answer_tokens)
 
         return result
-
 
     @report_time
     def infer_dataset(self) -> DataFrame:
