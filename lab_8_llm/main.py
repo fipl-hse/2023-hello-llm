@@ -15,7 +15,6 @@ from evaluate import load
 from pandas import DataFrame
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
-# from torchinfo import summary
 from transformers import BertForSequenceClassification, AutoTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
@@ -24,7 +23,6 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
-# from torch.utils.data import DataLoader, Dataset
 
 
 class RawDataImporter(AbstractRawDataImporter):
@@ -281,14 +279,17 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
-        to_eval_df = pd.read_csv(self._data_path)
+        predictions = pd.read_csv(self._data_path)
         evaluations = {}
         for metric in self._metrics:
             metric = load(metric.value)
-            evaluation = metric.compute(references=to_eval_df['target'].tolist(),
-                                        predictions=to_eval_df['predictions'].tolist(),
-                                        average='micro'
-                                        )
+            evaluation = metric.compute(references=predictions['target'],
+                                        predictions=predictions['predictions'],
+                                        average='macro')
+#            evaluation = metric.compute(references=to_eval_df['target'].tolist(),
+#                                        predictions=to_eval_df['predictions'].tolist())
+#                                        average='micro'
+#                                        )
             evaluations.update(dict(evaluation))
 
         return evaluations
