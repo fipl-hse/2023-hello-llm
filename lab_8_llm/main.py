@@ -7,7 +7,6 @@ Working with Large Language Models.
 from pathlib import Path
 from typing import Iterable, Sequence
 
-import pandas as pd
 import torch
 from datasets import load_dataset
 from evaluate import load
@@ -15,7 +14,7 @@ from pandas import DataFrame, read_csv
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
-from transformers import AutoModelForSequenceClassification, BertTokenizerFast
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -40,7 +39,7 @@ class RawDataImporter(AbstractRawDataImporter):
         """
         self._raw_data = load_dataset(
             path=self._hf_name,
-            split="train"
+            split="validation"
         ).to_pandas()
 
         if not isinstance(self._raw_data, DataFrame):
@@ -118,8 +117,10 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return str(self._data[ColumnNames.SOURCE.value].iloc[index]),\
-               str(self._data[ColumnNames.TARGET.value].iloc[index])
+        source = self._data[ColumnNames.SOURCE.value].iloc[index]
+        target = self._data[ColumnNames.TARGET.value].iloc[index]
+
+        return str(source), str(target)
 
     @property
     def data(self) -> DataFrame:
@@ -136,8 +137,6 @@ class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
     """
-
-    _model: torch.nn.Module
 
     def __init__(
             self,
@@ -163,7 +162,7 @@ class LLMPipeline(AbstractLLMPipeline):
         self._max_length = max_length
         self._batch_size = batch_size
         self._model = AutoModelForSequenceClassification.from_pretrained(model_name)
-        self._tokenizer = BertTokenizerFast.from_pretrained(model_name)
+        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -211,7 +210,7 @@ class LLMPipeline(AbstractLLMPipeline):
         if self._model is None:
             return None
 
-        return self._infer_batch([sample])[0]
+        return self._infer_batch((sample,))[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -245,23 +244,13 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-        batch_pred_list = []
-
-        for sequence in sample_batch[0]:
-            inputs = self._tokenizer(sequence,
-                                     max_length=self._max_length,
-                                     padding=True,
-                                     truncation=True,
-                                     return_tensors="pt")
-            outputs = self._model(**inputs)
-
-            predicted = torch.nn.functional.softmax(outputs.logits, dim=1)
-            predicted = torch.argmax(predicted, dim=1).numpy()
-
-            for pred in predicted:
-                batch_pred_list.append(str(pred))
-
-        return batch_pred_list
+        inputs = self._tokenizer(sample_batch[0],
+                                 max_length=self._max_length,
+                                 padding=True,
+                                 truncation=True,
+                                 return_tensors="pt")
+        outputs = self._model(**inputs).logits
+        return [str(prediction.item()) for prediction in list(torch.argmax(outputs, dim=1))]
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -290,11 +279,15 @@ class TaskEvaluator(AbstractTaskEvaluator):
         """
         predictions_df = read_csv(self._data_path)
 
-        results = {}
+        scores = {}
         for metric in self._metrics:
             metric_instance = load(metric.value)
-            result = metric_instance.compute(predictions=predictions_df["predictions"].tolist(),
-                                             references=predictions_df["target"].tolist())
-            results[metric.value] = result[metric.value]
+            score = metric_instance.compute(predictions=predictions_df["predictions"].tolist(),
+                                            references=predictions_df["target"].tolist(),
+                                            average="weighted"
+                                            )
+            scores.update(score)
 
-        return results
+        print(scores)
+
+        return scores

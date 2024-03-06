@@ -6,7 +6,7 @@ from pathlib import Path
 
 from config.lab_settings import LabSettings
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset,
+from lab_8_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset,
                             TaskEvaluator)
 
 
@@ -34,9 +34,11 @@ def main() -> None:
     dataset = TaskDataset(preprocessor.data.head(100))
 
     batch_size = 1
+    max_length = 120
+
     pipeline = LLMPipeline(model_name=settings_path.parameters.model,
                            dataset=dataset,
-                           max_length=120,
+                           max_length=max_length,
                            batch_size=batch_size,
                            device="cpu")
     pipeline.analyze_model()
@@ -46,7 +48,7 @@ def main() -> None:
     batch_size = 64
     pipeline = LLMPipeline(model_name=settings_path.parameters.model,
                            dataset=dataset,
-                           max_length=120,
+                           max_length=max_length,
                            batch_size=batch_size,
                            device="cpu")
     predictions = pipeline.infer_dataset()
