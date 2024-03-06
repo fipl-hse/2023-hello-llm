@@ -1,5 +1,5 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
-datasets~=2.16.1
+datasets==2.16.1
 evaluate==0.4.1
 fastapi==0.109.0
 pandas==2.2.0rc0
