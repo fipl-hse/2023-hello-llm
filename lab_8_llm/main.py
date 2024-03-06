@@ -30,6 +30,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
+    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -154,6 +155,7 @@ class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
     """
+    _model: torch.nn.Module
 
     def __init__(
             self,
@@ -193,7 +195,7 @@ class LLMPipeline(AbstractLLMPipeline):
         input_data = {"input_ids": tensor_data,
                       "attention_mask": tensor_data}
 
-        model_statistics = summary(self._model,
+        model_statistics = summary(model=self._model,
                                    input_data=input_data,
                                    verbose=False)
 
