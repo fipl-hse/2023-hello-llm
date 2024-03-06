@@ -280,12 +280,12 @@ class TaskEvaluator(AbstractTaskEvaluator):
         evaluations = {}
 
         for metric in self._metrics:
-            if metric.name == "bleu":
+            if metric == "bleu":
                 bleu_score = load(metric.value).compute(references=to_eval_df['target'],
                                                         predictions=dto_eval_dfata['predictions'])
                 evaluations.update({"bleu": bleu_score.get("bleu")})
 
-            elif metric.name == "rouge":
+            elif metric == "rouge":
                 rouge_score = load(metric.value).compute(references=to_eval_df['target'],
                                                          predictions=to_eval_df['predictions'])
                 evaluations.update({"rouge": rouge_score.get("rougeL")})
