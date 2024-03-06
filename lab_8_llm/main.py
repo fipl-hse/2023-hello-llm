@@ -200,7 +200,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        return None if self._model is None else self._infer_batch((sample,))
+        return None if self._model is None else str(self._infer_batch((sample,)))
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -249,7 +249,7 @@ class LLMPipeline(AbstractLLMPipeline):
         if sample_batch[0] in pred_batch[0]:
             pred_batch[0] = pred_batch[0][len(sample_batch[0]):].strip()
 
-        return pred_batch
+        return list(pred_batch)
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -284,7 +284,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
                                         predictions=to_eval_df['predictions'].tolist(),
                                         )
             if metric == "rouge":
-                evaluation = {"rougeL":evaluation["rougeL"]}
+                tmp = {"rougeL":evaluation["rougeL"]}
+                evaluation = tmp
 
             evaluations.update(dict(evaluation))
 
