@@ -39,13 +39,14 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
         self._raw_data = load_dataset(self._hf_name, split='train').to_pandas()
+        if not isinstance(self._raw_data, DataFrame):
+            raise TypeError
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     A class that analyzes and preprocesses a dataset.
     """
-    _data: DataFrame
 
     def analyze(self) -> dict:
         """
