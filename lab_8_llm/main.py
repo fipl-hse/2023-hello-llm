@@ -161,8 +161,8 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self._tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self._tokenizer.pad_token = self._tokenizer.eos_token
         self._model = GPTNeoXForCausalLM.from_pretrained(self._model_name)
+        self._tokenizer.pad_token = self._tokenizer.eos_token
 
     def analyze_model(self) -> dict:
         """
