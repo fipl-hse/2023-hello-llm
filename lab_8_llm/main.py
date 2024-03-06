@@ -14,7 +14,7 @@ from evaluate import load
 from pandas import DataFrame
 from torch.utils.data import DataLoader, Dataset
 from torchinfo import summary
-from transformers import GPTNeoXForCausalLM, AutoTokenizer
+from transformers import AutoTokenizer, GPTNeoXForCausalLM
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -248,7 +248,7 @@ class LLMPipeline(AbstractLLMPipeline):
 
         outputs = self._model.generate(**tokens, max_length=self._max_length)
 
-        return self._tokenizer.batch_decode(outputs, skip_special_tokens=True)
+        return list(self._tokenizer.batch_decode(outputs, skip_special_tokens=True))
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -281,7 +281,6 @@ class TaskEvaluator(AbstractTaskEvaluator):
             metric = load(metric)
             evaluation = metric.compute(references=to_eval_df['target'].tolist(),
                                         predictions=to_eval_df['predictions'].tolist(),
-                                        average='micro'
                                         )
             evaluations.update(dict(evaluation))
 
