@@ -3,10 +3,11 @@ Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
 import json
+from pathlib import Path
 
 from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
-from lab_8_llm.main import RawDataImporter, RawDataPreprocessor
+from lab_8_llm.main import RawDataImporter, RawDataPreprocessor, TaskDataset, LLMPipeline, TaskEvaluator
 
 
 @report_time
@@ -23,7 +24,33 @@ def main() -> None:
     raw_data.obtain()
 
     preprocessed_data = RawDataPreprocessor(raw_data.raw_data)
-    result = preprocessed_data.analyze()
+    print(preprocessed_data.analyze())
+
+    preprocessed_data.transform()
+
+    dataset = TaskDataset(preprocessed_data.data.head(100))
+
+    llm = LLMPipeline(settings["parameters"]["model"], dataset, 120, 1, "cpu")
+
+    print(llm.analyze_model())
+
+    sample_infer = llm.infer_sample(dataset.data['question'][0])
+    print('prediction for sample (', dataset.data['question'][0], ')', sample_infer)
+
+    predictions = llm.infer_dataset()
+    predictions_path = PROJECT_ROOT / 'lab_8_llm' / 'dist' / 'predictions.csv'
+
+    if not predictions_path.parent.exists():
+        predictions_path.parent.mkdir()
+
+    predictions.to_csv(predictions_path, index=False)
+
+    evaluator = TaskEvaluator(
+        Path(predictions_path),
+        settings['parameters']['metrics']
+    )
+    result = evaluator.run()
+
     print(result)
 
     assert result is not None, "Demo does not work correctly"
