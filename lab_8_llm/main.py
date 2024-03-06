@@ -167,6 +167,7 @@ class LLMPipeline(AbstractLLMPipeline):
             device (str): The device for inference
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
+        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
         self._model = BertForSequenceClassification.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
@@ -247,11 +248,10 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-        tokenizer = AutoTokenizer.from_pretrained(self._model_name)
         predictions = []
 
-        tokens = tokenizer(sample_batch[0], max_length=self._max_length, padding=True,
-                           return_tensors='pt', truncation=True)
+        tokens = self._tokenizer(sample_batch[0], max_length=self._max_length, padding=True,
+                                 return_tensors='pt', truncation=True)
         output = self._model(**tokens).logits
         predictions.extend([str(prediction.item())
                             for prediction in list(torch.argmax(output, dim=1))])
