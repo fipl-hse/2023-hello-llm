@@ -12,7 +12,7 @@ from datasets import load_dataset
 from pandas import DataFrame
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
