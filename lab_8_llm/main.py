@@ -4,7 +4,7 @@ Laboratory work.
 Working with Large Language Models.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
-from collections import namedtuple
+#from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
@@ -58,7 +58,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
-        return {
+        analyze_dataset = {
             "dataset_number_of_samples": self._raw_data.shape[0],
             "dataset_columns": self._raw_data.shape[1],
             "dataset_duplicates": self._raw_data.duplicated().sum(),
@@ -66,6 +66,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             "dataset_sample_min_len": len(min(self._raw_data['article_content'], key=len)),
             "dataset_sample_max_len": len(max(self._raw_data['article_content'], key=len))
         }
+        return analyze_dataset
     @report_time
     def transform(self) -> None:
         """
@@ -73,7 +74,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         self._data = (self._raw_data
                       .drop(["title", "date", "url"], axis=1)
-                      .rename(columns={"article_content": ColumnNames.SOURCE.value, "summary": ColumnNames.TARGET.value})
+                      .rename(columns={"article_content": ColumnNames.SOURCE.value,
+                                       "summary": ColumnNames.TARGET.value})
                       .dropna().drop_duplicates()
                       .reset_index(drop=True))
 
@@ -153,6 +155,7 @@ class LLMPipeline(AbstractLLMPipeline):
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self.tokenizer = AutoTokenizer.from_pretrained(self._model_name)
         self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
+
 
     def analyze_model(self) -> dict:
         """
