@@ -2,7 +2,6 @@
 Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
-import json
 from random import randint
 
 from config.constants import PROJECT_ROOT

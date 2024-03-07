@@ -211,7 +211,9 @@ class LLMPipeline(AbstractLLMPipeline):
         dataloader = DataLoader(self._dataset, batch_size=self._batch_size)
 
         for batch in dataloader:
-            predictions.extend(self._infer_batch(batch))
+            predictions.extend(self._infer_batch(batch,
+                                                 repetition_penalty=2.0,
+                                                 no_repeat_ngram_size=8))
 
         return DataFrame(
             {
@@ -221,12 +223,19 @@ class LLMPipeline(AbstractLLMPipeline):
         )
 
     @torch.no_grad()
-    def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
+    def _infer_batch(
+            self,
+            sample_batch: Sequence[tuple[str, ...]],
+            repetition_penalty: float = 1.0,
+            no_repeat_ngram_size: int = 0
+    ) -> list[str]:
         """
         Infer model on a single batch.
 
         Args:
             sample_batch (Sequence[tuple[str, ...]]): Batch to infer the model
+            repetition_penalty (float): Generation parameter, penalty rate for repetitions in output
+            no_repeat_ngram_size (int): Generation parameter, ngrams of the size can only occur once
 
         Returns:
             list[str]: Model predictions as strings
@@ -237,7 +246,12 @@ class LLMPipeline(AbstractLLMPipeline):
             truncation=True,
             return_tensors='pt'
         )
-        outputs = self._model.generate(**tokens, max_length=self._max_length)
+        outputs = self._model.generate(
+            **tokens,
+            max_length=self._max_length,
+            repetition_penalty=repetition_penalty,
+            no_repeat_ngram_size=no_repeat_ngram_size
+        )
         generated_texts = self._tokenizer.batch_decode(outputs, skip_special_tokens=True)
         return [
             text.removeprefix(f'{sample_batch[0][i]}\n') for i, text in enumerate(generated_texts)
