@@ -2,36 +2,39 @@
 Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
-from config.constants import PROJECT_ROOT
-from config.lab_settings import LabSettings
-from core_utils.llm.time_decorator import report_time
-from lab_8_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset)
+import json
 
+from config.constants import PROJECT_ROOT
+from core_utils.llm.time_decorator import report_time
+from lab_8_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset
 
 @report_time
 def main() -> None:
     """
     Run the translation pipeline.
     """
-    settings = LabSettings(PROJECT_ROOT / "lab_8_llm" / 'settings.json')
+    with open(PROJECT_ROOT / 'lab_8_llm' / 'settings.json', 'r', encoding='utf-8') as file:
+        settings = json.load(file)
+    importer = RawDataImporter(settings['parameters']['dataset'])
+    importer.obtain()
 
-    ds_obtainer = RawDataImporter(settings.parameters.dataset)
-    ds_obtainer.obtain()
+    preprocessor = RawDataPreprocessor(importer.raw_data)
 
-    ds_preprocess = RawDataPreprocessor(ds_obtainer.raw_data)
-    print(ds_preprocess.analyze())
-    ds_preprocess.transform()
+    data_analysis = preprocessor.analyze()
+    print(data_analysis)
 
-    ds_torch = TaskDataset(ds_preprocess.data.head(100))
+    preprocessor.transform()
 
-    result = LLMPipeline(model_name=settings.parameters.model,
-                         dataset=ds_torch,
-                         max_length=120,
-                         batch_size=64,
-                         device='cpu')
+    dataset = TaskDataset(preprocessor.data.head(100))
 
-    print(result.analyze_model())
-    print(result.infer_sample(ds_torch[0]))
+    pipeline = LLMPipeline(settings['parameters']['model'], dataset,
+                           max_length=120, batch_size=64, device='cpu')
+
+    model_analysis = pipeline.analyze_model()
+    print(model_analysis)
+
+    result = pipeline.infer_sample(dataset[0])
+    print(result)
 
     assert result is not None, "Demo does not work correctly"
 
