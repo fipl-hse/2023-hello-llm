@@ -9,12 +9,12 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 from datasets import load_dataset
-from transformers import AutoTokenizer, AutoModelForQuestionAnswering
+from transformers import AutoModelForQuestionAnswering, AutoTokenizer
 
 try:
     import torch
-    from torchinfo import summary
     from torch.utils.data.dataset import Dataset
+    from torchinfo import summary
 except ImportError:
     print('Library "torch" not installed. Failed to import.')
     Dataset = dict
@@ -119,7 +119,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data.iloc[index]['source']
+        return str(self._data[ColumnNames.QUESTION.value].iloc[index])
 
     @property
     def data(self) -> DataFrame:
@@ -218,8 +218,7 @@ class LLMPipeline(AbstractLLMPipeline):
                                  return_tensors='pt',
                                  truncation=True)
 
-        with torch.no_grad():
-            outputs = self._model(**tokens)
+        outputs = self._model(**tokens)
 
         answer_start_index = outputs.start_logits.argmax()
         answer_end_index = outputs.end_logits.argmax()
