@@ -284,10 +284,6 @@ class TaskEvaluator(AbstractTaskEvaluator):
             metric_instance = load(metric.value)
             score = metric_instance.compute(predictions=predictions_df["predictions"].tolist(),
                                             references=predictions_df["target"].tolist(),
-                                            average="weighted"
-                                            )
+                                            average="micro")
             scores.update(score)
-
-        print(scores)
-
         return scores
