@@ -7,7 +7,6 @@ Working with Large Language Models.
 from pathlib import Path
 from typing import Iterable, Sequence
 
-import numpy as np
 import pandas as pd
 import torch
 from datasets import load_dataset
@@ -258,6 +257,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        self._data_path = data_path / 'predictions.csv'
+        self._metrics = metrics
 
     @report_time
     def run(self) -> dict | None:
@@ -267,3 +268,19 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        data = pd.read_csv(self._data_path)
+        scores = {}
+
+        for metric_name in self._metrics:
+            metric = load(metric_name.value)
+            score = metric.compute(
+                predictions=data[ColumnNames.PREDICTION.value],
+                references=data[ColumnNames.TARGET.value]
+            )
+
+            if metric_name.value == Metrics.ROUGE.value:
+                scores[metric_name.value] = score.get(f'{metric_name.value}L')
+            else:
+                scores[metric_name.value] = score.get(metric_name.value)
+
+        return scores

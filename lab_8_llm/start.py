@@ -7,7 +7,6 @@ from random import randint
 
 from config.constants import PROJECT_ROOT
 from config.lab_settings import LabSettings
-from core_utils.llm.metrics import Metrics
 from core_utils.llm.time_decorator import report_time
 from lab_8_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset,
                             TaskEvaluator)
@@ -34,13 +33,15 @@ def main() -> None:
     pipeline.infer_sample(dataset[randint(0, len(dataset) - 1)])
 
     df_pred = pipeline.infer_dataset()
-    save_path = PROJECT_ROOT / 'lab_8_llm' / 'dist'
-    if not save_path.exists():
-        save_path.mkdir(exist_ok=True)
+    predictions_path = PROJECT_ROOT / 'lab_8_llm' / 'dist'
+    if not predictions_path.exists():
+        predictions_path.mkdir(exist_ok=True)
 
-    df_pred.to_csv(save_path / 'predictions.csv', index=False, encoding='utf-8')
+    df_pred.to_csv(predictions_path / 'predictions.csv', index=False, encoding='utf-8')
 
-    result = pipeline
+    evaluator = TaskEvaluator(predictions_path, settings.parameters.metrics)
+    result = evaluator.run()
+    print(result)
     assert result is not None, "Demo does not work correctly"
 
 
