@@ -30,6 +30,8 @@ class RawDataImporter(AbstractRawDataImporter):
     A class that imports the HuggingFace dataset.
     """
 
+    _raw_data: DataFrame
+
     @report_time
     def obtain(self) -> None:
         """
@@ -40,6 +42,13 @@ class RawDataImporter(AbstractRawDataImporter):
         """
         self._raw_data = load_dataset(self._hf_name,
                                       split='train').to_pandas()
+
+    @property
+    def get_raw_data(self) -> DataFrame:
+        """
+        Get raw dataset.
+        """
+        return self._raw_data
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -148,9 +157,9 @@ class LLMPipeline(AbstractLLMPipeline):
             device (str): The device for inference
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
-        self._model: torch.nn.Module = BertForSequenceClassification.from_pretrained(self._model_name)
-        self._tokenizer = BertTokenizer.from_pretrained(self._model_name,
-                                                        model_max_length=self._max_length)
+        self._model: torch.nn.Module = BertForSequenceClassification.from_pretrained(
+            self._model_name)
+        self._tokenizer = BertTokenizer.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -208,7 +217,7 @@ class LLMPipeline(AbstractLLMPipeline):
             predictions.extend(self._infer_batch(batch))
 
         data_with_predictions = pd.DataFrame(
-            {'target': self._dataset.data[ColumnNames.TARGET.value].tolist(),
+            {'target': self._dataset.data[ColumnNames.TARGET.value],
              'prediction': pd.Series(predictions)})
         return data_with_predictions
 
@@ -266,7 +275,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
             metric = load(metric.value)
             scores = metric.compute(
                 references=predictions['target'].tolist(),
-                predictions=predictions['prediction'].tolist())
+                predictions=predictions['prediction'].tolist(), average='micro')
             metric_scores[metric.name] = scores.get(metric.name)
 
         return metric_scores
