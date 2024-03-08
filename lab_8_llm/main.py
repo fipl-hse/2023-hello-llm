@@ -3,20 +3,20 @@ Laboratory work.
 
 Working with Large Language Models.
 """
+
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
-from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
+
 import numpy as np
 import pandas as pd
 import torch
 from datasets import load_dataset
-from evaluate import load
-from pandas import DataFrame, read_csv
-from torch.utils.data import DataLoader
+from pandas import DataFrame
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import BertForSequenceClassification, BertTokenizer
+
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
