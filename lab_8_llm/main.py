@@ -8,6 +8,8 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
+from datasets import load_dataset
+
 try:
     import torch
     from torch.utils.data.dataset import Dataset
@@ -22,10 +24,14 @@ except ImportError:
     print('Library "pandas" not installed. Failed to import.')
     DataFrame = dict  # type: ignore
 
+from torch.utils.data.dataset import Dataset
+from torchinfo import summary
+from transformers import AutoModelForQuestionAnswering, AutoTokenizer
+
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -43,6 +49,8 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        dataset = load_dataset(self._hf_name, split="test")
+        self._raw_data = dataset.to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -57,13 +65,20 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        analyzed = {'dataset_number_of_samples': len(self._raw_data),
+                    'dataset_columns': len(self._raw_data.columns),
+                    'dataset_duplicates': self._raw_data.duplicated().sum(),
+                    'dataset_empty_rows': self._raw_data.isna().sum().sum(),
+                    'dataset_sample_min_len': len(min(self._raw_data['instruction'], key=len)),
+                    'dataset_sample_max_len': len(max(self._raw_data['context'], key=len))}
+
+        return analyzed
 
     @report_time
     def transform(self) -> None:
         """
         Apply preprocessing transformations to the raw dataset.
         """
-
 
 class TaskDataset(Dataset):
     """
