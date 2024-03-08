@@ -1,13 +1,13 @@
 'use strict'
 
-let inferSampleFromForm = async (premise, result) => {
+let inferSampleFromForm = async (question, result) => {
     let response = await fetch('/infer', {
         method: 'POST',
         headers: {
             'Content-type': 'application/json'
         },
         body: JSON.stringify({
-            question: premise.value,
+            question: question.value,
         })
     })
     if (response.ok) {
@@ -19,26 +19,26 @@ let inferSampleFromForm = async (premise, result) => {
     }
 }
 
-let disableButton = (btn, premise) => {
-    btn.disabled = !(premise.value);
+let disableButton = (btn, question) => {
+    btn.disabled = !(question.value);
 }
 
 window.onload = function() {
     const btn = document.getElementById('btn_submit');
-    const premise = document.getElementById('premise');
+    const question = document.getElementById('question');
     const showResults = document.getElementById('result');
 
     disableButton(
         btn,
-        premise,
+        question,
     );
 
-    premise.addEventListener('change', () => {
-        disableButton(btn, premise)
+    question.addEventListener('change', () => {
+        disableButton(btn, question)
     });
 
     btn.addEventListener('click', () => {
-        inferSampleFromForm(premise, showResults)
+        inferSampleFromForm(question, showResults)
     })
 }
 

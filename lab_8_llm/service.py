@@ -16,7 +16,7 @@ from pydantic.dataclasses import dataclass
 
 from config.constants import PROJECT_ROOT
 from config.lab_settings import LabSettings
-from main import LLMPipeline, TaskDataset
+from lab_8_llm.main import LLMPipeline, TaskDataset
 
 
 def init_application() -> tuple[FastAPI, LLMPipeline]:
@@ -40,11 +40,10 @@ def init_application() -> tuple[FastAPI, LLMPipeline]:
 
 
 app, pipeline = init_application()
-app_dir = os.path.dirname(__file__)
-assets_abs_file_path = os.path.join(app_dir, "assets")
-app.mount("/assets", StaticFiles(directory=assets_abs_file_path), name="assets")
 
-jinja_template = Jinja2Templates(directory=str(Path(app_dir, 'assets')))
+app.mount("/assets", StaticFiles(directory=PROJECT_ROOT / "lab_8_llm" / 'assets'), name="assets")
+
+jinja_template = Jinja2Templates(directory=PROJECT_ROOT / "lab_8_llm" / 'assets')
 
 
 @app.get('/', response_class=HTMLResponse)
