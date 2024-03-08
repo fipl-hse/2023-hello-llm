@@ -42,10 +42,6 @@ class RawDataImporter(AbstractRawDataImporter):
                                    split='validation').to_pandas()
         self._raw_data = raw_dataset
 
-    @property
-    def raw_data(self) -> DataFrame:
-        return self._raw_data
-
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
