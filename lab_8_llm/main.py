@@ -7,10 +7,12 @@ Working with Large Language Models.
 from pathlib import Path
 from typing import Iterable, Sequence
 
+import pandas as pd
 import torch
 from datasets import load_dataset
+from evaluate import load
 from pandas import DataFrame
-from torch.utils.data.dataset import Dataset
+from torch.utils.data import DataLoader, Dataset
 from torchinfo import summary
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -202,7 +204,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        return None if self._model is None else self._infer_batch([sample])[0][len(sample[0])+1:]
+        return None if self._model is None else self._infer_batch([sample])[0][len(sample[0]) + 1:]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -212,7 +214,18 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        pred = []
+        target_pred = self._dataset.data[ColumnNames.TARGET.value].tolist()
+        dloader = DataLoader(self._dataset, batch_size=self._batch_size)
+        for batch in dloader:
+            pred.extend(self._infer_batch(batch))
 
+        return DataFrame(
+            {
+                'target': target_pred,
+                'predictions': pred
+            }
+        )
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -249,6 +262,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        self._metrics = metrics
+        self._data_path = data_path
 
     @report_time
     def run(self) -> dict | None:
@@ -258,3 +273,22 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        predictions = pd.read_csv(self._data_path)
+
+        metrics = {}
+
+        for metric in self._metrics:
+            if metric.value == 'bleu':
+                metrics.update(
+                    {'bleu': load(metric.value).compute(references=predictions['target'],
+                                                        predictions=predictions[
+                                                            'predictions'])})
+            elif metric.value == 'rouge':
+                metrics.update(
+                    {'rouge': load(metric.value).compute(references=predictions['target'],
+                                                         predictions=predictions[
+                                                             'predictions'])})
+        return {
+            'bleu': metrics.get('bleu').get('bleu'),
+            'rouge': metrics.get('rouge').get('rougeL')
+        }
