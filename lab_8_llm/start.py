@@ -5,6 +5,7 @@ Neural machine translation starter.
 import os
 
 import pandas
+import pandas as pd
 
 from config.constants import PROJECT_ROOT
 from config.lab_settings import LabSettings
@@ -24,7 +25,11 @@ def main() -> None:
     ds_obtainer = RawDataImporter(settings.parameters.dataset)
     ds_obtainer.obtain()
 
-    ds_preprocess = RawDataPreprocessor(ds_obtainer.raw_data)
+    if ds_obtainer.raw_data is None:
+        ds_preprocess = RawDataPreprocessor(pd.DataFrame())
+    else:
+        ds_preprocess = RawDataPreprocessor(ds_obtainer.raw_data)
+
     print(ds_preprocess.analyze())
     ds_preprocess.transform()
 
