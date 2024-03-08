@@ -1,8 +1,10 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
 datasets==2.16.1
 evaluate==0.4.1
 nltk==3.8.1
 pandas==2.1.4
 rouge_score==0.1.2
+scikit-learn==1.4.1.post1
 torch==2.1.2
 torchinfo==1.8.0
 transformers==4.37.2
