@@ -22,7 +22,7 @@ def main() -> None:
     if not predictions_path.parent.exists():
         predictions_path.parent.mkdir(exist_ok=True)
 
-    device = "mps"
+    device = "cpu"
     batch_size = 1
     max_length = 120
     num_samples = 10
