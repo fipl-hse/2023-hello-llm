@@ -165,7 +165,8 @@ class LLMPipeline(AbstractLLMPipeline):
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self._model = AutoModelForCausalLM.from_pretrained(
             model_name)
-        self._tokenizer = AutoTokenizer.from_pretrained(model_name, model_max_length=max_length)
+        self._tokenizer = AutoTokenizer.from_pretrained(model_name, model_max_length=max_length,
+                                                        padding_side='left')
         self._tokenizer.pad_token = self._tokenizer.eos_token
         self._dataset = dataset
         self._batch_size = batch_size
@@ -204,7 +205,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        return None if self._model is None else self._infer_batch([sample])[0][len(sample[0]) + 1:]
+        return None if self._model is None else self._infer_batch([sample])[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -245,8 +246,8 @@ class LLMPipeline(AbstractLLMPipeline):
             return_tensors='pt'
         )
         outputs = self._model.generate(**tokens, max_length=self._max_length)
-        return (self._tokenizer
-                .batch_decode(outputs, skip_special_tokens=True))
+        res = self._tokenizer.batch_decode(outputs, skip_special_tokens=True)
+        return [pred[len(sample_batch[0][i]) + 1:] for i, pred in enumerate(res)]
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
