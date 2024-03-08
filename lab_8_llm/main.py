@@ -7,25 +7,20 @@ Working with Large Language Models.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
-
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
-
+import numpy as np
+import pandas as pd
+import torch
+from datasets import load_dataset
+from evaluate import load
+from pandas import DataFrame, read_csv
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import Dataset
+from torchinfo import summary
+from transformers import BertForSequenceClassification, BertTokenizer
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -43,6 +38,10 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        dataframe = load_dataset(self._hf_name, split='train').to_pandas()
+      #  if not isinstance(dataframe, pd.DataFrame):
+     #       raise TypeError()
+        self._raw_data = dataframe
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -57,12 +56,25 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        return {'dataset_number_of_samples': self._raw_data.shape[0],
+                 'dataset_columns': self._raw_data.shape[1],
+                 'dataset_duplicates': self._raw_data.duplicated().sum(),
+                 'dataset_empty_rows': self._raw_data.isna().sum().sum(),
+                 'dataset_sample_min_len': len(min(self._raw_data["comment"], key=len)),
+                 'dataset_sample_max_len': len(max(self._raw_data["comment"], key=len))
+                }
 
     @report_time
     def transform(self) -> None:
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        self._data = self._raw_data.copy()
+        self._data.rename(columns={
+            'comment': ColumnNames.SOURCE.value,
+            'toxic': ColumnNames.TARGET.value
+        }, inplace=True)
+
 
 
 class TaskDataset(Dataset):
@@ -77,6 +89,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+        self._data = data
 
     def __len__(self) -> int:
         """
@@ -85,6 +98,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -96,6 +110,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
+        return (str(self._data[ColumnNames.SOURCE.value].iloc[index]),)
 
     @property
     def data(self) -> DataFrame:
@@ -105,6 +120,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
+        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
@@ -130,6 +146,9 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        super().__init__(model_name, dataset, max_length, batch_size, device)
+        self._tokenizer = BertTokenizer.from_pretrained(model_name)
+        self._model = BertForSequenceClassification.from_pretrained(model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -138,6 +157,26 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        if self._model is None:
+            raise TypeError("there is no model(")
+
+        noize = torch.ones(1, self._model.config.max_position_embeddings, dtype=torch.long)
+
+        model_inf = summary(self._model,
+                            input_data={'input_ids': noize,
+                                        'attention_mask': noize},
+                            device=self._device,
+                            verbose=0)
+
+        return {
+            "embedding_size": self._model.config.max_position_embeddings,
+            "input_shape": {k: list(v) for k, v in model_inf.input_size.items()},
+            "output_shape": model_inf.summary_list[-1].output_size,
+            "max_context_length": self._model.config.max_length,
+            "num_trainable_params": model_inf.trainable_params,
+            "size": model_inf.total_param_bytes,
+            "vocab_size": self._model.config.vocab_size
+        }
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -150,6 +189,18 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        #tokens = self._tokenizer(
+        #    sample,
+        #    max_length=self._max_length,
+        #    padding=True,
+        #    truncation=True,
+        #    return_tensors='pt'
+        #)
+
+        #return str(torch.argmax(self._model(**tokens).logits).item())
+        if self._model is None:
+            return None
+        return self._infer_batch([sample])[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -171,6 +222,20 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+        if self._model is None:
+            return []
+
+        inputs = self._tokenizer(
+            sample_batch[0],
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=self._max_length
+        ).to(self._device)
+
+        outputs = self._model(**inputs)
+
+        return list(str(i) for i in np.argmax(outputs.logits.cpu().detach().numpy(), axis=-1))
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
