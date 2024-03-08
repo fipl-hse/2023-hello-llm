@@ -243,7 +243,7 @@ class LLMPipeline(AbstractLLMPipeline):
             max_length=self._max_length
         ).to(self._device)
 
-        outputs = self._model(**inputs, max_length=self._max_length)
+        outputs = self._model(**inputs)
 
         return list(str(i) for i in np.argmax(outputs.logits.cpu().detach().numpy(), axis=-1))
 
