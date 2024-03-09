@@ -28,7 +28,6 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
-    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -41,6 +40,9 @@ class RawDataImporter(AbstractRawDataImporter):
         self._raw_data = load_dataset(self._hf_name,
                                       split='train').to_pandas()
 
+        if not isinstance(self._raw_data, pd.DataFrame):
+            raise TypeError
+
     @property
     def raw_data(self) -> DataFrame:
         """
@@ -49,6 +51,9 @@ class RawDataImporter(AbstractRawDataImporter):
         Returns:
             pandas.DataFrame: A dataset in a table format
         """
+        if not isinstance(self._raw_data, pd.DataFrame):
+            raise TypeError
+
         return self._raw_data
 
 
