@@ -24,7 +24,18 @@ def main() -> None:
     data_analysis = preprocessor.analyze()
     print(data_analysis)
 
-    result = data_analysis
+    preprocessor.transform()
+
+    dataset = TaskDataset(preprocessor.data.head(100))
+
+    pipeline = LLMPipeline(settings['parameters']['model'], dataset,
+                           max_length=120, batch_size=64, device='cpu')
+
+    model_analysis = pipeline.analyze_model()
+    print(model_analysis)
+
+    result = pipeline.infer_sample(dataset[0])
+    print(result)
 
     assert result is not None, "Demo does not work correctly"
 
