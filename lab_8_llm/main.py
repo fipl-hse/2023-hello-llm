@@ -268,8 +268,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
-        super().__init__(metrics)
         self._data_path = data_path
+        self._metrics = metrics
 
     @report_time
     def run(self) -> dict | None:
@@ -283,14 +283,14 @@ class TaskEvaluator(AbstractTaskEvaluator):
         evaluations = {}
 
         for metric in self._metrics:
-            if metric == "bleu":
-                bleu_score = load(metric).compute(references=to_eval_df['target'],
+            if metric == Metrics.BLEU.name:
+                bleu_score = load(metric.lower()).compute(references=to_eval_df['target'],
                                                   predictions=to_eval_df['predictions'])
-                evaluations.update({"bleu": bleu_score.get("bleu")})
+                evaluations["bleu"] = bleu_score.get("bleu")
 
-            elif metric == "rouge":
-                rouge_score = load(metric).compute(references=to_eval_df['target'],
+            elif metric == Metrics.ROUGE.name:
+                rouge_score = load(metric.lower()).compute(references=to_eval_df['target'],
                                                    predictions=to_eval_df['predictions'])
-                evaluations.update({"rouge": rouge_score.get("rougeL")})
+                evaluations["rouge"] = rouge_score.get("rougeL")
 
         return evaluations

@@ -52,6 +52,7 @@ def main() -> None:
         Path(predictions_path),
         settings['parameters']['metrics']
     )
+
     result = evaluator.run()
 
     print(result)
