@@ -4,13 +4,11 @@ Laboratory work.
 Working with Large Language Models.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
-from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
 import pandas as pd
 import torch
-
 from datasets import load_dataset
 from evaluate import load
 from pandas import DataFrame
@@ -31,6 +29,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
+    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -42,6 +41,10 @@ class RawDataImporter(AbstractRawDataImporter):
         """
         dataset = load_dataset(self._hf_name, split="test")
         self._raw_data = dataset.to_pandas()
+
+    @property
+    def raw_data(self) -> DataFrame:
+        return self._raw_data
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -244,6 +247,38 @@ class LLMPipeline(AbstractLLMPipeline):
         return predictions
 
 
+def convert_to_squad(data):
+    """
+    Convert the data into a special structure for squad metric.
+
+    Args:
+        pd.DataFrame: Data with predictions
+    Returns:
+        Sequence[list[dict, ...]]: Lists of dictionaries
+    """
+    data = data.to_dict('split')
+
+    list_for_squad_r = []
+    list_for_squad_p = []
+
+    for i in data['index']:
+        reference = {'predictions': {}, 'references': {}}
+
+        reference['predictions']['id'] = str(i)
+        reference['references']['id'] = str(i)
+
+        reference['predictions']['prediction_text'] = data['data'][i][1]
+
+        reference['references']['answers'] = {}
+        reference['references']['answers']['text'] = [data['data'][i][0]]
+        reference['references']['answers']['answer_start'] = [i]
+
+        list_for_squad_r.append(reference['references'])
+        list_for_squad_p.append(reference['predictions'])
+
+    return list_for_squad_r, list_for_squad_p
+
+
 class TaskEvaluator(AbstractTaskEvaluator):
     """
     A class that compares prediction quality using the specified metric.
@@ -260,37 +295,6 @@ class TaskEvaluator(AbstractTaskEvaluator):
         super().__init__(metrics)
         self._data_path = data_path
 
-    def convert_to_squad(self, data):
-        """
-        Convert the data into a special structure for squad metric.
-
-        Args:
-            pd.DataFrame: Data with predictions
-        Returns:
-            Sequence[list[dict, ...]]: Lists of dictionaries
-        """
-        data = data.to_dict('split')
-
-        list_for_squad_r = []
-        list_for_squad_p = []
-
-        for i in data['index']:
-            reference = {'predictions': {}, 'references': {}}
-
-            reference['predictions']['id'] = str(i)
-            reference['references']['id'] = str(i)
-
-            reference['predictions']['prediction_text'] = data['data'][i][1]
-
-            reference['references']['answers'] = {}
-            reference['references']['answers']['text'] = [data['data'][i][0]]
-            reference['references']['answers']['answer_start'] = [i]
-
-            list_for_squad_r.append(reference['references'])
-            list_for_squad_p.append(reference['predictions'])
-
-        return list_for_squad_r, list_for_squad_p
-
     @report_time
     def run(self) -> dict | None:
         """
@@ -302,7 +306,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
         predictions = pd.read_csv(self._data_path)
         scores = {}
 
-        data_for_squad = self.convert_to_squad(predictions)
+        data_for_squad = convert_to_squad(predictions)
 
         for metric in self._metrics:
             metric = load(str(metric))
