@@ -244,7 +244,6 @@ class LLMPipeline(AbstractLLMPipeline):
         )
 
         output = self._model.generate(**tokens, max_length=self._max_length)
-
         pred_batch = self._tokenizer.batch_decode(output, skip_special_tokens=True)
 
         return [predictions[len(sample_batch[0][i]) + 1:] for i, predictions in enumerate(pred_batch)]
