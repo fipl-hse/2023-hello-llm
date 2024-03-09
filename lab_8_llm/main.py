@@ -229,7 +229,7 @@ class LLMPipeline(AbstractLLMPipeline):
         )
 
     @torch.no_grad()
-    def _infer_batch(self,sample_batch: Sequence[tuple[str, ...]],) -> list[str]:
+    def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]], ) -> list[str]:
         """
         Infer model on a single batch.
 
@@ -279,18 +279,21 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
-        to_eval_df = pd.read_csv(self._data_path)
+
+        data = pd.read_csv(self._data_path)
         evaluations = {}
 
-        for metric in self._metrics:
-            if metric == Metrics.BLEU.name:
-                bleu_score = load(metric.lower()).compute(references=to_eval_df['target'],
-                                                  predictions=to_eval_df['predictions'])
-                evaluations["bleu"] = bleu_score.get("bleu")
+        for metric_name in self._metrics:
+            metric = load(metric_name)
 
-            elif metric == Metrics.ROUGE.name:
-                rouge_score = load(metric.lower()).compute(references=to_eval_df['target'],
-                                                   predictions=to_eval_df['predictions'])
-                evaluations["rouge"] = rouge_score.get("rougeL")
+            evaluation = metric.compute(
+                predictions=data[ColumnNames.PREDICTION.value],
+                references=data[ColumnNames.TARGET.value]
+            )
+
+            if metric_name == Metrics.ROUGE.value:
+                evaluations[metric_name] = evaluation.get(f'{metric_name}L')
+            else:
+                evaluations[metric_name] = evaluation.get(metric_name)
 
         return evaluations

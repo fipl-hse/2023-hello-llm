@@ -2,7 +2,7 @@
   "parameters": {
     "model": "EleutherAI/pythia-160m-deduped",
     "dataset": "jtatman/databricks-dolly-8k-qa-open-close",
-    "metrics": ["BLEU", "ROUGE"]
+    "metrics": ["bleu", "rouge"]
   },
   "target_score": 8
 }
