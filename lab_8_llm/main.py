@@ -77,9 +77,12 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._data = self._raw_data[self._raw_data['task'].values == 'Question Answering'][
+        mask = self._raw_data['task'].values == 'Question Answering'
+        self._data = pd.DataFrame(self._raw_data.rename(columns={
+            'note': ColumnNames.CONTEXT.value, 'answer': ColumnNames.TARGET.value
+        }).reset_index(drop=True)[
             ['note', 'question', 'answer']
-        ].rename(columns={'note': ColumnNames.CONTEXT.value, 'answer': ColumnNames.TARGET.value}).reset_index()
+        ][mask])
 
 
 class TaskDataset(Dataset):
