@@ -2,8 +2,8 @@
 Web service for model inference.
 """
 # pylint: disable=undefined-variable, duplicate-code
-import uvicorn
 import pandas as pd
+import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
