@@ -1,8 +1,8 @@
 {
   "parameters": {
-    "model": "fabriceyhc/bert-base-uncased-ag_news",
-    "dataset": "ag_news",
-    "metrics": ["f1"]
+    "model": "",
+    "dataset": "",
+    "metrics": []
   },
-  "target_score": 8
+  "target_score": 0
 }
