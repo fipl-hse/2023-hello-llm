@@ -306,7 +306,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
 
             result = metric.compute(references=pred_df['target'],
                                     predictions=pred_df['predictions'],
-                                    average='weighted')
+                                    average='micro')
             results.update(result)
 
         return results
