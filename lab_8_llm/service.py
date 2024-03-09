@@ -1,13 +1,14 @@
 """
 Web service for model inference.
 """
+from pathlib import Path
+
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pandas import DataFrame
-from pathlib import Path
 from pydantic.dataclasses import dataclass
 
 from config.constants import PROJECT_ROOT
