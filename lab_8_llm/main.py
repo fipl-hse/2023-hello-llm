@@ -268,8 +268,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        super().__init__(metrics)
         self._data_path = data_path
-        self._metrics = metrics
 
     @report_time
     def run(self) -> dict | None:
@@ -292,7 +292,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
             )
 
             if metric_name == Metrics.ROUGE.value:
-                evaluations[metric_name] = evaluation.get(f'{metric_name}L')
+                evaluations[metric_name] = evaluation.get('rougeL')
             else:
                 evaluations[metric_name] = evaluation.get(metric_name)
 
