@@ -16,7 +16,7 @@ from lab_8_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, T
 @report_time
 def main() -> None:
     """
-    Run the translation pipeline.
+    Run the closed qa pipeline.
     """
     with open(PROJECT_ROOT / 'lab_8_llm' / 'settings.json', 'r', encoding='utf-8') as file:
         settings = json.load(file)
