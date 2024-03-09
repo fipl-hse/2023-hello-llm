@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cyrillic turkic languages</title>
+    <link rel="stylesheet" href="{{ url_for('assets', path='styles.css') }}">
+    <script type="text/javascript" src="{{ url_for('assets', path='main.js') }}"></script>
+</head>
+<body>
+    <div id="main">
+        <form>
+            <h1>Let's define what language it is!</h1>
+            <p>I can predict the following languages:</p>
+            <p id="lang">Bashkir, Chuvash, Karachay-Balkar, Kazakh, Kyrgyz, Russian, Tatar,
+                Tuvinian, Yakut</p>
+            <textarea id="question" spellcheck="false" placeholder="Enter your text"></textarea>
+            <button type="button" id="submit">Define language</button>
+        </form>
+        <table>
+            <tr>
+                <td><p> >>> </p></td>
+                <td><h3 id="output"></h3></td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
