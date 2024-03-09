@@ -10,29 +10,47 @@ from tqdm import tqdm
 from config.get_model_analytics import get_references, save_reference
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from lab_7_llm.main import RawDataImporter, RawDataPreprocessor
 
 from reference_lab_classification.main import (AgNewsDataImporter, AgNewsPreprocessor,  # isort:skip
+                                               CyrillicTurkicDataImporter,
+                                               CyrillicTurkicPreprocessor,
                                                DairAiEmotionDataImporter, DairAiEmotionPreprocessor,
                                                GoEmotionsDataImporter,
-                                               GoEmotionsRawDataPreprocessor, ImdbDataImporter,
-                                               ImdbDataPreprocessor,
+                                               GoEmotionsRawDataPreprocessor,
+                                               HealthcareDataImporter, HealthcarePreprocessor,
+                                               ImdbDataImporter, ImdbDataPreprocessor,
+                                               KinopoiskDataImporter, KinopoiskPreprocessor,
                                                LanguageIdentificationDataImporter,
                                                LanguageIdentificationPreprocessor,
+                                               RuDetoxifierDataImporter, RuDetoxifierPreprocessor,
                                                RuGoEmotionsRawDataPreprocessor, RuGoRawDataImporter,
-                                               WikiToxicDataImporter, WikiToxicRawDataPreprocessor)
+                                               RuNonDetoxifiedDataImporter,
+                                               RuNonDetoxifiedPreprocessor, RuParadetoxDataImporter,
+                                               RuParadetoxPreprocessor, WikiToxicDataImporter,
+                                               WikiToxicRawDataPreprocessor,
+                                               ToxicityDataPreprocessor,
+                                               ParadetoxDataPreprocessor, ToxicityDataImporter,
+                                               ParadetoxDataImporter)
 from reference_lab_generation.main import (ClinicalNotesRawDataImporter,  # isort:skip
                                            ClinicalNotesRawDataPreprocessor,
                                            DollyClosedRawDataImporter,
                                            DollyClosedRawDataPreprocessor, NoRobotsRawDataImporter,
-                                           NoRobotsRawDataPreprocessor)
+                                           NoRobotsRawDataPreprocessor, SberquadRawDataImporter,
+                                           WikiOmniaRawDataImporter, SberquadRawDataPreprocessor,
+                                           WikiOmniaRawDataPreprocessor)
 from reference_lab_nli.main import (DatasetTypes, GlueDataImporter,  # isort:skip
                                     NliDataPreprocessor,
                                     NliRusDataImporter, NliRusTranslatedDataPreprocessor,
                                     QnliDataPreprocessor, RussianSuperGlueDataImporte,
                                     XnliDataImporter)
-from reference_lab_nmt.helpers import (EnDeRawDataPreprocessor, RuEnRawDataImporter,  # isort:skip
-                                       RuEnRawDataPreprocessor, RuEsRawDataPreprocessor)
-from reference_lab_nmt.main import RawDataImporter, RawDataPreprocessor  # isort:skip
+from reference_lab_nmt.main import (RuEnRawDataImporter, RuEnRawDataPreprocessor,  # isort:skip
+                                    RuEsRawDataPreprocessor, EnDeRawDataPreprocessor)
+from reference_lab_open_qa.main import (AlpacaRawDataPreprocessor,  # isort:skip
+                                        DatabricksRawDataPreprocessor,
+                                        DollyOpenQARawDataImporter, DollyOpenQARawDataPreprocessor,
+                                        QARawDataImporter, TruthfulQARawDataImporter,
+                                        TruthfulQARawDataPreprocessor)
 from reference_lab_summarization.main import (DailymailRawDataImporter,  # isort:skip
                                               DailymailRawDataPreprocessor,
                                               GovReportRawDataPreprocessor,
@@ -44,7 +62,6 @@ from reference_lab_summarization.main import (DailymailRawDataImporter,  # isort
                                               ScientificLiteratureRawDataImporter,
                                               ScientificLiteratureRawDataPreprocessor,
                                               SummarizationRawDataImporter)
-
 
 
 def main() -> None:
@@ -86,6 +103,10 @@ def main() -> None:
             importer = ClinicalNotesRawDataImporter(dataset_name)
         elif dataset_name == 'HuggingFaceH4/no_robots':
             importer = NoRobotsRawDataImporter(dataset_name)
+        elif dataset_name == 'sberquad':
+            importer = SberquadRawDataImporter(dataset_name)
+        elif dataset_name == 'RussianNLP/wikiomnia':
+            importer = WikiOmniaRawDataImporter(dataset_name)
         elif dataset_name == DatasetTypes.XNLI.value:
             importer = XnliDataImporter(dataset_name)
         elif dataset_name == DatasetTypes.NLI_RUS.value:
@@ -111,8 +132,32 @@ def main() -> None:
             importer = SummarizationRawDataImporter(dataset_name)
         elif dataset_name == 'shreevigneshs/iwslt-2023-en-ru-train-val-split-0.2':
             importer = RuEnRawDataImporter(dataset_name)
+        elif dataset_name == 'blinoff/kinopoisk':
+            importer = KinopoiskDataImporter(dataset_name)
+        elif dataset_name == 'blinoff/healthcare_facilities_reviews':
+            importer = HealthcareDataImporter(dataset_name)
+        elif dataset_name == 'tatiana-merz/cyrillic_turkic_langs':
+            importer = CyrillicTurkicDataImporter(dataset_name)
+        elif dataset_name == 's-nlp/ru_paradetox_toxicity':
+            importer = RuParadetoxDataImporter(dataset_name)
+        elif dataset_name == 's-nlp/ru_non_detoxified':
+            importer = RuNonDetoxifiedDataImporter(dataset_name)
+        elif dataset_name == 'd0rj/rudetoxifier_data':
+            importer = RuDetoxifierDataImporter(dataset_name)
+        elif dataset_name == 'truthful_qa':
+            importer = TruthfulQARawDataImporter(dataset_name)
+        elif dataset_name in ['tatsu-lab/alpaca',
+                              'jtatman/databricks-dolly-8k-qa-open-close']:
+            importer = QARawDataImporter(dataset_name)
+        elif dataset_name == 'lionelchg/dolly_open_qa':
+            importer = DollyOpenQARawDataImporter(dataset_name)
+        elif dataset_name == 'Arsive/toxicity_classification_jigsaw':
+            importer = ToxicityDataImporter(dataset_name)
+        elif dataset_name == 's-nlp/en_paradetox_toxicity':
+            importer = ParadetoxDataImporter(dataset_name)
         else:
             importer = RawDataImporter(dataset_name)
+
         importer.obtain()
 
         if importer.raw_data is None:
@@ -139,6 +184,10 @@ def main() -> None:
             preprocessor = ClinicalNotesRawDataPreprocessor(importer.raw_data)
         elif dataset_name == 'HuggingFaceH4/no_robots':
             preprocessor = NoRobotsRawDataPreprocessor(importer.raw_data)
+        elif dataset_name == 'sberquad':
+            preprocessor = SberquadRawDataPreprocessor(importer.raw_data)
+        elif dataset_name == 'RussianNLP/wikiomnia':
+            preprocessor = WikiOmniaRawDataPreprocessor(importer.raw_data)
         elif dataset_name in (DatasetTypes.XNLI.value,
                               DatasetTypes.MNLI.value,
                               DatasetTypes.TERRA.value):
@@ -169,10 +218,37 @@ def main() -> None:
             preprocessor = RuEsRawDataPreprocessor(importer.raw_data)
         elif dataset_name == 'RocioUrquijo/en_de':
             preprocessor = EnDeRawDataPreprocessor(importer.raw_data)
+        elif dataset_name == 'blinoff/kinopoisk':
+            preprocessor = KinopoiskPreprocessor(importer.raw_data)
+        elif dataset_name == 'blinoff/healthcare_facilities_reviews':
+            preprocessor = HealthcarePreprocessor(importer.raw_data)
+        elif dataset_name == 'tatiana-merz/cyrillic_turkic_langs':
+            preprocessor = CyrillicTurkicPreprocessor(importer.raw_data)
+        elif dataset_name == 's-nlp/ru_paradetox_toxicity':
+            preprocessor = RuParadetoxPreprocessor(importer.raw_data)
+        elif dataset_name == 's-nlp/ru_non_detoxified':
+            preprocessor = RuNonDetoxifiedPreprocessor(importer.raw_data)
+        elif dataset_name == 'd0rj/rudetoxifier_data':
+            preprocessor = RuDetoxifierPreprocessor(importer.raw_data)
+        elif dataset_name == 'truthful_qa':
+            preprocessor = TruthfulQARawDataPreprocessor(importer.raw_data)
+        elif dataset_name == 'jtatman/databricks-dolly-8k-qa-open-close':
+            preprocessor = DatabricksRawDataPreprocessor(importer.raw_data)
+        elif dataset_name == 'tatsu-lab/alpaca':
+            preprocessor = AlpacaRawDataPreprocessor(importer.raw_data)
+        elif dataset_name == 'lionelchg/dolly_open_qa':
+            preprocessor = DollyOpenQARawDataPreprocessor(importer.raw_data)
+        elif dataset_name == 'Arsive/toxicity_classification_jigsaw':
+            preprocessor = ToxicityDataPreprocessor(importer.raw_data)
+        elif dataset_name == 's-nlp/en_paradetox_toxicity':
+            preprocessor = ParadetoxDataPreprocessor(importer.raw_data)
         else:
             preprocessor = RawDataPreprocessor(importer.raw_data)
-
-        dataset_analysis = preprocessor.analyze()
+        try:
+            dataset_analysis = preprocessor.analyze()
+        except Exception as e:
+            print(f'{dataset_name} analysis has some problems!')
+            raise e
         result[dataset_name] = dataset_analysis
 
     save_reference(dest, result)

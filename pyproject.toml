@@ -9,7 +9,9 @@ markers = [
     "reference_lab_summarization: tests for summarization task",
     "reference_lab_nli: tests for nli task",
     "reference_lab_generation: tests for generation task",
+    "reference_lab_open_qa: tests for open generative Q&A task",
     "lab_7_llm: tests for lab 7",
+    "lab_8_llm: tests for lab 8",
 ]
 norecursedirs = [
     "venv*"
@@ -75,6 +77,8 @@ module = [
     'core_utils.llm.llm_pipeline',
     'lab_7_llm.service',
     'lab_7_llm.main',
+    'lab_8_llm.service',
+    'lab_8_llm.main',
 ]
 disable_error_code = [
     'no-any-unimported'
@@ -82,10 +86,15 @@ disable_error_code = [
 
 [[tool.mypy.overrides]]
 module = [
-    'config.get_datasets_analytics'
+    'config.get_datasets_analytics',
+    'config.get_inference_analytics',
+    'config.get_references',
+    'seminars.seminar_02_06_2024.try_fastapi',
 ]
 disable_error_code = [
-    'import-not-found'
+    'import-not-found',
+    'no-any-unimported',
+    'assignment'
 ]
 
 [[tool.mypy.overrides]]
@@ -127,9 +136,11 @@ src_paths = [
     "reference_lab_nmt",
     "reference_lab_nli",
     "reference_lab_generation",
+    "reference_lab_open_qa",
     "core_utils",
     "config",
-    "lab_7_llm"
+    "lab_7_llm",
+    "lab_8_llm"
 ]
 
 [tool.doc8]

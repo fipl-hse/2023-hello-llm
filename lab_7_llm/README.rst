@@ -1,3 +1,5 @@
+.. _lab_7_llm/README:
+
 Laboratory work №7. Large Language Models no. 1
 ===============================================
 
@@ -326,6 +328,8 @@ which allows to preprocess dataset.
           you should change column names. To do this use fields of the
           :py:class:`core_utils.llm.raw_data_preprocessor.ColumnNames` abstraction.
 
+Save your preprocessed dataset to ``self._data`` attribute.
+
 Stage 3. Introduce dataset abstraction: ``TaskDataset``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -377,8 +381,9 @@ which allows to retrieve an item from the dataset by index.
 PyTorch ``DataLoader`` calls this method to retrieve data for each batch.
 Implementing this method allows you to define how the data is retrieved
 from the dataset and how it is structured.
-It should return a tuple containing the item
-from the ``source`` column to be retrieved.
+It should return a tuple containing items
+from columns with text to be retrieved.
+Depending on the task, the number of columns may vary.
 
 Stage 3.3. Retrieve data
 """"""""""""""""""""""""
@@ -409,7 +414,7 @@ which has the following internal attributes:
 
 .. note:: When loading a model and tokenizer, you will import special
           `Auto Classes <https://huggingface.co/docs/transformers/model_doc/auto>`__.
-          However, for some models and tokenizers you need to use special classes
+          However, for some models and tokenizers you can use special classes
           that are based on the architecture of the pre-trained model.
           You can find out which class you need to use
           through the ``architectures`` parameter of the model ``config`` object.
@@ -494,7 +499,7 @@ use:
     * ``max_length`` = 120;
     * ``device`` = 'cpu'.
 
-.. note:: For generation task use ``max_length`` = 512.
+.. note:: For generation closed QA task use ``max_length`` = 512.
 
 Stage 4.4. Infer dataset
 """"""""""""""""""""""""
@@ -536,7 +541,7 @@ first you need to implement method
 which allows to infer a single batch.
 
 .. note:: There are going to be a few peculiarities
-         when implementing method for generation task.
+         when implementing method for generation closed QA task.
          You can find them in :ref:`generation-label`.
 
 .. important:: You have to rewrite ``infer_sample()`` and ``infer_dataset()`` methods
@@ -558,7 +563,7 @@ which has the following internal attributes:
     * ``self._metrics`` - a field of
       :py:class:`core_utils.llm.metrics.Metrics` abstraction
       with suitable metric;
-    * ``self._data_path`` - a string with the path to the `predictions.csv`.
+    * ``self._data_path`` - a string with the path to the ``predictions.csv`` file.
 
 See the intended instantiation:
 
@@ -615,44 +620,55 @@ to see how LLMs can be deployed and integrated into practical applications.
           your service should accept sentence in one language
           and return translated sentence.
 
-.. important:: All logic should be implemented in the ``service.py`` module.
+.. important:: All logic should be implemented in the following modules:
+
+                   * ``service.py``
+                   * ``assets/index.html``
+                   * ``assets/main.js``
+                   * ``assets/styles.css``
+
 
 Stage 6.1. Initialize core application
 """"""""""""""""""""""""""""""""""""""
 
-Implement method
-:py:meth:`lab_7_llm.service.init_application`
-which allows to initialize all needed
-instances for pipeline and web-service.
+Let's start implementing the service with initialisation
+all needed instances for a pipeline and web-service.
+To do this, implement
+:py:meth:`lab_7_llm.service.init_application` method.
 
 .. important:: Remember, you have to implement your service using
               ``FastAPI`` web framework.
 
+To initialize the service, you need to create ``FastAPI`` instance
+and a handler for statistical files from ``assets`` directory
+where the implementation of the service interface will be stored.
+Also, as parameters for initialization a pipeline use
+values from **Stage 4.3** and **Stage 5.2**.
+
 Stage 6.2. Make root endpoint
 """""""""""""""""""""""""""""
-
-Implement method
-which allows to create a root endpoint of the service.
 
 **Root endpoint** is the base URL of your service,
 where start web page with user interface for the service will be located.
 
-Some important points:
+Some important points about user interface implementation:
 
     * Your start page should be made using
-      `Jinja <https://jinja.palletsprojects.com/en/3.1.x/>`__ templating engine;
+      `Jinja <https://jinja.palletsprojects.com/en/3.1.x/>`__
+      templating engine in ``assets/index.html`` file;
     * The request from the HTML page must be performed
-      using `JavaScript <https://learn.javascript.ru/>`__;
-    * The code should be written in the ``assets/main.js`` file
-      which you should import into the ``assets/index.html`` file;
-    * CSS markup should be put in the ``assets/styles.css``.
+      using `JavaScript <https://learn.javascript.ru/>`__ in ``assets/main.js`` file.
+      Then you will import it into ``assets/index.html`` file;
+    * CSS markup should be put in ``assets/styles.css`` file.
 
+Let's look at the implementation of the request
+from the HTML page in a little more detail.
 The code of the request should be placed inside
 an event listener for the button click event.
 Specifically, you should call the asynchronous
-`fetch <https://learn.javascript.ru/fetch>`__ method.
+`fetch() <https://learn.javascript.ru/fetch>`__ method.
 
-Fill the ``options`` parameter of ``fetch`` method with properties:
+Fill the ``options`` parameter of ``fetch()`` method with properties:
 
     * ``method`` - corresponding to the one in ``FastAPI``;
     * ``headers`` - appropriate for sending ``JSON``;
@@ -662,11 +678,20 @@ The request's ``JSON`` structure should match the
 expected format in your ``FastAPI`` service
 so that the query can be correctly processed.
 
-Example of the start page:
+So, an example of start page might look like this:
 
-.. image:: ../docs/images/site/site.png
+.. image:: assets/site.png
 
-.. note:: Use `@app.get("/") <https://expressjs.com/en/4x/api.html#app.get>`__
+And now we are ready to implement
+:py:meth:`lab_7_llm.service.root` method
+which allows to create a root endpoint of the service.
+The method should return an HTML page using ``TemplateResponse``
+which renders an HTML page based on a specific template and passed data.
+Before that you need to create a template using
+``Jinja2Templates`` with ``assets`` directory and
+call :py:meth:`lab_7_llm.service.init_application` method.
+
+.. note:: Use ``@app.get("/")``
           decorator to create a route for the root URL.
 
 Stage 6.2. Make main endpoint
@@ -676,26 +701,29 @@ When a user clicks the button on the start page,
 a POST request must be initiated to the main endpoint
 which is responsible for processing the data using LLM pipeline.
 
-Implement method which allows to create a main endpoint for model call.
+Implement :py:meth:`lab_7_llm.service.infer` method
+which allows to create a main endpoint for model call.
 
-To be able to make a query in an ``entry field``
-you need to implement a class abstraction
-with the field ``question`` which contains text of the query.
+To make a query in an ``entry field`` you need to implement
+:py:class:`lab_7_llm.service.Query` abstraction
+with ``question`` field which contains text of the query.
+Use ``@dataclass`` decorator from ``pydantic`` module.
 
 Response obtained as a result of the pipeline
 will be displayed in the ``output field``.
 Response should be in the form of the **dictionary**
-with the key ``infer`` and the value containing response.
+with ``infer`` key and the value containing response.
 
-.. note:: Use ``@app.post("/infer")`` decorator to create a route for the
-          main endpoint URL.
+.. note:: Use ``@app.post("/infer")``
+          decorator to create a route for the main endpoint URL.
 
 Stage 6.3. Demonstrate the result
 """""""""""""""""""""""""""""""""
 
 .. important:: **Stage 6** is required to get the mark **10**.
 
-Demonstrate work of your service by running server
+Demonstrate work of your service by running a server
 implemented in ``service.py`` module and obtaining one sample inference result.
 
-.. note:: You can run you server using ``uvicorn PATH:app --reload`` command.
+.. note:: You can run you server using ``uvicorn PATH:app --reload`` command,
+          where ``PATH`` is a path to ``service.py`` module.
