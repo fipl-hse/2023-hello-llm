@@ -4,27 +4,18 @@ Laboratory work.
 Working with Large Language Models.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
-from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
+import pandas as pd
+import torch
 from datasets import load_dataset
+from pandas import DataFrame
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import ElectraForQuestionAnswering, ElectraTokenizer
-
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
+from evaluate import load
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -80,8 +71,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         self._data = self._raw_data.loc[
             self._raw_data['task'] == 'Question Answering'
             ].loc[:, ['note', 'question', 'answer']].rename(columns={
-                'note': ColumnNames.CONTEXT,
-                'answer': ColumnNames.TARGET
+                'note': ColumnNames.CONTEXT.value,
+                'answer': ColumnNames.TARGET.value
             })
 
 
@@ -119,7 +110,7 @@ class TaskDataset(Dataset):
             tuple[str, ...]: The item to be received
         """
         return (self._data.iloc[index][ColumnNames.QUESTION.value],
-                self._data.iloc[index][ColumnNames.CONTEXT])
+                self._data.iloc[index][ColumnNames.CONTEXT.value])
 
     @property
     def data(self) -> DataFrame:
@@ -199,27 +190,9 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        if self._model is None:
+        if not self._model:
             return None
-        tokens = self._tokenizer(*sample,
-                                 padding=True,
-                                 truncation=True,
-                                 max_length=self._max_length,
-                                 return_tensors='pt')
-        outputs = self._model(**tokens)
-
-        start_scores = outputs.start_logits
-        end_scores = outputs.end_logits
-
-        start_index = torch.argmax(start_scores)
-        end_index = torch.argmax(end_scores)
-
-        results = self._tokenizer.convert_tokens_to_string(
-            self._tokenizer.convert_ids_to_tokens(
-                tokens['input_ids'][0][start_index:end_index + 1]
-            )
-        )
-        return results
+        return self._infer_batch([(sample[0],), (sample[1],)])[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -229,6 +202,17 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        dataset_loader = DataLoader(self._dataset, self._batch_size)
+        predictions = []
+
+        for batch in dataset_loader:
+            predictions.extend(self._infer_batch(batch))
+
+        df_predict = pd.DataFrame({
+            "target": self._dataset.data[ColumnNames.TARGET.value],
+            "predictions": predictions
+        })
+        return df_predict
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -241,6 +225,25 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+        predictions = []
+        answer_tokens = []
+
+        tokens = self._tokenizer(*sample_batch,
+                                 max_length=self._max_length,
+                                 padding=True,
+                                 return_tensors='pt',
+                                 truncation=True)
+        outputs = self._model(**tokens)
+
+        for i, idx in enumerate(tokens['input_ids']):
+            answer_start_index = outputs.start_logits[i].argmax()
+            answer_end_index = outputs.end_logits[i].argmax()
+            answer_tokens.append(idx[answer_start_index:answer_end_index + 1])
+
+        result = self._tokenizer.batch_decode(answer_tokens, skip_special_tokens=True)
+        predictions.extend(result)
+
+        return predictions
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -256,6 +259,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        self._data_path = data_path
+        self._metrics = metrics
 
     @report_time
     def run(self) -> dict | None:
@@ -265,3 +270,27 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        result = {}
+        predictions = []
+        references = []
+
+        data = pd.read_csv(self._data_path)
+        data = data.fillna(' ')
+        for ind in data.index:
+            prediction = {'prediction_text': data[ColumnNames.PREDICTION.value].iloc[ind],
+                          'id': str(ind)}
+
+            reference = {'id': str(ind),
+                         'answers': {'answer_start': [ind],
+                                     'text': [data[ColumnNames.TARGET.value].iloc[ind]]}}
+
+            predictions.append(prediction)
+            references.append(reference)
+
+        for metric in self._metrics:
+            score = load(metric.value).compute(
+                references=references,
+                predictions=predictions
+            )
+            result[metric.value] = score.get('f1')
+        return result
