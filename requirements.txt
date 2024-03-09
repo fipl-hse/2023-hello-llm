@@ -1,7 +1,6 @@
 datasets==2.16.1
 evaluate==0.4.1
 pandas==2.1.4
-pydantic~=2.6.1
 pytest~=8.0.0
 torchinfo==1.8.0
 torch~=2.2.0
