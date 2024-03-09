@@ -10,12 +10,12 @@ from typing import Iterable, Sequence
 import pandas as pd
 import torch
 from datasets import load_dataset
+from evaluate import load
 from pandas import DataFrame
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import ElectraForQuestionAnswering, ElectraTokenizer
-from evaluate import load
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -127,6 +127,7 @@ class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
     """
+    _model: torch.nn.Module
 
     def __init__(
             self,

@@ -4,6 +4,8 @@ Neural machine translation starter.
 # pylint: disable= too-many-locals
 import json
 
+import pandas as pd
+
 from config.constants import PROJECT_ROOT
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.time_decorator import report_time
@@ -22,7 +24,10 @@ def main() -> None:
     importer = RawDataImporter(settings['parameters']['dataset'])
     importer.obtain()
 
-    preprocessor = RawDataPreprocessor(importer.raw_data)
+    preprocessor = RawDataPreprocessor(
+        pd.DataFrame()
+    ) if importer.raw_data is None else RawDataPreprocessor(importer.raw_data)
+
     print(preprocessor.analyze())
     preprocessor.transform()
 
