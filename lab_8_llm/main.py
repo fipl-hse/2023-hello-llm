@@ -313,7 +313,6 @@ class TaskEvaluator(AbstractTaskEvaluator):
         for metric in self._metrics:
             metric = load(metric.value)
             result = metric.compute(references=data_for_squad[0], predictions=data_for_squad[1])
-
-            scores[metric.name] = result
+            scores[metric.name] = result['f1']
 
         return scores
