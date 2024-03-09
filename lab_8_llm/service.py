@@ -16,6 +16,14 @@ from config.lab_settings import LabSettings
 from lab_8_llm.main import LLMPipeline, TaskDataset
 
 
+@dataclass
+class Query:
+    """
+    Abstraction class which contains text of the query.
+    """
+    question: str
+
+
 def init_application() -> tuple[FastAPI, LLMPipeline]:
     """
     #doctest: +SKIP
@@ -26,7 +34,6 @@ def init_application() -> tuple[FastAPI, LLMPipeline]:
     Returns:
         tuple[fastapi.FastAPI, LLMPipeline]: instance of server and pipeline
     """
-
     application = FastAPI()
     application.mount(
         "/assets",
@@ -49,21 +56,12 @@ def init_application() -> tuple[FastAPI, LLMPipeline]:
 app, pipeline = init_application()
 
 
-@dataclass
-class Query:
-    """
-    Abstraction class which contains text of the query.
-    """
-    question: str
-
-
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request) -> HTMLResponse:
     """
     Root endpoint of application.
     """
-
-    templates = Jinja2Templates(directory="assets")
+    templates = Jinja2Templates(directory=PROJECT_ROOT / "lab_8_llm" / "assets")
     return templates.TemplateResponse("index.html", {"request": request})
 
 
@@ -72,9 +70,14 @@ async def infer(query: Query) -> dict:
     """
     Infer endpoint of application.
     """
+    id2label = {
+        "0": "NEUTRAL",
+        "1": "POSITIVE",
+        "2": "NEGATIVE"
+    }
 
     prediction = pipeline.infer_sample(query.question)
-    return {'infer': prediction}
+    return {'infer': id2label.get(prediction)}
 
 
 if __name__ == "__main__":
