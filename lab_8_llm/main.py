@@ -8,22 +8,13 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
+import pandas as pd
+import torch
+
 from datasets import load_dataset
-
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
-
+from evaluate import load
+from pandas import DataFrame
+from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import AutoModelForQuestionAnswering, AutoTokenizer
@@ -81,7 +72,6 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         self._data = (self._raw_data[['instruction', 'context', 'response']]
                       .rename(columns={'instruction': ColumnNames.QUESTION.value,
-                                       'context': ColumnNames.SOURCE.value,
                                        'response': ColumnNames.TARGET.value})
                       .reset_index(drop=True))
 
@@ -119,7 +109,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data['source'].iloc[index]
+        return self._data['question'].iloc[index], self._data['context'].iloc[index]
 
     @property
     def data(self) -> DataFrame:
@@ -202,18 +192,9 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        tokens = self._tokenizer(sample[0], sample[1], max_length=120, padding=True,
-                                 return_tensors='pt', truncation=True)
-        with torch.no_grad():
-            outputs = self._model(**tokens)
-
-        answer_start_index = outputs.start_logits.argmax()
-        answer_end_index = outputs.end_logits.argmax()
-
-        predict_answer_tokens = tokens.input_ids[0, answer_start_index: answer_end_index + 1]
-        result = self._tokenizer.decode(predict_answer_tokens)
-
-        return result
+        if not self._model:
+            return None
+        return self._infer_batch(sample)[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -223,6 +204,15 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        dataset_loader = DataLoader(self._dataset, self._batch_size)
+        all_predictions = []
+        for batch in dataset_loader:
+            all_predictions.extend(self._infer_batch(batch))
+        df_predict = pd.DataFrame({
+            "target": self._dataset.data['target'],
+            "predictions": all_predictions
+        })
+        return df_predict
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -235,6 +225,23 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+        predictions = []
+        predict_answer_tokens = []
+
+        tokens = self._tokenizer(sample_batch[0], sample_batch[1], max_length=512, padding=True,
+                                 return_tensors='pt', truncation=True)
+        with torch.no_grad():
+            outputs = self._model(**tokens)
+
+        for i, idx in enumerate(tokens['input_ids']):
+            answer_start_index = outputs.start_logits[i].argmax()
+            answer_end_index = outputs.end_logits[i].argmax()
+            predict_answer_tokens.append(idx[answer_start_index:answer_end_index + 1])
+
+        result = self._tokenizer.batch_decode(predict_answer_tokens, skip_special_tokens=True)
+        predictions.extend(result)
+
+        return predictions
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -250,6 +257,39 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        super().__init__(metrics)
+        self._data_path = data_path
+
+    def convert_to_squad(self, data):
+        """
+        Convert the data into a special structure for squad metric.
+
+        Args:
+            pd.DataFrame: Data with predictions
+        Returns:
+            Sequence[list[dict, ...]]: Lists of dictionaries
+        """
+        data = data.to_dict('split')
+
+        list_for_squad_r = []
+        list_for_squad_p = []
+
+        for i in data['index']:
+            reference = {'predictions': {}, 'references': {}}
+
+            reference['predictions']['id'] = str(i)
+            reference['references']['id'] = str(i)
+
+            reference['predictions']['prediction_text'] = data['data'][i][1]
+
+            reference['references']['answers'] = {}
+            reference['references']['answers']['text'] = [data['data'][i][0]]
+            reference['references']['answers']['answer_start'] = [i]
+
+            list_for_squad_r.append(reference['references'])
+            list_for_squad_p.append(reference['predictions'])
+
+        return list_for_squad_r, list_for_squad_p
 
     @report_time
     def run(self) -> dict | None:
@@ -259,3 +299,15 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        predictions = pd.read_csv(self._data_path)
+        scores = {}
+
+        data_for_squad = self.convert_to_squad(predictions)
+
+        for metric in self._metrics:
+            metric = load(str(metric))
+            result = metric.compute(references=data_for_squad[0], predictions=data_for_squad[1])
+
+            scores[metric.name] = result
+
+        return scores
