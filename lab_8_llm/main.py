@@ -81,7 +81,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         self._data = pd.DataFrame(self._raw_data.rename(columns={
             'note': ColumnNames.CONTEXT.value, 'answer': ColumnNames.TARGET.value
         }).reset_index(drop=True)[
-            ['note', 'question', 'answer']
+            ['context', 'question', 'target']
         ][mask])
 
 
@@ -287,16 +287,11 @@ class TaskEvaluator(AbstractTaskEvaluator):
 
         data = pd.read_csv(self._data_path)
         data = data.fillna(' ')
-        for ind in range(len(data.index)):
-            prediction = {}
-            reference = {}
+        for ind in data.index:
 
-            prediction['prediction_text'] = data['predictions'].iloc[ind]
-            prediction['id'] = str(ind)
+            prediction = {'prediction_text': data['predictions'].iloc[ind], 'id': str(ind)}
 
-            answer = {'answer_start': [ind], 'text': [data['target'].iloc[ind]]}
-            reference['answers'] = answer
-            reference['id'] = str(ind)
+            reference = {'id': str(ind), 'answers': {'answer_start': [ind], 'text': [data['target'].iloc[ind]]}}
 
             predictions.append(prediction)
             references.append(reference)
