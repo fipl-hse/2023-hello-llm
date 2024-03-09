@@ -64,16 +64,15 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
-        lengths = self._raw_data.dropna().apply(lambda x: len(x))
+        no_empty_rows = self._raw_data.replace("", pd.NA).dropna().reset_index()
 
-        return {
-            'dataset_columns': len(self._raw_data.columns),
-            'dataset_number_of_samples': len(self._raw_data),
-            'dataset_duplicates': len(self._raw_data[self._raw_data.duplicated()]),
-            'dataset_empty_rows': len(self._raw_data[self._raw_data.isna().any(axis=1)]),
-            'dataset_sample_max_len': lengths.max().max(),
-            'dataset_sample_min_len': lengths.min().min()
-        }
+        return {'dataset_number_of_samples': self._raw_data.shape[0],
+                'dataset_columns': self._raw_data.shape[1],
+                'dataset_duplicates': self._raw_data.duplicated().sum(),
+                'dataset_empty_rows': self._raw_data.replace("", pd.NA).isna().sum().sum(),
+                'dataset_sample_min_len': len(min(no_empty_rows["instruction"], key=len)),
+                'dataset_sample_max_len': len(max(no_empty_rows["instruction"], key=len)),
+                }
 
     @report_time
     def transform(self) -> None:
@@ -205,6 +204,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         if generation_parameters is None:
             generation_parameters = {}
+
         return None if self._model is None else self._infer_batch((sample, ), generation_parameters)[0]
 
     @report_time
@@ -261,14 +261,8 @@ class LLMPipeline(AbstractLLMPipeline):
 
         pred_batch = self._tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
-        if len(sample_batch) == 1:
-            pred_batch[0] = pred_batch[0][len(sample_batch[0]):].strip()
-        else:
-            for i, sample in enumerate(sample_batch[0]):
-                if sample in pred_batch[0][i]:
-                    pred_batch[i] = pred_batch[i][len(sample):].strip()
+        return [predictions[len(sample_batch[0][i]) + 1:] for i, predictions in enumerate(pred_batch)]
 
-        return list(pred_batch)
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
