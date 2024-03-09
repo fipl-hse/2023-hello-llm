@@ -20,6 +20,9 @@ def main() -> None:
     importer = RawDataImporter(settings.parameters.dataset)
     importer.obtain()
 
+    if importer.raw_data is None:
+        raise TypeError('Dataset is not defined')
+
     preprocessor = RawDataPreprocessor(importer.raw_data)
     preprocessor.analyze()
     preprocessor.transform()
@@ -34,7 +37,7 @@ def main() -> None:
     df_pred = pipeline.infer_dataset()
     predictions_path = PROJECT_ROOT / 'lab_8_llm' / 'dist' / 'predictions.csv'
     if not predictions_path.parent.exists():
-        predictions_path.mkdir(exist_ok=True)
+        predictions_path.parent.mkdir(exist_ok=True)
 
     df_pred.to_csv(predictions_path, index=False, encoding='utf-8')
 
