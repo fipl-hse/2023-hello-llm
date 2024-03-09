@@ -201,8 +201,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         if not self._model:
             return None
-        sample = [(sample[0],), (sample[1],)]
-        return self._infer_batch(sample)[0]
+        return self._infer_batch([(sample[0],), (sample[1],)])[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -251,17 +250,15 @@ class LLMPipeline(AbstractLLMPipeline):
         return predictions
 
 
-def convert_to_squad(data: pd.DataFrame) -> tuple[list[dict], list[dict]]:
+def convert_to_squad(data: dict) -> tuple[list[dict], list[dict]]:
     """
     Convert the data into a special structure for squad metric.
 
     Args:
-        pd.DataFrame: Data with predictions
+        data (dict): Data with predictions
     Returns:
         tuple[list[dict], list[dict]]: Lists of dictionaries
     """
-    data = data.to_dict('split')
-
     list_for_squad_r = []
     list_for_squad_p = []
 
@@ -309,8 +306,9 @@ class TaskEvaluator(AbstractTaskEvaluator):
         """
         predictions = pd.read_csv(self._data_path)
         scores = {}
+        data = predictions.to_dict('split')
 
-        data_for_squad = convert_to_squad(predictions)
+        data_for_squad = convert_to_squad(data)
 
         for metric in self._metrics:
             metric = load(metric.value)
