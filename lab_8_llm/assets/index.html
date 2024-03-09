@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Text Generation Webservice</title>
+    <title>AQAWebservice</title>
     <link rel="stylesheet" href="{{ url_for('assets', path='styles.css') }}">
     <script type="text/javascript" src="{{ url_for('assets', path='main.js') }}"></script>
 </head>
@@ -10,15 +10,15 @@
     <div id="main">
         <form>
             <div>
-                <h1>Awesome Text Generation Webservice</h1>
-                <p>Write your Text</p>
+                <h1>Awesome Question Answering Webservice</h1>
+                <p>What is your Question?</p>
                 <label>
-                    <input type="text" name="question" id="question" placeholder="type something..." autofocus>
+                    <input type="text" name="question" id="question" placeholder="What do you want to know?" autofocus>
                 </label>
             </div>
-            <button id="submit" class="btn" type="button">Generate!</button>
+            <button id="submit" class="btn" type="button">Get Answer</button>
         </form>
-        <h2>Generated Text:</h2>
+        <h2>Answer:</h2>
         <h3 id="output"></h3>
     </div>
 </body>
