@@ -200,7 +200,6 @@ class LLMPipeline(AbstractLLMPipeline):
             "size": model_summary.total_param_bytes,
             "max_context_length": self._model.config.max_length
         }
-        print(model_info)
         return model_info
 
     @report_time
@@ -294,7 +293,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
         scores = {}
 
         for metric in self._metrics:
-            metric = load(metric)
+            metric = load(metric.value)
 
             result = metric.compute(references=predictions['target'].to_list(),
                                     predictions=predictions['predictions'].to_list(),

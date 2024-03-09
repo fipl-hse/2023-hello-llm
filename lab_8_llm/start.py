@@ -2,10 +2,9 @@
 Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
-import json
 from pathlib import Path
 
-from config.constants import PROJECT_ROOT
+from config.lab_settings import LabSettings
 from core_utils.llm.time_decorator import report_time
 from lab_8_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset,
                             TaskEvaluator)
@@ -16,15 +15,15 @@ def main() -> None:
     """
     Run the translation pipeline.
     """
-    with open(PROJECT_ROOT / 'lab_8_llm' / 'settings.json', 'r', encoding='utf-8') as settings_file:
-        settings = json.load(settings_file)
 
-    pred_path = PROJECT_ROOT / "dist" / "predictions.csv"
+    root_path = Path(__file__).parent
+    settings_path = LabSettings(root_path / "settings.json")
+    predictions_path = root_path / "dist" / "predictions.csv"
 
-    if not pred_path.parent.exists():
-        pred_path.parent.mkdir(exist_ok=True)
+    if not predictions_path.parent.exists():
+        predictions_path.parent.mkdir(exist_ok=True)
 
-    importer = RawDataImporter(settings['parameters']['dataset'])
+    importer = RawDataImporter(settings_path.parameters.dataset)
     importer.obtain()
 
     preprocessor = RawDataPreprocessor(importer.raw_data)
@@ -36,7 +35,7 @@ def main() -> None:
     batch_size = 1
     max_length = 120
 
-    pipeline = LLMPipeline(model_name=settings['parameters']['model'],
+    pipeline = LLMPipeline(model_name=settings_path.parameters.model,
                            dataset=dataset,
                            max_length=max_length,
                            batch_size=batch_size,
@@ -45,15 +44,15 @@ def main() -> None:
     pipeline.infer_sample(next(iter(dataset)))
 
     batch_size = 64
-    pipeline = LLMPipeline(model_name=settings['parameters']['model'],
+    pipeline = LLMPipeline(model_name=settings_path.parameters.model,
                            dataset=dataset,
                            max_length=max_length,
                            batch_size=batch_size,
                            device="cpu")
     predictions = pipeline.infer_dataset()
-    predictions.to_csv(pred_path, index=False, encoding="utf-8")
+    predictions.to_csv(predictions_path, index=False, encoding="utf-8")
 
-    evaluator = TaskEvaluator(pred_path, settings['parameters']['metrics'])
+    evaluator = TaskEvaluator(predictions_path, settings_path.parameters.metrics)
     result = evaluator.run()
 
     assert result is not None, "Demo does not work correctly"
