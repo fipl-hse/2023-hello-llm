@@ -95,8 +95,10 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Apply preprocessing transformations to the raw dataset.
         """
 
-        self._data = self._raw_data.rename(columns={'text': ColumnNames.SOURCE,
-                                                    'label': ColumnNames.TARGET}).reset_index().reset_index(drop=True)
+        self._data = self._raw_data.rename(columns={
+            'text': ColumnNames.SOURCE,
+            'label': ColumnNames.TARGET
+        }).reset_index().reset_index(drop=True)
 
 
 class TaskDataset(Dataset):
@@ -192,15 +194,20 @@ class LLMPipeline(AbstractLLMPipeline):
                                  self._model.config.max_position_embeddings,
                                  dtype=torch.long)
 
-        input_data = {"input_ids": tensor_data,
-                      "attention_mask": tensor_data}
+        input_data = {
+            "input_ids": tensor_data,
+            "attention_mask": tensor_data
+        }
 
         model_statistics = summary(model=self._model,
                                    input_data=input_data,
                                    verbose=False)
 
         model_info = {
-            "input_shape": list(input_data['input_ids'].shape),
+            "input_shape": {
+                "input_ids": list(input_data['input_ids'].shape),
+                "attention_mask": list(input_data['attention_mask'].shape)
+            },
             "embedding_size": self._model.config.max_position_embeddings,
             "output_shape": model_statistics.summary_list[-1].output_size,
             "num_trainable_params": model_statistics.trainable_params,
