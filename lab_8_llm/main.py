@@ -72,6 +72,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
                 'dataset_sample_min_len': min(data_droped_empty['instruction'].str.len()),
                 'dataset_sample_max_len': max(data_droped_empty['instruction'].str.len())}
 
+
     @report_time
     def transform(self) -> None:
         """
@@ -95,7 +96,9 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+
         self._data = data
+
 
     def __len__(self) -> int:
         """
@@ -105,6 +108,7 @@ class TaskDataset(Dataset):
             int: The number of items in the dataset
         """
         return len(self._data)
+
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -117,6 +121,7 @@ class TaskDataset(Dataset):
             tuple[str, ...]: The item to be received
         """
         return (self._data.iloc[index][ColumnNames.QUESTION.value],)
+
 
     @property
     def data(self) -> DataFrame:
@@ -158,6 +163,7 @@ class LLMPipeline(AbstractLLMPipeline):
         self._tokenizer.pad_token = self._tokenizer.eos_token
         self._model = AutoModelForCausalLM.from_pretrained(model_name)
 
+
     def analyze_model(self) -> dict:
         """
         Analyze model computing properties.
@@ -188,6 +194,7 @@ class LLMPipeline(AbstractLLMPipeline):
             'max_context_length': config.max_length
         }
 
+
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
         """
@@ -206,6 +213,7 @@ class LLMPipeline(AbstractLLMPipeline):
                                  return_tensors='pt')
         output_tokens = self._model.generate(**tokens, max_length=self._max_length)
         return self._tokenizer.batch_decode(output_tokens, skip_special_tokens=True)[0][len(sample[0]) + 1:]
+
 
     @report_time
     def infer_dataset(self) -> DataFrame:
