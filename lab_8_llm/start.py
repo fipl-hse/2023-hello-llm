@@ -38,12 +38,13 @@ def main() -> None:
 
     batch_size = 1
     max_length = 120
+    device = "cpu"
 
     pipeline = LLMPipeline(model_name=settings_path.parameters.model,
                            dataset=dataset,
                            max_length=max_length,
                            batch_size=batch_size,
-                           device="cpu")
+                           device=device)
     pipeline.analyze_model()
     pipeline.infer_sample(next(iter(dataset)))
 
@@ -53,7 +54,7 @@ def main() -> None:
                            dataset=dataset,
                            max_length=max_length,
                            batch_size=batch_size,
-                           device="cpu")
+                           device=device)
     predictions = pipeline.infer_dataset()
     predictions.to_csv(predictions_path, index=False, encoding="utf-8")
 
