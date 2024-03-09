@@ -1,8 +1,8 @@
 {
   "parameters": {
-    "model": "t5-small",
-    "dataset": "RocioUrquijo/en_de",
+    "model": "",
+    "dataset": "",
     "metrics": []
   },
-  "target_score": 6
+  "target_score": 0
 }
