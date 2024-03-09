@@ -77,7 +77,7 @@ input::placeholder{
 }
 
 button{
-    width: 120px;
+    width: 122px;
     height: 42px;
     border: var(--border);
     border-radius: 50px;
@@ -99,8 +99,9 @@ button:hover{
 }
 
 .results>div{
-    width: 482px;
-    height: 47px;
+    width: 550px;
+    min-height: 47px;
+    height: auto;
     background-color: var(--back_color);
     padding: var(--padding_main);
     border-bottom: var(--border);
