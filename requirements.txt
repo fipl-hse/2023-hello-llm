@@ -3,5 +3,9 @@
 datasets==2.16.1
 evaluate==0.4.1
 pandas==2.1.4
-torch==2.1.2
+torch~=2.2.0
 torchinfo==1.8.0
+pydantic~=2.6.1
+tqdm~=4.66.1
+transformers~=4.37.2
+pytest~=8.0.0
