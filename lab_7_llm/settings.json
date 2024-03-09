@@ -1,8 +1,8 @@
 {
   "parameters": {
-    "model": "mrm8488/bert-mini2bert-mini-finetuned-cnn_daily_mail-summarization",
-    "dataset": "cnn_dailymail",
-    "metrics": ["rouge"]
+    "model": "",
+    "dataset": "",
+    "metrics": []
   },
-  "target_score": 10
+  "target_score": 0
 }

@@ -26,6 +26,9 @@ def main() -> None:
     importer = RawDataImporter(settings_path.parameters.dataset)
     importer.obtain()
 
+    if importer.raw_data is None:
+        raise ValueError("importer.raw_data is None.")
+
     # mark6
     preprocessor = RawDataPreprocessor(importer.raw_data)
     preprocessor.analyze()
