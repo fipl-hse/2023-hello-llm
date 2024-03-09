@@ -42,6 +42,9 @@ class RawDataImporter(AbstractRawDataImporter):
         dataset = load_dataset(self._hf_name, split="test")
         self._raw_data = dataset.to_pandas()
 
+        if not isinstance(self._raw_data, DataFrame):
+            raise TypeError
+
     @property
     def raw_data(self) -> DataFrame:
         return self._raw_data
@@ -129,6 +132,7 @@ class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
     """
+    _model: torch.nn.Module
 
     def __init__(
             self,
@@ -234,8 +238,7 @@ class LLMPipeline(AbstractLLMPipeline):
 
         tokens = self._tokenizer(sample_batch[0], sample_batch[1], max_length=512, padding=True,
                                  return_tensors='pt', truncation=True)
-        with torch.no_grad():
-            outputs = self._model(**tokens)
+        outputs = self._model(**tokens)
 
         for i, idx in enumerate(tokens['input_ids']):
             answer_start_index = outputs.start_logits[i].argmax()
@@ -248,7 +251,7 @@ class LLMPipeline(AbstractLLMPipeline):
         return predictions
 
 
-def convert_to_squad(data) -> tuple[list[dict], list[dict]]:
+def convert_to_squad(data: pd.DataFrame) -> tuple[list[dict], list[dict]]:
     """
     Convert the data into a special structure for squad metric.
 
