@@ -80,8 +80,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
                 columns={"sentiment": ColumnNames.TARGET.value,
                          "content": ColumnNames.SOURCE.value})
                 .dropna()
-                .replace({"positive": 0,
-                          "negative": 1}))
+                .replace({"positive": 1,
+                          "negative": 2}))
 
 
 class TaskDataset(Dataset):
@@ -296,7 +296,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             metric = load(metric.value)
 
             result = metric.compute(references=predictions['target'].to_list(),
-                                    predictions=predictions['predictions'].to_list())
+                                    predictions=predictions['predictions'].to_list(),
+                                    average='micro')
 
             scores[metric.name] = result.get(metric.name)
         print(scores)
