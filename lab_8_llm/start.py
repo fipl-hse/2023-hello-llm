@@ -26,13 +26,16 @@ def main() -> None:
     importer = RawDataImporter(settings_path.parameters.dataset)
     importer.obtain()
 
+    if importer.raw_data is None:
+        raise TypeError('Dataset is None')
+
     preprocessor = RawDataPreprocessor(importer.raw_data)
     preprocessor.analyze()
     preprocessor.transform()
 
     dataset = TaskDataset(preprocessor.data.head(100))
 
-    batch_size = 1
+    batch_size = 64
     max_length = 120
 
     pipeline = LLMPipeline(model_name=settings_path.parameters.model,
@@ -43,12 +46,6 @@ def main() -> None:
     pipeline.analyze_model()
     pipeline.infer_sample(next(iter(dataset)))
 
-    batch_size = 64
-    pipeline = LLMPipeline(model_name=settings_path.parameters.model,
-                           dataset=dataset,
-                           max_length=max_length,
-                           batch_size=batch_size,
-                           device="cpu")
     predictions = pipeline.infer_dataset()
     predictions.to_csv(predictions_path, index=False, encoding="utf-8")
 
