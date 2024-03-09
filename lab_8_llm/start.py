@@ -6,7 +6,6 @@ import json
 from config.constants import PROJECT_ROOT
 # pylint: disable= too-many-locals
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import RawDataImporter
 
 
 @report_time
