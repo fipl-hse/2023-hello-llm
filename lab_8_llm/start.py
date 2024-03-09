@@ -51,10 +51,9 @@ def main() -> None:
 
     dataset_result.to_csv(predictions_path, index=False)
 
-    evaluator = TaskEvaluator(
-        Path(predictions_path),
-        settings['parameters']['metrics']
-    )
+    metrics = [Metrics[metric.upper()] for metric in settings['parameters']['metrics']]
+
+    evaluator = TaskEvaluator(Path(predictions_path), metrics)
 
     result = evaluator.run()
     print(result)
