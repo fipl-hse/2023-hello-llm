@@ -4,28 +4,23 @@ Laboratory work.
 Working with Large Language Models.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
-from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
+import pandas as pd
+import torch
+from datasets import load_dataset
+from evaluate import load
+from pandas import DataFrame
+from torch.utils.data import DataLoader
+from torch.utils.data.dataset import Dataset
+from torchinfo import summary
+from transformers import AutoModelForSequenceClassification, BertTokenizerFast
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -34,6 +29,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
+    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -43,6 +39,10 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        self._raw_data = load_dataset(self._hf_name, split="validation").to_pandas()
+
+        if not isinstance(self._raw_data, DataFrame):
+            raise TypeError
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -58,11 +58,30 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             dict: Dataset key properties
         """
 
+        dataset_analysis = {
+            "dataset_number_of_samples": self._raw_data.shape[0],
+            "dataset_columns": self._raw_data.shape[1],
+            "dataset_duplicates": self._raw_data.duplicated().sum(),
+            "dataset_empty_rows": self._raw_data.isnull().any(axis=1).sum(),
+            "dataset_sample_min_len": len(min(self._raw_data["content"], key=len)),
+            "dataset_sample_max_len": len(max(self._raw_data["content"], key=len))
+        }
+        return dataset_analysis
+
     @report_time
     def transform(self) -> None:
         """
         Apply preprocessing transformations to the raw dataset.
         """
+
+        self._data = (
+            self._raw_data[["content", "sentiment"]]
+                .rename(
+                columns={"sentiment": ColumnNames.TARGET.value,
+                         "content": ColumnNames.SOURCE.value})
+                .dropna()
+                .replace({"positive": 0,
+                          "negative": 1}))
 
 
 class TaskDataset(Dataset):
@@ -77,6 +96,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+        self._data = data
 
     def __len__(self) -> int:
         """
@@ -85,6 +105,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -97,6 +118,11 @@ class TaskDataset(Dataset):
             tuple[str, ...]: The item to be received
         """
 
+        source = self._data[ColumnNames.SOURCE.value].iloc[index]
+        target = self._data[ColumnNames.TARGET.value].iloc[index]
+
+        return str(source), str(target)
+
     @property
     def data(self) -> DataFrame:
         """
@@ -105,6 +131,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
+        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
@@ -131,6 +158,14 @@ class LLMPipeline(AbstractLLMPipeline):
             device (str): The device for inference
         """
 
+        self._model_name = model_name
+        self._dataset = dataset
+        self._device = device
+        self._max_length = max_length
+        self._batch_size = batch_size
+        self._model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        self._tokenizer = BertTokenizerFast.from_pretrained(model_name)
+
     def analyze_model(self) -> dict:
         """
         Analyze model computing properties.
@@ -138,6 +173,33 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+
+        tensor_data = torch.ones(1,
+                                 self._model.config.max_position_embeddings,
+                                 dtype=torch.long)
+
+        input_data = {
+            "attention_mask": tensor_data,
+            "input_ids": tensor_data
+        }
+
+        model_summary = summary(model=self._model,
+                                input_data=input_data,
+                                device=self._device,
+                                verbose=False)
+
+        model_info = {
+            "input_shape": {'attention_mask': list(model_summary.input_size["attention_mask"]),
+                            'input_ids': list(model_summary.input_size["input_ids"])},
+            "embedding_size": self._model.config.max_position_embeddings,
+            "output_shape": model_summary.summary_list[-1].output_size,
+            "num_trainable_params": model_summary.trainable_params,
+            "vocab_size": self._model.config.vocab_size,
+            "size": model_summary.total_param_bytes,
+            "max_context_length": self._model.config.max_length
+        }
+        print(model_info)
+        return model_info
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -151,6 +213,11 @@ class LLMPipeline(AbstractLLMPipeline):
             str | None: A prediction
         """
 
+        if self._model is None:
+            return None
+
+        return self._infer_batch((sample,))[0]
+
     @report_time
     def infer_dataset(self) -> DataFrame:
         """
@@ -159,6 +226,20 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+
+        dataset_loader = DataLoader(self._dataset, self._batch_size)
+
+        predictions = []
+
+        for batch in dataset_loader:
+            predictions.extend(self._infer_batch(batch))
+
+        df_predict = pd.DataFrame({
+            "target": self._dataset.data[ColumnNames.TARGET.value],
+            "predictions": predictions
+        })
+
+        return df_predict
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -171,6 +252,16 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+
+        predictions = []
+
+        tokens = self._tokenizer(sample_batch[0], max_length=self._max_length, padding=True,
+                                 return_tensors='pt', truncation=True)
+        output = self._model(**tokens).logits
+        predictions.extend([str(prediction.item())
+                            for prediction in list(torch.argmax(output, dim=1))])
+        print(predictions)
+        return predictions
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
@@ -186,6 +277,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        self._data_path = data_path
+        self._metrics = metrics
 
     @report_time
     def run(self) -> dict | None:
@@ -195,3 +288,16 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+
+        predictions = pd.read_csv(self._data_path)
+        scores = {}
+
+        for metric in self._metrics:
+            metric = load(metric.value)
+
+            result = metric.compute(references=predictions['target'].to_list(),
+                                    predictions=predictions['predictions'].to_list())
+
+            scores[metric.name] = result.get(metric.name)
+        print(scores)
+        return scores

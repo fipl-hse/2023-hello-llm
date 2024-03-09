@@ -1,8 +1,12 @@
+datasets==2.16.1
+pandas==2.1.4
+torch==2.1.2
 --extra-index-url https://download.pytorch.org/whl/cpu
 datasets==2.16.1
 evaluate==0.4.1
 pandas==2.1.4
-rouge-score==0.1.2
+pydantic==2.6.1
+scikit-learn==1.2.2
 torch==2.1.2
 torchinfo==1.8.0
 transformers==4.37.2
