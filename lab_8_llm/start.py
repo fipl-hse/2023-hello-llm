@@ -4,6 +4,7 @@ Neural machine translation starter.
 # pylint: disable= too-many-locals
 import json
 from pathlib import Path
+from random import randint
 
 from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
@@ -35,8 +36,9 @@ def main() -> None:
 
     print(llm.analyze_model())
 
-    sample_infer = llm.infer_sample(dataset.data['question'][0])
-    print('prediction for sample (', dataset.data['question'][0], ')', sample_infer)
+    sample = dataset.data['question'][randint(0, len(dataset) - 1)]
+    sample_infer = llm.infer_sample(sample)
+    print('prediction for sample (', sample, ')', sample_infer[len(sample):])
 
     predictions = llm.infer_dataset()
     predictions_path = PROJECT_ROOT / 'lab_8_llm' / 'dist' / 'predictions.csv'

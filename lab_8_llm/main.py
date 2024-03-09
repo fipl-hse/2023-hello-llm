@@ -189,23 +189,18 @@ class LLMPipeline(AbstractLLMPipeline):
         }
 
     @report_time
-    def infer_sample(self, sample: tuple[str, ...],
-                     generation_parameters: dict | None = None) -> str | None:
+    def infer_sample(self, sample: tuple[str, ...]) -> str | None:
+
         """
         Infer model on a single sample.
 
         Args:
             sample (tuple[str, ...]): The given sample for inference with model
-            generation_parameters (dict | None): Optional parameters dictionary for generation
-
 
         Returns:
             str | None: A prediction
         """
-        if generation_parameters is None:
-            generation_parameters = {}
-
-        return None if self._model is None else self._infer_batch((sample, ), generation_parameters)[0]
+        return None if self._model is None else self._infer_batch((sample,))[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -219,9 +214,7 @@ class LLMPipeline(AbstractLLMPipeline):
         dataloader = DataLoader(self._dataset, batch_size=self._batch_size)
 
         for batch in dataloader:
-            predictions.extend(self._infer_batch(batch,
-                                                 {'repetition_penalty': 2.5,
-                                                  'no_repeat_ngram_size': 8}))
+            predictions.extend(self._infer_batch(batch))
 
         return DataFrame(
             {
@@ -231,15 +224,12 @@ class LLMPipeline(AbstractLLMPipeline):
         )
 
     @torch.no_grad()
-    def _infer_batch(self,
-                     sample_batch: Sequence[tuple[str, ...]],
-                     generation_params: dict) -> list[str]:
+    def _infer_batch(self,sample_batch: Sequence[tuple[str, ...]],) -> list[str]:
         """
         Infer model on a single batch.
 
         Args:
             sample_batch (Sequence[tuple[str, ...]]): Batch to infer the model
-            generation_params (dict): a dictionary of parameters to use in generation
 
         Returns:
             list[str]: Model predictions as strings
@@ -253,16 +243,11 @@ class LLMPipeline(AbstractLLMPipeline):
             return_tensors='pt'
         )
 
-        outputs = self._model.generate(
-            **tokens,
-            max_length=self._max_length,
-            **generation_params
-        )
+        output = self._model.generate(**tokens, max_length=self._max_length)
 
-        pred_batch = self._tokenizer.batch_decode(outputs, skip_special_tokens=True)
+        pred_batch = self._tokenizer.batch_decode(output, skip_special_tokens=True)
 
         return [predictions[len(sample_batch[0][i]) + 1:] for i, predictions in enumerate(pred_batch)]
-
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
