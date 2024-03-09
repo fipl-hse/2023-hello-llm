@@ -187,17 +187,20 @@ class LLMPipeline(AbstractLLMPipeline):
         }
 
     @report_time
-    def infer_sample(self, sample: tuple[str, ...]) -> str | None:
+    def infer_sample(self, sample: tuple[str, ...], gen_params: dict | None = None) -> str | None:
         """
         Infer model on a single sample.
 
         Args:
             sample (tuple[str, ...]): The given sample for inference with model
+            gen_params (dict | None): Optional parameters dictionary for generation
 
         Returns:
             str | None: A prediction
         """
-        return None if self._model is None else self._infer_batch((sample,))[0]
+        if gen_params is None:
+            gen_params = {}
+        return None if self._model is None else self._infer_batch((sample, ), gen_params)[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -212,8 +215,8 @@ class LLMPipeline(AbstractLLMPipeline):
 
         for batch in dataloader:
             predictions.extend(self._infer_batch(batch,
-                                                 repetition_penalty=2.0,
-                                                 no_repeat_ngram_size=8))
+                                                 {'repetition_penalty': 2.0,
+                                                  'no_repeat_ngram_size': 8}))
 
         return DataFrame(
             {
@@ -223,19 +226,15 @@ class LLMPipeline(AbstractLLMPipeline):
         )
 
     @torch.no_grad()
-    def _infer_batch(
-            self,
-            sample_batch: Sequence[tuple[str, ...]],
-            repetition_penalty: float = 1.0,
-            no_repeat_ngram_size: int = 0
-    ) -> list[str]:
+    def _infer_batch(self,
+                     sample_batch: Sequence[tuple[str, ...]],
+                     generation_params: dict) -> list[str]:
         """
         Infer model on a single batch.
 
         Args:
             sample_batch (Sequence[tuple[str, ...]]): Batch to infer the model
-            repetition_penalty (float): Generation parameter, penalty rate for repetitions in output
-            no_repeat_ngram_size (int): Generation parameter, ngrams of the size can only occur once
+            generation_params (dict): a dictionary of parameters to use in generation
 
         Returns:
             list[str]: Model predictions as strings
@@ -249,8 +248,7 @@ class LLMPipeline(AbstractLLMPipeline):
         outputs = self._model.generate(
             **tokens,
             max_length=self._max_length,
-            repetition_penalty=repetition_penalty,
-            no_repeat_ngram_size=no_repeat_ngram_size
+            **generation_params
         )
         generated_texts = self._tokenizer.batch_decode(outputs, skip_special_tokens=True)
         return [
@@ -271,7 +269,7 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
-        self._data_path = data_path / 'predictions.csv'
+        self._data_path = data_path
         self._metrics = metrics
 
     @report_time

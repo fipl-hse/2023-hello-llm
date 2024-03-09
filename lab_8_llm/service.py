@@ -3,7 +3,6 @@ Web service for model inference.
 """
 # pylint: disable=undefined-variable, duplicate-code
 import pandas as pd
-import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -75,5 +74,7 @@ async def infer(query: Query) -> dict:
     Returns:
         dict: a dictionary with a prediction.
     """
-    prediction = pipeline.infer_sample(query.question)
-    return {'infer': prediction}
+    return {'infer': pipeline.infer_sample(query.question,
+                                           {'repetition_penalty': 2.0,
+                                            'no_repeat_ngram_size': 6,
+                                            'do_sample': True})}

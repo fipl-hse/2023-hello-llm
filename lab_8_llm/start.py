@@ -32,11 +32,11 @@ def main() -> None:
     pipeline.infer_sample(dataset[randint(0, len(dataset) - 1)])
 
     df_pred = pipeline.infer_dataset()
-    predictions_path = PROJECT_ROOT / 'lab_8_llm' / 'dist'
-    if not predictions_path.exists():
+    predictions_path = PROJECT_ROOT / 'lab_8_llm' / 'dist' / 'predictions.csv'
+    if not predictions_path.parent.exists():
         predictions_path.mkdir(exist_ok=True)
 
-    df_pred.to_csv(predictions_path / 'predictions.csv', index=False, encoding='utf-8')
+    df_pred.to_csv(predictions_path, index=False, encoding='utf-8')
 
     evaluator = TaskEvaluator(predictions_path, settings.parameters.metrics)
     result = evaluator.run()
