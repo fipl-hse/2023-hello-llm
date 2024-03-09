@@ -49,6 +49,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     A class that analyzes and preprocesses a dataset.
     """
+    _raw_data: DataFrame
 
     def analyze(self) -> dict:
         """
@@ -138,6 +139,7 @@ class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
     """
+    _model: torch.nn.Module
 
     def __init__(
             self,
@@ -260,7 +262,6 @@ class LLMPipeline(AbstractLLMPipeline):
         output = self._model(**tokens).logits
         predictions.extend([str(prediction.item())
                             for prediction in list(torch.argmax(output, dim=1))])
-        print(predictions)
         return predictions
 
 
@@ -293,12 +294,11 @@ class TaskEvaluator(AbstractTaskEvaluator):
         scores = {}
 
         for metric in self._metrics:
-            metric = load(metric.value)
+            metric = load(metric)
 
             result = metric.compute(references=predictions['target'].to_list(),
                                     predictions=predictions['predictions'].to_list(),
                                     average='micro')
 
             scores[metric.name] = result.get(metric.name)
-        print(scores)
         return scores
