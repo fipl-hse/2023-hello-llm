@@ -1,5 +1,4 @@
-let sample_inference = async (premise, hypothesis, result) => {
-        let question = premise.value.concat("|", hypothesis.value)
+let sample_inference = async (question, result) => {
         const response = await fetch("/infer", {
             method: "POST",
             headers: {
@@ -16,9 +15,8 @@ let sample_inference = async (premise, hypothesis, result) => {
 }
 
 window.onload = function(){
-    const premise = document.getElementById("premise")
-    const hypothesis = document.getElementById("hypothesis")
+    const question = document.getElementById("question")
     const button = document.getElementById("button")
     const result = document.getElementById("result")
-    button.addEventListener("click", ()=>{sample_inference(premise, hypothesis, result)})
+    button.addEventListener("click", ()=>{sample_inference(question, result)})
 };

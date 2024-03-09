@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('assets', path='styles.css') }}">
+    <script type="text/javascript" src="{{ url_for('assets', path='main.js') }}"></script>
+    <title>QA Service</title>
+</head>
+<body>
+    <form>
+      <span class="header">GET ANSWER</span>
+        <div class="text">
+            <label for="question">YOUR QUESTION</label>
+            <input id="question" type="text" placeholder="Type here...">
+        </div>
+      <button id="button" type="button">GENERATE</button>
+      <div class="results">
+        <span class="header">ANSWER</span>
+        <div>
+          <span id="result"></span>
+        </div>
+      </div>
+    </form>
+</body>
+</html>
