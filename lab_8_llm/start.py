@@ -28,8 +28,8 @@ def main() -> None:
 
     print(dataset_analysis)
     print(model_analysis)
-    #print(inf_sample)
-    #print(predictions)
+    print(inf_sample)
+    print(predictions)
 
     result = 1
     assert result is not None, "Demo does not work correctly"

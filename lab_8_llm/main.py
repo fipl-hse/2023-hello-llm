@@ -232,8 +232,6 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-        """ if self._tokenizer.pad_token is None:
-            self._tokenizer.add_special_tokens({'pad_token': '[PAD]'})"""
         self._tokenizer.pad_token = self._tokenizer.eos_token
         tokens = self._tokenizer(sample_batch[0], padding=True, truncation=True, return_tensors='pt')
         model_output = self._model.generate(**tokens, max_length=self._max_length)
