@@ -1,8 +1,8 @@
 {
   "parameters": {
-    "model": "cross-encoder/qnli-distilroberta-base",
-    "dataset": "qnli",
+    "model": "",
+    "dataset": "",
     "metrics": []
   },
-  "target_score": 4
+  "target_score": 0
 }
