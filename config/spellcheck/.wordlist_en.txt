@@ -335,6 +335,7 @@ mro
 mrqa
 mse
 much
+multiclass
 mypy
 n-gram
 name
