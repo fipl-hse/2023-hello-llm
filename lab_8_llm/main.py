@@ -46,7 +46,7 @@ class RawDataImporter(AbstractRawDataImporter):
             split='validation'
         ).to_pandas()
 
-        if not isinstance(self._raw_data, DataFrame):
+        if not isinstance(self._raw_data, pd.DataFrame):
             raise TypeError
 
 
