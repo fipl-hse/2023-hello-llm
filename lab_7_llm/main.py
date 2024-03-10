@@ -67,8 +67,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
                     'dataset_columns':  self._raw_data.shape[1],
                     'dataset_duplicates': len(self._raw_data[self._raw_data.duplicated()]),
                     'dataset_empty_rows': self._raw_data.shape[0] - len(empty_data_drop),
-                    'dataset_sample_min_len': min(empty_data_drop['instruction'].str.len()),
-                    'dataset_sample_max_len': max(empty_data_drop['instruction'].str.len())
+                    'dataset_sample_min_len': min(empty_data_drop['article'].str.len()),
+                    'dataset_sample_max_len': max(empty_data_drop['article'].str.len())
                     }
 
         return analyzed
