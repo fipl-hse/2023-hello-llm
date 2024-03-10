@@ -11,10 +11,9 @@ import pandas as pd
 import torch
 from datasets import load_dataset
 from pandas import DataFrame
-from torch.utils.data import DataLoader
-from torch.utils.data.dataset import Dataset
+from torch.utils.data import DataLoader, Dataset
 from torchinfo import summary
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -22,7 +21,6 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
-
 
 
 class RawDataImporter(AbstractRawDataImporter):
@@ -225,7 +223,7 @@ class LLMPipeline(AbstractLLMPipeline):
         tokens = self._tokenizer(sample_batch[0], padding=True, truncation=True, return_tensors='pt')
         model_output = self._model.generate(**tokens, max_length=self._max_length)
         text_output = self._tokenizer.batch_decode(model_output, skip_special_tokens=True)
-        return [text.removeprefix(f'{sample_batch[0][i]}\n\n') for i, text in enumerate(text_output)]
+        return [text.removeprefix(f'{sample_batch[0][i]}\n') for i, text in enumerate(text_output)]
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
