@@ -293,3 +293,4 @@ class TaskEvaluator(AbstractTaskEvaluator):
             evaluations.update(dict(evaluation))
 
         return evaluations
+
