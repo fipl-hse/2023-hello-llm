@@ -4,27 +4,17 @@ Laboratory work.
 Working with Large Language Models.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
-from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
+import pandas as pd
+import torch
+from datasets import load_dataset
+from pandas import DataFrame
 from torch.utils.data import DataLoader
+from torch.utils.data.dataset import Dataset
 from torchinfo import summary
 from transformers import AutoTokenizer, AutoModelForCausalLM
-
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -32,8 +22,7 @@ from core_utils.llm.raw_data_importer import AbstractRawDataImporter
 from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
-from datasets import load_dataset
-import pandas as pd
+
 
 
 class RawDataImporter(AbstractRawDataImporter):
@@ -236,8 +225,7 @@ class LLMPipeline(AbstractLLMPipeline):
         tokens = self._tokenizer(sample_batch[0], padding=True, truncation=True, return_tensors='pt')
         model_output = self._model.generate(**tokens, max_length=self._max_length)
         text_output = self._tokenizer.batch_decode(model_output, skip_special_tokens=True)
-
-        return [text_output[len(sample_batch[0][i]) + 1:] for i, prediction in enumerate(text_output)]
+        return [text.removeprefix(f'{sample_batch[0][i]}\n\n') for i, text in enumerate(text_output)]
 
 
 class TaskEvaluator(AbstractTaskEvaluator):

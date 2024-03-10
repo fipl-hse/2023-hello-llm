@@ -4,6 +4,7 @@ Neural machine translation starter.
 # pylint: disable= too-many-locals
 import json
 from config.constants import PROJECT_ROOT
+from config.lab_settings import LabSettings
 from core_utils.llm.time_decorator import report_time
 from lab_8_llm.main import RawDataImporter, RawDataPreprocessor, TaskDataset, LLMPipeline
 
@@ -21,14 +22,13 @@ def main() -> None:
     dataset_analysis = processed_dataset.analyze()
     processed_dataset.transform()
     dataset = TaskDataset(processed_dataset.data.head(100))
-    pipeline = LLMPipeline(settings_dict['parameters']['model'], dataset, 512, 64, 'cpu')
+    pipeline = LLMPipeline(settings_dict['parameters']['model'], dataset, 120, 64, 'cpu')
     model_analysis = pipeline.analyze_model()
     inf_sample = pipeline.infer_sample(dataset[0])
     predictions = pipeline.infer_dataset()
 
     print(dataset_analysis)
     print(model_analysis)
-    print(inf_sample)
     print(predictions)
 
     result = 1
