@@ -199,7 +199,7 @@ class LLMPipeline(AbstractLLMPipeline):
             str | None: A prediction
         """
         inputs = self._tokenizer(sample[0],
-                                 max_len=self._max_length,
+                                 max_length=self._max_length,
                                  padding=True,
                                  truncation=True,
                                  return_tensors='pt').input_ids
