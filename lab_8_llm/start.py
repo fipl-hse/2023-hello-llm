@@ -20,6 +20,8 @@ def main() -> None:
 
     dataset = RawDataImporter(settings.parameters.dataset)
     dataset.obtain()
+    if dataset.raw_data is None:
+        raise TypeError
 
     data_preprocessor = RawDataPreprocessor(dataset.raw_data)
     print(data_preprocessor.analyze())
