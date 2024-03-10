@@ -9,7 +9,7 @@ from typing import Iterable, Sequence
 
 from datasets import load_dataset
 from torchinfo import summary
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from transformers import AutoModelForSeq2SeqLM, T5TokenizerFast
 
 try:
     import torch
@@ -154,7 +154,7 @@ class LLMPipeline(AbstractLLMPipeline):
         self._max_length = max_length
         self._batch_size = batch_size
         self._device = device
-        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self._tokenizer = T5TokenizerFast.from_pretrained(model_name)
         self._model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
     def analyze_model(self) -> dict:
@@ -198,7 +198,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         inputs = self._tokenizer(sample[0],
                                  max_length=self._max_length,
-                                 padding=True,
+                                 padding='longest',
                                  truncation=True,
                                  return_tensors='pt').input_ids
         results = self._model.generate(inputs)
