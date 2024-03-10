@@ -18,6 +18,8 @@ except ImportError:
 import pandas as pd
 from datasets import load_dataset
 from torch.utils.data.dataset import Dataset
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from torchinfo import summary
 
 try:
     from pandas import DataFrame
@@ -149,6 +151,13 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        self._model_name = model_name
+        self._dataset = dataset
+        self._max_length = max_length
+        self._batch_size = batch_size
+        self._device = device
+        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self._model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -157,6 +166,26 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        config = self._model.config
+        embeddings_length = config.max_poition_embeddings
+        input_ids = torch.ones(1, embeddings_length, dtype=torch.long)
+        model_summary = summary(
+            self._model,
+            input_data={'input_ids':input_ids, 'decoder_input_ids': input_ids},
+            device=self._device,
+            verbose=False
+        )
+
+        analysis = {
+            'input_shape': {'input_ids':list(input_ids.shape), 'attention_mask':list(input_ids.shape)},
+            'embeddings_size': embeddings_length,
+            'output_shape': model_summary.summary_list[-1].output_size,
+            'num_trainable_params': model_summary.trainable_params,
+            'vocab_size': config.encoder.vocab_size,
+            'size': model_summary.total_param_bytes,
+            'max_context_length': config.max_length
+        }
+        return analysis
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -169,6 +198,13 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        inputs = self._tokenizer(sample[0],
+                                 max_len=self._max_length,
+                                 padding=True,
+                                 truncation=True,
+                                 return_tensors='pt').input_ids
+        results = self._model.generate(inputs)
+        return self._tokenizer.batch_decode(results, skip_special_tokens=True)[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
