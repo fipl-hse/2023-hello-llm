@@ -23,7 +23,7 @@ from core_utils.llm.time_decorator import report_time
 
 class RawDataImporter(AbstractRawDataImporter):
     """
-    A class that imports the HuggingFace dataset.
+    A class that imports the HuggingFace dataset..
     """
 
     @report_time
