@@ -3,8 +3,6 @@ Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
 import json
-import os
-from pathlib import Path
 
 from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
@@ -26,7 +24,7 @@ def main() -> None:
 
     dataset = TaskDataset(preprocessor.data.head(100))
 
-    pipeline = LLMPipeline(settings['parameters']['model'], dataset, 256, 8, 'cpu')
+    pipeline = LLMPipeline(settings['parameters']['model'], dataset, 256, 1, 'cpu')
     result = pipeline.infer_sample(dataset[0])
     assert result is not None, "Demo does not work correctly"
 
