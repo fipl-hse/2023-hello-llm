@@ -165,17 +165,17 @@ class LLMPipeline(AbstractLLMPipeline):
             dict: Properties of a model
         """
         config = self._model.config
-        embeddings_length = config.max_poition_embeddings
+        embeddings_length = config.encoder.max_poition_embeddings
         input_ids = torch.ones(1, embeddings_length, dtype=torch.long)
         model_summary = summary(
             self._model,
-            input_data={'input_ids':input_ids, 'decoder_input_ids': input_ids},
+            input_data={'input_ids': input_ids, 'decoder_input_ids': input_ids},
             device=self._device,
             verbose=False
         )
 
         analysis = {
-            'input_shape': {'input_ids':list(input_ids.shape), 'attention_mask':list(input_ids.shape)},
+            'input_shape': {'input_ids': list(input_ids.shape), 'attention_mask': list(input_ids.shape)},
             'embeddings_size': embeddings_length,
             'output_shape': model_summary.summary_list[-1].output_size,
             'num_trainable_params': model_summary.trainable_params,
