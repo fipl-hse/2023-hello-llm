@@ -198,8 +198,8 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         tokens = self._tokenizer(sample[0], sample[1], max_length=120, padding=True,
                                  return_tensors='pt', truncation=True)
-        with torch.no_grad():
-            outputs = self._model(**tokens)
+
+        outputs = self._model(**tokens)
 
         answer_start_index = outputs.start_logits.argmax()
         answer_end_index = outputs.end_logits.argmax()
