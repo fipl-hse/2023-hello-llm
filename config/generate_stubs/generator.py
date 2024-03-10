@@ -1,6 +1,7 @@
 """
-Generator of stubs for existing lab implementation
+Generator of stubs for existing lab implementation.
 """
+# pylint: disable=too-many-statements
 import ast
 from _ast import alias, stmt
 from pathlib import Path
@@ -12,14 +13,18 @@ from tap import Tap
 
 class NoDocStringForAMethodError(Exception):
     """
-    Error for a method that lacks docstring
+    Error for a method that lacks docstring.
     """
 
 
 def remove_implementation_from_function(original_declaration: ast.stmt,
                                         parent: Optional[ast.ClassDef] = None) -> None:
     """
-    Remove reference implementation
+    Remove reference implementation.
+
+    Args:
+        original_declaration (ast.stmt): Original declaration
+        parent (Optional[ast.ClassDef]): Parent
     """
     if not isinstance(original_declaration, ast.FunctionDef):
         return
@@ -49,7 +54,13 @@ def remove_implementation_from_function(original_declaration: ast.stmt,
 # pylint: disable=too-many-branches
 def cleanup_code(source_code_path: Path) -> str:
     """
-    Removing implementation based on AST parsing of code
+    Remove implementation based on AST parsing of code.
+
+    Args:
+        source_code_path (Path): Path to source code
+
+    Returns:
+        str: Implementation without AST parsing of code
     """
     with source_code_path.open(encoding='utf-8') as file:
         data = ast.parse(file.read(), source_code_path.name, type_comments=True)
@@ -63,8 +74,29 @@ def cleanup_code(source_code_path: Path) -> str:
         'lab_3_generate_by_ngrams.main': ['*'],
         'core_utils.llm.time_decorator': ['report_time'],
     }
-    if source_code_path.name != 'start.py':
+
+    if source_code_path.name not in ('start.py', 'service.py'):
         accepted_modules['pathlib'] = ['Path']
+        accepted_modules['torch'] = ['']
+        accepted_modules['pandas'] = ['DataFrame']
+        accepted_modules['core_utils.llm.llm_pipeline'] = ['AbstractLLMPipeline']
+        accepted_modules['core_utils.llm.metrics'] = ['Metrics']
+        accepted_modules['core_utils.llm.raw_data_importer'] = ['AbstractRawDataImporter']
+        accepted_modules['core_utils.llm.raw_data_preprocessor'] = ['AbstractRawDataPreprocessor']
+        accepted_modules['core_utils.llm.task_evaluator'] = ['AbstractTaskEvaluator']
+
+    if 'reference_lab' in source_code_path.parent.name:
+        accepted_modules['config.lab_settings'] = ['InferenceParams']
+
+    if source_code_path.name == 'start.py' and 'llm' in source_code_path.parent.name:
+        accepted_modules.pop('typing')
+
+    if source_code_path.name == 'main.py' and 'reference_lab' in source_code_path.parent.name:
+        accepted_modules.pop('pandas')
+
+    if source_code_path.name == 'service.py':
+        accepted_modules['fastapi'] = ['FastAPI']
+        accepted_modules['lab_7_llm.main'] = ['LLMPipeline']
 
     new_decl: list[stmt] = []
 
@@ -73,6 +105,15 @@ def cleanup_code(source_code_path: Path) -> str:
             data.body.insert(data_2.body.index(decl_2), decl_2)
 
     for decl in data.body:
+        if isinstance(decl, ast.AsyncFunctionDef) or \
+                isinstance(decl, ast.ClassDef) and \
+                decl.name == 'Query':
+            decl = []  # type: ignore
+
+        if source_code_path.name == 'service.py' and \
+                isinstance(decl, ast.Assign):
+            decl = ast.parse("app, pipeline = None, None")  # type: ignore
+
         if isinstance(decl, (ast.Import, ast.ImportFrom)):
             if (module_name := getattr(decl, 'module', None)) is None:
                 module_name = decl.names[0].name
@@ -133,7 +174,7 @@ def cleanup_code(source_code_path: Path) -> str:
 
 class ArgumentParser(Tap):
     """
-    Types for CLI interface of a module
+    Types for CLI interface of a module.
     """
     source_code_path: str
     target_code_path: str
@@ -141,7 +182,7 @@ class ArgumentParser(Tap):
 
 def main() -> None:
     """
-    Entrypoint for stub generation
+    Entrypoint for stub generation.
     """
     args = ArgumentParser().parse_args()
 

@@ -1,5 +1,5 @@
 """
-Module to check if wordlist is properly sorted
+Module to check if wordlist is properly sorted.
 """
 
 import re
@@ -7,6 +7,12 @@ from pathlib import Path
 
 
 def check_wordlist(wordlist_path: Path) -> None:
+    """
+    Check that wordlist is properly sorted.
+
+    Args:
+        wordlist_path (Path): Path to wordlist
+    """
     with open(wordlist_path, encoding='utf-8') as f:
         original_text = f.read()
         words = [i.strip().lower() for i in original_text.split('\n') if i.strip()]
@@ -28,6 +34,9 @@ def check_wordlist(wordlist_path: Path) -> None:
 
 
 def main() -> None:
+    """
+    Call functions.
+    """
     main_wordlist_path = Path(__file__).parent / '.wordlist.txt'
     secondary_wordlist_path = Path(__file__).parent / '.wordlist_en.txt'
 
