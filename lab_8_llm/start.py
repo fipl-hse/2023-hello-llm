@@ -18,13 +18,18 @@ def main() -> None:
     raw_dataset = RawDataImporter(settings_dict["parameters"]["dataset"])
     raw_dataset.obtain()
     processed_dataset = RawDataPreprocessor(raw_dataset.raw_data)
-    analysis = processed_dataset.analyze()
+    dataset_analysis = processed_dataset.analyze()
     processed_dataset.transform()
     dataset = TaskDataset(processed_dataset.data.head(100))
-    # pipeline = LLMPipeline(settings_dict['parameters']['model'], dataset, 512, 64, 'cpu')
-    # pipeline.analyze_model()
-    print(analysis)
-    # print(raw_dataset.raw_data.head(10))
+    pipeline = LLMPipeline(settings_dict['parameters']['model'], dataset, 512, 64, 'cpu')
+    model_analysis = pipeline.analyze_model()
+    inf_sample = pipeline.infer_sample(dataset[0])
+    predictions = pipeline.infer_dataset()
+
+    print(dataset_analysis)
+    print(model_analysis)
+    #print(inf_sample)
+    #print(predictions)
 
     result = 1
     assert result is not None, "Demo does not work correctly"
