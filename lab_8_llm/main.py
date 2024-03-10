@@ -157,7 +157,7 @@ class LLMPipeline(AbstractLLMPipeline):
         self._device = device
         self._batch_size = batch_size
         self._max_length = max_length
-        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name, padding_side='left')
         self._model = AutoModelForCausalLM.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
@@ -232,8 +232,9 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-        if self._tokenizer.pad_token is None:
-            self._tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+        """ if self._tokenizer.pad_token is None:
+            self._tokenizer.add_special_tokens({'pad_token': '[PAD]'})"""
+        self._tokenizer.pad_token = self._tokenizer.eos_token
         tokens = self._tokenizer(sample_batch[0], padding=True, truncation=True, return_tensors='pt')
         model_output = self._model.generate(**tokens, max_length=self._max_length)
         text_output = self._tokenizer.batch_decode(model_output, skip_special_tokens=True)
