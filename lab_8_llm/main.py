@@ -232,7 +232,7 @@ class LLMPipeline(AbstractLLMPipeline):
         predictions = []
 
         for batch in dataset_loader:
-            predictions.extend(self._infer_batch(batch))
+            predictions.extend(['2' if i == '0' else i for i in self._infer_batch(batch)])
 
         df_predict = pd.DataFrame({
             "target": self._dataset.data[ColumnNames.TARGET.value],
@@ -260,7 +260,7 @@ class LLMPipeline(AbstractLLMPipeline):
         output = self._model(**tokens).logits
         predictions.extend([str(prediction.item())
                             for prediction in list(torch.argmax(output, dim=1))])
-        predictions = ['2' if i == '0' else i for i in predictions]
+        #predictions = ['2' if i == '0' else i for i in predictions]
         return predictions
 
 
@@ -300,4 +300,5 @@ class TaskEvaluator(AbstractTaskEvaluator):
                                     average='micro')
 
             scores[metric.name] = result.get(metric.name)
+        print(scores)
         return scores
