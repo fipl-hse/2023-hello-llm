@@ -2,7 +2,6 @@
 Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
-# from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
@@ -144,7 +143,6 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self._model = MarianMTModel.from_pretrained(model_name)
-        # self._model.to(device)
         self._tokenizer = MarianTokenizer.from_pretrained(model_name)
 
     def analyze_model(self) -> dict:
@@ -216,8 +214,6 @@ class LLMPipeline(AbstractLLMPipeline):
                                  truncation=True,
                                  max_length=self._max_length,
                                  return_tensors="pt")
-        # output = self._model(**inputs)
-        # predictions = [str(prediction.item()) for prediction in torch.argmax(output.logits, dim=1)]
         outputs = self._model.generate(**inputs, max_length=self._max_length)
         predictions = [self._tokenizer.decode(output, skip_special_tokens=True) for output in outputs]
         return predictions
