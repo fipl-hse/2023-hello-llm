@@ -4,7 +4,6 @@ Laboratory work.
 Working with Large Language Models.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
-#from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
@@ -30,7 +29,6 @@ class RawDataImporter(AbstractRawDataImporter):
     """
     A class that imports the HuggingFace dataset.
     """
-    _raw_data: DataFrame
 
     @report_time
     def obtain(self) -> None:
@@ -46,9 +44,8 @@ class RawDataImporter(AbstractRawDataImporter):
             split="train"
         ).to_pandas()
 
-    @property
-    def raw_data(self) -> DataFrame:
-        return self._raw_data
+        if not isinstance(self._raw_data, DataFrame):
+            raise TypeError
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
