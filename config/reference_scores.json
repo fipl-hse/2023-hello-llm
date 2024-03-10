@@ -110,7 +110,7 @@
     },
     "blanchefort/rubert-base-cased-sentiment-rusentiment": {
         "blinoff/healthcare_facilities_reviews": {
-            "f1": 0.71
+            "f1": 0.89
         },
         "blinoff/kinopoisk": {
             "f1": 0.64
