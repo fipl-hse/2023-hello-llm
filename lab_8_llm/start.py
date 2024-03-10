@@ -23,6 +23,9 @@ def main() -> None:
     importer = RawDataImporter(settings['parameters']['dataset'])
     importer.obtain()
 
+    if importer.raw_data is None:
+        raise TypeError
+
     preprocessor = RawDataPreprocessor(importer.raw_data)
 
     data_analysis = preprocessor.analyze()
