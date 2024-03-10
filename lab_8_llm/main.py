@@ -44,9 +44,6 @@ class RawDataImporter(AbstractRawDataImporter):
             split="train"
         ).to_pandas()
 
-        if not isinstance(self._raw_data, DataFrame):
-            raise TypeError
-
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
