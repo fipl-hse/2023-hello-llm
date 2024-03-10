@@ -48,6 +48,7 @@ class RawDataImporter(AbstractRawDataImporter):
         """
         self._raw_data = load_dataset(self._hf_name, name='default', split='test').to_pandas()
 
+
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
     A class that analyzes and preprocesses a dataset.
@@ -68,6 +69,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
                            'dataset_sample_max_len': len(max(self._raw_data['info'], key=len)),
                            }
         return analyse_dataset
+
     @report_time
     def transform(self) -> None:
         """
@@ -76,6 +78,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         self._data = self._raw_data.rename(
             columns={'info': ColumnNames.SOURCE.value,
                      'summary': ColumnNames.TARGET.value}).reset_index(drop=True)
+
 
 class TaskDataset(Dataset):
     """
@@ -98,7 +101,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
-        return len (self._data)
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -121,6 +124,7 @@ class TaskDataset(Dataset):
             pandas.DataFrame: Preprocessed DataFrame
         """
         return self._data
+
 
 class LLMPipeline(AbstractLLMPipeline):
     """
@@ -145,8 +149,6 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
-
-
 
     def analyze_model(self) -> dict:
         """
