@@ -60,12 +60,23 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        props_analyzed = {'dataset_number_of_samples': len(self._raw_data),
+                          'dataset_columns': len(self._raw_data.columns),
+                          'dataset_duplicates': self._raw_data.duplicated().sum(),
+                          'dataset_empty_rows': self._raw_data.isna().sum().sum(),
+                          'dataset_sample_min_len': len(min(self._raw_data['instruction'], key=len)),
+                          'dataset_sample_max_len': len(max(self._raw_data['instruction'], key=len))}
+
+        return props_analyzed
 
     @report_time
-    def transform(self) -> None:
+    def transform(self):
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        self._data = (self._raw_data
+                      .rename(columns={'instruction': 'question', 'output': 'target'})
+                      .drop(columns=['input', 'text']))
 
 
 class TaskDataset(Dataset):
