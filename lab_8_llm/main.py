@@ -149,11 +149,7 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
-        self._model_name = model_name
-        self._dataset = dataset
-        self._max_length = max_length
-        self._batch_size = batch_size
-        self._device = device
+        super().__init__(model_name, dataset, max_length, batch_size, device)
         self._tokenizer = AutoTokenizer.from_pretrained(model_name)
         self._model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
