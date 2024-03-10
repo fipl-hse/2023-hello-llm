@@ -40,7 +40,7 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
         self._raw_data = load_dataset(self._hf_name,
-                                      split='validation').to_pandas()
+                                      split='test').to_pandas()
 
     @property
     def raw_data(self) -> DataFrame:
