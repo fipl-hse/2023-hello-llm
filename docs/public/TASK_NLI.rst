@@ -26,21 +26,25 @@ Models
 Datasets
 --------
 
-1. `nli-rus-translated-v2021 <https://huggingface.co/datasets/cointegrated/nli-rus-translated-v2021>`__
+1. `cointegrated/nli-rus-translated-v2021 <https://huggingface.co/datasets/cointegrated/nli-rus-translated-v2021>`__
 
    1. **Lang**: RU
    2. **Rows**: 19647
    3. **Preprocess**:
 
-      1. Filter the dataset by the column ``source`` with the value ``mnli``.
-      2. Cut to 100 rows.
+      1. Select ``dev`` split.
+      2. Filter the dataset by the column ``source`` with the value ``mnli``.
+
+         1. This step you should implement in :py:meth:`lab_7_llm.main.RawDataImporter.obtain`.
+
       3. Leave only columns ``premise_ru``, ``hypothesis_ru`` and ``label``.
       4. Rename column ``premise_ru`` to ``premise``.
       5. Rename column ``hypothesis_ru`` to ``hypothesis``.
       6. Rename column ``label`` to  ``target``.
-      7. Map ``target`` with class labels.
-      8. Delete empty rows in dataset.
-      9. Reset index.
+      7. Delete empty rows in dataset.
+      8. Delete duplicates in dataset.
+      9. Map ``target`` with class labels.
+      10. Reset indexes.
 
 2. `Russian Super GLUE TERRA <https://huggingface.co/datasets/RussianNLP/russian_super_glue>`__
 
@@ -48,11 +52,11 @@ Datasets
    2. **Rows**: 307
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
+      1. Select ``terra`` subset.
       2. Rename column ``label`` to  ``target``.
       3. Delete duplicates in dataset.
       4. Delete empty rows in dataset.
-      5. Reset index.
+      5. Reset indexes.
 
 3. `XNLI <https://huggingface.co/datasets/xnli>`__
 
@@ -60,11 +64,11 @@ Datasets
    2. **Rows**: 2490
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
+      1. Select ``ru`` subset.
       2. Rename column ``label`` to  ``target``.
       3. Delete duplicates in dataset.
       4. Delete empty rows in dataset.
-      5. Reset index.
+      5. Reset indexes.
 
 4. `GLUE QNLI <https://huggingface.co/datasets/glue>`__
 
@@ -72,13 +76,14 @@ Datasets
    2. **Rows**: 5463
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
+      1. Select ``qnli`` subset.
       2. Rename column ``question`` to  ``premise``.
       3. Rename column ``sentence`` to  ``hypothesis``.
       4. Rename column ``label`` to  ``target``.
       5. Delete duplicates in dataset.
       6. Delete empty rows in dataset.
-      7. Reset index.
+      7. Map ``target`` with class labels.
+      8. Reset indexes.
 
 5. `GLUE MNLI <https://huggingface.co/datasets/glue>`__
 
@@ -86,11 +91,11 @@ Datasets
    2. **Rows**: 9815
    3. **Preprocess**:
 
-      1. Cut to 100 rows.
+      1. Select ``mnli`` subset.
       2. Rename column ``label`` to  ``target``.
       3. Delete duplicates in dataset.
       4. Delete empty rows in dataset.
-      5. Reset index.
+      5. Reset indexes.
 
 Metrics
 -------

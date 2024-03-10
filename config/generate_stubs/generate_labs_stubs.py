@@ -1,6 +1,7 @@
 """
-Generator of all labs
+Generator of all labs.
 """
+
 from pathlib import Path
 
 from config.constants import PROJECT_CONFIG_PATH, PROJECT_ROOT
@@ -11,10 +12,10 @@ from config.project_config import ProjectConfig
 
 def _generate_stubs_single_module(module_path: Path) -> None:
     """
-    Single module processing.
+    Process single module.
 
-    Arguments:
-         module_path (Path): path to module
+    Args:
+        module_path (Path): Path to module
     """
     stub_path = module_path.parent / f'{module_path.stem}_stub{module_path.suffix}'
 
@@ -24,9 +25,13 @@ def _generate_stubs_single_module(module_path: Path) -> None:
     format_stub_file(stub_path)
     sort_stub_imports(stub_path)
 
+
 def generate_all_stubs(project_config: ProjectConfig) -> None:
     """
-    Generates stubs for all labs
+    Generate stubs for all labs.
+
+    Args:
+        project_config (ProjectConfig): Project config
     """
     labs = project_config.get_labs_names()
     for lab_name in labs:
@@ -39,12 +44,13 @@ def generate_all_stubs(project_config: ProjectConfig) -> None:
         for module_path in module_paths:
             if not module_path.exists():
                 continue
+            print(f'\t\t{module_path}')
             _generate_stubs_single_module(module_path)
 
 
 def main() -> None:
     """
-    Entrypoint for stub generation
+    Entrypoint for stub generation.
     """
     proj_conf = ProjectConfig(PROJECT_CONFIG_PATH)
     generate_all_stubs(proj_conf)
