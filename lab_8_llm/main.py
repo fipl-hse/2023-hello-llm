@@ -40,7 +40,7 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
         self._raw_data = load_dataset(self._hf_name,
-                                      split='test').to_pandas()
+                                      split='validation').to_pandas()
 
     @property
     def raw_data(self) -> DataFrame:
@@ -283,13 +283,12 @@ class TaskEvaluator(AbstractTaskEvaluator):
         evaluations = {}
         for metric in self._metrics:
             metric = load(metric.value)
-            evaluation = metric.compute(references=predictions['target'],
-                                        predictions=predictions['predictions'],
-                                        average='macro')
-#            evaluation = metric.compute(references=to_eval_df['target'].tolist(),
-#                                        predictions=to_eval_df['predictions'].tolist())
-#                                        average='micro'
-#                                        )
+#            evaluation = metric.compute(references=predictions['target'],
+#                                        predictions=predictions['predictions'],
+#                                        average='micro')
+            evaluation = metric.compute(references=predictions['target'].tolist(),
+                                        predictions=predictions['predictions'].tolist(),
+                                        average='micro')
             evaluations.update(dict(evaluation))
 
         return evaluations
