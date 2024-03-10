@@ -165,7 +165,7 @@ class LLMPipeline(AbstractLLMPipeline):
             dict: Properties of a model
         """
         config = self._model.config
-        embeddings_length = config.encoder.max_poition_embeddings
+        embeddings_length = config.max_poition_embeddings
         input_ids = torch.ones(1, embeddings_length, dtype=torch.long)
         model_summary = summary(
             self._model,
