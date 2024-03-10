@@ -260,7 +260,6 @@ class LLMPipeline(AbstractLLMPipeline):
         output = self._model(**tokens).logits
         predictions.extend([str(prediction.item())
                             for prediction in list(torch.argmax(output, dim=1))])
-        #predictions = ['2' if i == '0' else i for i in predictions]
         return predictions
 
 
