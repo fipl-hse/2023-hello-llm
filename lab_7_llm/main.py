@@ -5,6 +5,8 @@ Neural machine translation module.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
+from datasets import load_dataset
+from pandas import DataFrame
 
 try:
     import torch
@@ -14,16 +16,16 @@ except ImportError:
     Dataset = dict
     torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
 
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
+# try:
+#     from pandas import DataFrame
+# except ImportError:
+#     print('Library "pandas" not installed. Failed to import.')
+#     DataFrame = dict  # type: ignore
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -41,6 +43,7 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        self._raw_data = load_dataset(self._hf_name, split="test").to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -55,12 +58,26 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        return {
+            'dataset_number_of_samples': len(self._raw_data),  #okay
+            'dataset_columns': self._raw_data.shape[1],  #okay
+            'dataset_duplicates': self._raw_data.duplicated().sum(),  #okay
+            'dataset_empty_rows': self._raw_data.isna().sum().sum(),  #okay
+            'dataset_sample_min_len': len(min(self._raw_data['en'], key=len)),  #okay
+            'dataset_sample_max_len': len(max(self._raw_data['en'], key=len))  #okay
+        }
+
 
     @report_time
     def transform(self) -> None:
         """
         Apply preprocessing transformations to the raw dataset.
         """
+        self._data = self._raw_data.rename(
+            columns={'en': ColumnNames.SOURCE.value,
+                     'fr': ColumnNames.TARGET.value})
+
+        self._data.drop_duplicates().reset_index(drop=True)
 
 
 class TaskDataset(Dataset):
