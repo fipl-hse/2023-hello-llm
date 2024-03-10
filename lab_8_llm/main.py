@@ -246,7 +246,7 @@ class LLMPipeline(AbstractLLMPipeline):
         outputs = self._model(**inputs)
 
         return list(str(prediction) for prediction in torch.argmax(
-            outputs.logits.cpu().detach().numpy(), dim=1))
+            outputs.logits.cpu().detach(), dim=1))
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
