@@ -61,7 +61,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
-        empty_data_drop = self._raw_data.dropna()[self._raw_data['article'] != '']
+        empty_data_drop = self._raw_data.dropna()
 
         analyzed = {'dataset_number_of_samples':  self._raw_data.shape[0],
                     'dataset_columns':  self._raw_data.shape[1],
