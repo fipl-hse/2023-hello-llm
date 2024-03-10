@@ -1,5 +1,5 @@
 datasets==2.17.0
 pandas==2.2.0
 torch==2.2.0
-transformers
-torchinfo
+torchinfo==1.8.0
+transformers== 4.38.2

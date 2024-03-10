@@ -31,6 +31,7 @@ def main():
     print(model_analysis)
 
     result = pipeline.infer_sample(dataset[0])
+
     assert result is not None, "Demo does not work correctly"
 
 if __name__ == "__main__":
