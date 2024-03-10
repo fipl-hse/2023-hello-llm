@@ -21,7 +21,9 @@ def main() -> None:
         settings = json.load(file)
     importer = RawDataImporter(settings['parameters']['dataset'])
     importer.obtain()
-    preprocessor = RawDataPreprocessor(importer.get_raw_data)
+    if importer.raw_data is None:
+        raise TypeError
+    preprocessor = RawDataPreprocessor(importer.raw_data)
     dataset_analysis = preprocessor.analyze()
     print(dataset_analysis)
     preprocessor.transform()

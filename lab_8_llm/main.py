@@ -30,8 +30,6 @@ class RawDataImporter(AbstractRawDataImporter):
     A class that imports the HuggingFace dataset.
     """
 
-    _raw_data: DataFrame
-
     @report_time
     def obtain(self) -> None:
         """
@@ -42,13 +40,6 @@ class RawDataImporter(AbstractRawDataImporter):
         """
         self._raw_data = load_dataset(self._hf_name,
                                       split='train').to_pandas()
-
-    @property
-    def get_raw_data(self) -> DataFrame:
-        """
-        Get raw dataset.
-        """
-        return self._raw_data
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
