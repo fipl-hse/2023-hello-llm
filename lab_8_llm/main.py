@@ -9,13 +9,13 @@ from typing import Iterable, Sequence
 
 import pandas as pd
 import torch
-import torchinfo
+from torchinfo import summary
 from datasets import load_dataset
 from evaluate import load
 from pandas import DataFrame
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
-from transformers import BertForSequenceClassification, AutoTokenizer
+from transformers import AutoTokenizer, BertForSequenceClassification
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -40,7 +40,7 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
         self._raw_data = load_dataset(self._hf_name,
-                                      split='test').to_pandas()
+                                      split='validation').to_pandas()
 
     @property
     def raw_data(self) -> DataFrame:
@@ -179,7 +179,7 @@ class LLMPipeline(AbstractLLMPipeline):
             'attention_mask': ids
         }
 
-        model_summary = torchinfo.summary(self._model, input_data=data, verbose=0)
+        model_summary = summary(self._model, input_data=data, verbose=0)
 
         summary_dict = {
             "input_shape": {'attention_mask': list(model_summary.input_size['attention_mask']),
@@ -292,5 +292,4 @@ class TaskEvaluator(AbstractTaskEvaluator):
 #                                        )
             evaluations.update(dict(evaluation))
 
-        return evaluations
-
+        return evaluation
