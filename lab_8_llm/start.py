@@ -20,6 +20,9 @@ def main() -> None:
     importer = RawDataImporter(settings.parameters.dataset)
     importer.obtain()
 
+    if not isinstance(importer.raw_data, pd.DataFrame) or importer.raw_data is None:
+            raise TypeError
+
     preprocessor = RawDataPreprocessor(importer.raw_data)
     preprocessor.analyze()
     preprocessor.transform()
