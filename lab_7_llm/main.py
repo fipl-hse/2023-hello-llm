@@ -27,7 +27,7 @@ except ImportError:
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -75,10 +75,9 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._data = (self._raw_data
-                      .rename(columns={"article": "source", "abstract": "target"})
-                      .dropna().drop_duplicates()
-                      .reset_index(drop=True))
+        self._data = self._raw_data.rename(
+            columns={'Article': ColumnNames.SOURCE.value,
+                     'Summary': ColumnNames.TARGET.value}).reset_index(drop=True)
 
 class TaskDataset(Dataset):
     """
