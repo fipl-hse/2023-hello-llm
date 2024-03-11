@@ -51,7 +51,7 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
-        data_dropped_empty = self._raw_data.replace('', pandas.NA).dropna().reset_index()
+        data_dropped_empty = self._raw_data.replace('', pandas.NA).dropna()
 
         dataset_analysis = {'dataset_number_of_samples': len(self._raw_data),
                 'dataset_columns': len(self._raw_data.columns),
