@@ -61,17 +61,14 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
-        empty_data_drop = self._raw_data.dropna()
-
-        analyzed = {'dataset_number_of_samples':  self._raw_data.shape[0],
-                    'dataset_columns':  self._raw_data.shape[1],
-                    'dataset_duplicates': len(self._raw_data[self._raw_data.duplicated()]),
-                    'dataset_empty_rows': self._raw_data.shape[0] - len(empty_data_drop),
-                    'dataset_sample_min_len': min(empty_data_drop['article'].str.len()),
-                    'dataset_sample_max_len': max(empty_data_drop['article'].str.len())
-                    }
-
-        return analyzed
+        return {
+            'dataset_number_of_samples': len(self._raw_data),
+            'dataset_columns': self._raw_data.shape[1],
+            'dataset_duplicates': self._raw_data.duplicated().sum(),
+            'dataset_empty_rows': self._raw_data.isna().sum().sum(),
+            'dataset_sample_min_len': len(min(self._raw_data['article'], key=len)),
+            'dataset_sample_max_len': len(max(self._raw_data['article'], key=len))
+        }
 
     @report_time
     def transform(self) -> None:
