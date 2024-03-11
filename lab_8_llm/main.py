@@ -38,8 +38,8 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
         dataframe = load_dataset(self._hf_name, split='train').to_pandas()
-      #  if not isinstance(dataframe, pd.DataFrame):
-     #       raise TypeError()
+        if not isinstance(dataframe, pd.DataFrame):
+            raise TypeError()
         self._raw_data = dataframe
 
 
@@ -188,18 +188,18 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        #tokens = self._tokenizer(
-        #    sample,
-        #    max_length=self._max_length,
-        #    padding=True,
-        #    truncation=True,
-        #    return_tensors='pt'
-        #)
-
-        #return str(torch.argmax(self._model(**tokens).logits).item())
         if self._model is None:
             return None
-        return self._infer_batch([sample])[0]
+
+        tokens = self._tokenizer(
+            sample,
+            max_length=self._max_length,
+            padding=True,
+            truncation=True,
+            return_tensors='pt'
+        )
+
+        return str(torch.argmax(self._model(**tokens).logits).item())
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -221,20 +221,6 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-        if self._model is None:
-            return []
-
-        inputs = self._tokenizer(
-            sample_batch[0],
-            return_tensors="pt",
-            padding=True,
-            truncation=True,
-            max_length=self._max_length
-        ).to(self._device)
-
-        outputs = self._model(**inputs)
-
-        return list(str(i) for i in np.argmax(outputs.logits.cpu().detach().numpy(), axis=-1))
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
