@@ -21,7 +21,7 @@ def main() -> None:
     importer.obtain()
 
     if not isinstance(importer.raw_data, pd.DataFrame) or importer.raw_data is None:
-            raise TypeError
+        raise TypeError
 
     preprocessor = RawDataPreprocessor(importer.raw_data)
     preprocessor.analyze()
