@@ -20,9 +20,6 @@ def main() -> None:
     importer = RawDataImporter(settings.parameters.dataset)
     importer.obtain()
 
-    if importer.raw_data is None:
-        raise TypeError('Dataset is not defined')
-
     preprocessor = RawDataPreprocessor(importer.raw_data)
     preprocessor.analyze()
     preprocessor.transform()

@@ -42,7 +42,7 @@ class RawDataImporter(AbstractRawDataImporter):
             name='generation',
             split='validation'
         ).to_pandas()
-        if not isinstance(self._raw_data, pd.DataFrame):
+        if not isinstance(self._raw_data, pd.DataFrame) or self._raw_data is None:
             raise TypeError
 
 
