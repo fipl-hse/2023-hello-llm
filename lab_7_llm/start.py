@@ -5,7 +5,7 @@ Neural machine translation starter.
 from core_utils.llm.time_decorator import report_time
 from config.constants import PROJECT_ROOT
 
-from main import RawDataImporter, RawDataPreprocessor
+from lab_7_llm.main import RawDataImporter, RawDataPreprocessor
 
 import json
 
