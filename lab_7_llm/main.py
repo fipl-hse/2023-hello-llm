@@ -6,6 +6,7 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
+import pandas as pd
 try:
     import torch
     from torch.utils.data.dataset import Dataset
@@ -19,6 +20,11 @@ try:
 except ImportError:
     print('Library "pandas" not installed. Failed to import.')
     DataFrame = dict  # type: ignore
+
+try:
+    from datasets import load_dataset
+except ImportError:
+    print('Library "datasets" not installed. Failed to import.')
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -42,6 +48,15 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
 
+        self._raw_data = load_dataset(
+            self._hf_name,
+            name='simplified',
+            split='validation'
+        ).to_pandas()
+
+        if not isinstance(self._raw_data, pd.DataFrame):
+            raise TypeError
+
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
@@ -55,6 +70,16 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+
+        analysis = {
+            'dataset_number_of_samples': len(self._raw_data),
+            'dataset_columns': len(self._raw_data.columns),
+            'dataset_duplicates': len(self._raw_data[self._raw_data.duplicated()]),
+            'dataset_empty_rows': len(self._raw_data[self._raw_data.isna().any(axis=1)]),
+            'dataset_sample_min_len': len(min(self._raw_data["info"], key=len)),
+            'dataset_sample_max_len': len(max(self._raw_data["info"], key=len))
+        }
+        return analysis
 
     @report_time
     def transform(self) -> None:
@@ -148,7 +173,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-    m
+
 
     @report_time
     def infer_dataset(self) -> DataFrame:
