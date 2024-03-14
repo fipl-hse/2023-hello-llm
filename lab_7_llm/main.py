@@ -6,24 +6,13 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
-from datasets import load_dataset
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-
 import pandas as pd
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-    from torchinfo import summary
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
+import torch
+from datasets import load_dataset
+from pandas import DataFrame
+from torch.utils.data.dataset import Dataset
+from torchinfo import summary
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
