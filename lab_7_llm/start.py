@@ -6,20 +6,21 @@ import json
 from pprint import pprint
 
 from config.constants import PROJECT_ROOT
+from config.lab_settings import LabSettings
 from core_utils.llm.time_decorator import report_time
-from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset
+from lab_7_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset,
+                            TaskEvaluator)
 
 SETTINGS = PROJECT_ROOT / "lab_7_llm" / "settings.json"
-
+PREDICTIONS = PROJECT_ROOT / "lab_7_llm" / "dist" / "predictions.csv"
 
 @report_time
 def main() -> None:
     """
     Run the translation pipeline.
     """
-    with open(SETTINGS, encoding="utf-8") as path:
-        settings = json.load(path)
-    data_loader = RawDataImporter(settings["parameters"]["dataset"])
+    parameters = LabSettings(SETTINGS).parameters
+    data_loader = RawDataImporter(parameters.dataset)
     data_loader.obtain()
 
     preprocessor = RawDataPreprocessor(data_loader.raw_data)
@@ -29,7 +30,7 @@ def main() -> None:
     dataset = TaskDataset(preprocessor.data.head(100))
 
     pipeline = LLMPipeline(
-        settings["parameters"]["model"],
+        parameters.model,
         dataset,
         max_length=120,
         batch_size=64,
@@ -37,8 +38,15 @@ def main() -> None:
     )
 
     pipeline.analyze_model()
-    result = pipeline.infer_sample(next(iter(dataset)))
+    pipeline.infer_sample(next(iter(dataset)))
+
+    PREDICTIONS.parent.mkdir(exist_ok=True)
+    pipeline.infer_dataset().to_csv(PREDICTIONS, index=False)
+
+    evaluator = TaskEvaluator(PREDICTIONS, parameters.metrics)
+    result = evaluator.run()
     print(result)
+
     assert result is not None, "Demo does not work correctly"
 
 

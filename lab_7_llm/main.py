@@ -6,6 +6,8 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
+from evaluate import load
+from pandas import read_csv
 from torch.utils.data import DataLoader
 from torchinfo import torchinfo
 from transformers import AlbertForSequenceClassification, AutoTokenizer
@@ -227,7 +229,7 @@ class LLMPipeline(AbstractLLMPipeline):
 
         self._dataset.data["predictions"] = prediction
         return DataFrame({
-            "target": self._dataset.data[ColumnNames.TARGET.value].tolist(),
+            "target": self._dataset.data[ColumnNames.TARGET].tolist(),
             "predictions": prediction
         })
 
@@ -266,6 +268,8 @@ class TaskEvaluator(AbstractTaskEvaluator):
             data_path (pathlib.Path): Path to predictions
             metrics (Iterable[Metrics]): List of metrics to check
         """
+        super().__init__(metrics)
+        self._data_path = data_path
 
     @report_time
     def run(self) -> dict | None:
@@ -275,3 +279,13 @@ class TaskEvaluator(AbstractTaskEvaluator):
         Returns:
             dict | None: A dictionary containing information about the calculated metric
         """
+        predictions_df = read_csv(self._data_path)
+
+        evaluations = {}
+        for metric in self._metrics:
+            metric_instance = load(metric.value)
+            evaluations[metric.value] = metric_instance.compute(
+                predictions=predictions_df["predictions"].tolist(),
+                references=predictions_df["target"].tolist(),
+            )[metric.value]
+        return evaluations
