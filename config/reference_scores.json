@@ -110,7 +110,7 @@
     },
     "blanchefort/rubert-base-cased-sentiment-rusentiment": {
         "blinoff/healthcare_facilities_reviews": {
-            "f1": 0.71
+            "f1": 0.89
         },
         "blinoff/kinopoisk": {
             "f1": 0.64
@@ -158,7 +158,7 @@
             "rouge": 0.09538
         },
         "trixdade/reviews_russian": {
-            "bleu": 1e-05,
+            "bleu": 0.00001,
             "rouge": 0.0
         }
     },
@@ -295,6 +295,14 @@
         },
         "starmpcc/Asclepius-Synthetic-Clinical-Notes": {
             "squad": 2.78039
+        }
+    },
+    "IlyaGusev/rubertconv_toxic_clf": {
+        "Arsive/toxicity_classification_jigsaw": {
+            "f1": 0.67000
+        },
+        "s-nlp/en_paradetox_toxicity": {
+            "f1": 0.68999
         }
     }
 }

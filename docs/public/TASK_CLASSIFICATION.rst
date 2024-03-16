@@ -24,6 +24,9 @@ Models
 | `XSY/albert-base-v2-imdb-calssification <https://hugging            | EN   |
 | face.co/XSY/albert-base-v2-imdb-calssification>`__                  |      |
 +---------------------------------------------------------------------+------+
+| `IlyaGusev/rubertconv_toxic_clf <https://hugging                    | EN   |
+| face.co/IlyaGusev/rubertconv_toxic_clf>`__                          |      |
++---------------------------------------------------------------------+------+
 | `aiknowyou/it-emotion-analyzer <https://hugging                     | RU   |
 | face.co/aiknowyou/it-emotion-analyzer>`__                           |      |
 +---------------------------------------------------------------------+------+
@@ -59,12 +62,13 @@ Datasets
 
       1. Select ``simplified`` subset.
       2. Drop columns ``id`` and ``text``.
-      3. Rename columns ``labels`` to ``target``.
-      4. Rename column ``ru_text`` to ``source``.
-      5. Group emotions and change numbers to words.
-      6. Delete duplicates in ``target``.
-      7. Clean column ``source``.
-      8. Reset indexes.
+      3. Convert column ``labels`` to tuple.
+      4. Rename columns ``labels`` to ``target``.
+      5. Rename column ``ru_text`` to ``source``.
+      6. Group emotions and change numbers to words.
+      7. Delete duplicates in ``target``.
+      8. Clean column ``source``.
+      9. Reset indexes.
 
 3. `papluca/language-identification <https://huggingface.co/datasets/papluca/language-identification>`__
 
@@ -93,9 +97,10 @@ Datasets
    2. **Rows**: 25000
    3. **Preprocess**:
 
-      1. Rename column ``labels`` to ``target``.
-      2. Rename column ``text`` to ``source``.
-      3. Reset indexes.
+      1. Select ``test`` split.
+      2. Rename column ``labels`` to ``target``.
+      3. Rename column ``text`` to ``source``.
+      4. Reset indexes.
 
 6. `dair-ai/emotion <https://huggingface.co/datasets/dair-ai/emotion>`__
 
@@ -104,9 +109,10 @@ Datasets
    3. **Preprocess**:
 
       1. Select ``split`` subset.
-      2. Rename column ``label`` to ``target``.
-      3. Rename column ``text`` to ``source``.
-      4. Reset indexes.
+      2. Select ``validation`` split.
+      3. Rename column ``label`` to ``target``.
+      4. Rename column ``text`` to ``source``.
+      5. Reset indexes.
 
 7. `blinoff/kinopoisk <https://huggingface.co/datasets/blinoff/kinopoisk>`__
 
@@ -114,12 +120,13 @@ Datasets
    2. **Rows**: 36591
    3. **Preprocess**:
 
-      1. Leave only ``content`` and ``grade3`` columns.
-      2. Rename column ``grade3`` to ``target``.
-      3. Rename column ``content`` to ``source``.
-      4. Delete empty rows in dataset.
-      5. Map ``target`` with class labels.
-      6. Reset indexes.
+      1. Select ``validation`` split.
+      2. Leave only ``content`` and ``grade3`` columns.
+      3. Rename column ``grade3`` to ``target``.
+      4. Rename column ``content`` to ``source``.
+      5. Delete empty rows in dataset.
+      6. Map ``target`` with class labels.
+      7. Reset indexes.
 
 8. `blinoff/healthcare_facilities_reviews <https://huggingface.co/datasets/blinoff/healthcare_facilities_reviews>`__
 
@@ -127,10 +134,14 @@ Datasets
    2. **Rows**: 70597
    3. **Preprocess**:
 
-      1. Leave only ``content`` and ``sentiment`` columns.
-      2. Rename column ``sentiment`` to ``target``.
-      3. Rename column ``content`` to ``source``.
-      4. Map ``target`` with class labels.
+      1. Select ``validation`` split.
+      2. Leave only ``content`` and ``sentiment`` columns.
+      3. Rename column ``sentiment`` to ``target``.
+      4. Rename column ``content`` to ``source``.
+      5. Map ``target`` with class labels.
+
+.. note:: In combination with a multiclass model ``blanchefort/rubert-base-cased-sentiment-rusentiment``
+          it is necessary to bring the ``neutral`` class to the ``negative`` class at the prediction stage.
 
 9. `tatiana-merz/cyrillic_turkic_langs <https://huggingface.co/datasets/tatiana-merz/cyrillic_turkic_langs>`__
 
@@ -138,9 +149,10 @@ Datasets
    2. **Rows**: 9000
    3. **Preprocess**:
 
-      1. Rename column ``label`` to ``target``.
-      2. Rename column ``text`` to ``source``.
-      3. Map ``target`` with class labels.
+      1. Select ``validation`` split.
+      2. Rename column ``label`` to ``target``.
+      3. Rename column ``text`` to ``source``.
+      4. Map ``target`` with class labels.
 
 10. `s-nlp/ru_paradetox_toxicity <https://huggingface.co/datasets/s-nlp/ru_paradetox_toxicity>`__
 
@@ -160,8 +172,9 @@ Datasets
    2. **Rows**: 163187
    3. **Preprocess**:
 
-      1. Rename column ``toxic`` to ``target``.
-      2. Rename column ``text`` to ``source``.
+      1. Select ``train`` split.
+      2. Rename column ``toxic`` to ``target``.
+      3. Rename column ``text`` to ``source``.
 
 12. `s-nlp/ru_non_detoxified <https://huggingface.co/datasets/s-nlp/ru_non_detoxified>`__
 
@@ -176,6 +189,30 @@ Datasets
       4. Remove irrelevant rows in dataset.
       5. Delete duplicates in dataset.
       6. Reset indexes.
+
+13. `Arsive/toxicity_classification_jigsaw <https://huggingface.co/datasets/Arsive/toxicity_classification_jigsaw>`__
+
+   1. **Lang**: EN
+   2. **Rows**: 6490
+   3. **Preprocess**:
+
+      1. Select ``validation`` split.
+      2. Drop column ``id``, ``severe_toxic``, ``obscene``,
+         ``threat``, ``insult``, ``identity_hate``.
+      3. Rename column ``toxic`` to ``target``.
+      4. Rename column ``comment_text`` to ``source``.
+      5. Reset indexes.
+
+14. `s-nlp/en_paradetox_toxicity <https://huggingface.co/datasets/s-nlp/en_paradetox_toxicity>`__
+
+   1. **Lang**: EN
+   2. **Rows**: 26507
+   3. **Preprocess**:
+
+      1. Select ``train`` split.
+      2. Rename column ``toxic`` to ``target``.
+      3. Rename column ``comment`` to ``source``.
+      4. Reset indexes.
 
 Metrics
 -------
