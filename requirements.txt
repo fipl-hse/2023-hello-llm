@@ -1,6 +1,5 @@
 datasets==2.17.0
---extra-index-url https://download.pytorch.org/whl/cpu
+evaluate==0.4.1
 torch==2.2.0
 torchinfo==1.8.0
 transformers==4.37.2
-evaluate==0.4.1
