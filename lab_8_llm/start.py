@@ -21,7 +21,21 @@ def main() -> None:
 
     preprocessor = RawDataPreprocessor(loader.raw_data)
 
-    result = preprocessor.analyze()
+    preprocessor.analyze()
+    preprocessor.transform()
+
+    dataset = TaskDataset(preprocessor.data.head(100))
+
+    pipeline = LLMPipeline(model_name=config['parameters']['model'],
+                           dataset=dataset,
+                           max_length=120,
+                           batch_size=1,
+                           device='cpu')
+
+    model_analysis = pipeline.analyze_model()
+    print(model_analysis)
+
+    result = pipeline.infer_sample(dataset[0])
     print(result)
     assert result is not None, "Demo does not work correctly"
 
