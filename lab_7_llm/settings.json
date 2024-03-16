@@ -1,7 +1,7 @@
 {
   "parameters": {
-    "model": "IlyaGusev/rubertconv_toxic_clf",
-    "dataset": "s-nlp/en_paradetox_toxicity",
+    "model": "XSY/albert-base-v2-imdb-calssification",
+    "dataset": "imdb",
     "metrics": ["accuracy"]
   },
   "target_score": 4

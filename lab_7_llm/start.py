@@ -29,7 +29,7 @@ def main() -> None:
     data_loader.obtain()
 
     preprocessor = RawDataPreprocessor(data_loader.raw_data)
-    pprint(preprocessor.analyze())
+    print(preprocessor.analyze())
     preprocessor.transform()
 
     dataset = TaskDataset(preprocessor.data.head(100))

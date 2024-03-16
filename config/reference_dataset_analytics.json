@@ -137,11 +137,11 @@
     },
     "imdb": {
         "dataset_columns": 2,
-        "dataset_duplicates": 199,
+        "dataset_duplicates": 96,
         "dataset_empty_rows": 0,
         "dataset_number_of_samples": 25000,
-        "dataset_sample_max_len": 12988,
-        "dataset_sample_min_len": 32
+        "dataset_sample_max_len": 13704,
+        "dataset_sample_min_len": 52
     },
     "jtatman/databricks-dolly-8k-qa-open-close": {
         "dataset_columns": 5,

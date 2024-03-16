@@ -8,7 +8,7 @@ from typing import Iterable, Iterator, Sequence
 
 import numpy as np
 from torchinfo import torchinfo
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, BertForSequenceClassification
+from transformers import AlbertForSequenceClassification, AutoTokenizer
 
 try:
     import torch
@@ -67,12 +67,12 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             dict: Dataset key properties
         """
         return {
-            "dataset_number_of_samples": len(self._raw_data),
-            "dataset_columns": len(self._raw_data.columns),
-            "dataset_duplicates": len(self._raw_data[self._raw_data.duplicated()]),
-            "dataset_empty_rows": len(self._raw_data[self._raw_data.isna().any(axis=1)]),
-            "dataset_sample_min_len": len(min(self._raw_data["comment"], key=len)),
-            "dataset_sample_max_len": len(max(self._raw_data["comment"], key=len))
+            "dataset_number_of_samples": self._raw_data.shape[0],
+            "dataset_columns": self._raw_data.shape[1],
+            "dataset_duplicates": self._raw_data.duplicated().sum(),
+            "dataset_empty_rows": self._raw_data.isna().sum().sum(),
+            "dataset_sample_min_len": len(min(self._raw_data["text"], key=len)),
+            "dataset_sample_max_len": len(max(self._raw_data["text"], key=len))
         }
 
     @report_time
@@ -82,8 +82,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         self._data = self._raw_data.rename(
             columns={
-                "comment": ColumnNames.SOURCE,
-                "toxic": ColumnNames.TARGET,
+                "text": ColumnNames.SOURCE,
+                "label": ColumnNames.TARGET,
             }
         ).reset_index(drop=True)
 
@@ -159,7 +159,7 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self._tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self._model = BertForSequenceClassification.from_pretrained(self._model_name)
+        self._model = AlbertForSequenceClassification.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
