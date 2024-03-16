@@ -75,11 +75,10 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._data = (self._raw_data
-                      .rename(columns={"article": "source", "abstract": "target"})
-                      .dropna().drop_duplicates()
+        self._data = (self._raw_data.rename(columns={'article': ColumnNames.SOURCE.value,
+                                                     'abstract': ColumnNames.TARGET.value})
+                      .drop_duplicates()
                       .reset_index(drop=True))
-        self._data["source"] = self._data["source"].str.replace(r"\(CNN\)", "", regex=True)
 
 class TaskDataset(Dataset):
     """
