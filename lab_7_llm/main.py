@@ -8,7 +8,7 @@ from typing import Iterable, Iterator, Sequence
 
 import numpy as np
 from torchinfo import torchinfo
-from transformers import AutoModelForSeq2SeqLM
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, BertForSequenceClassification
 
 try:
     import torch
@@ -47,7 +47,7 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = load_dataset(self._hf_name, split="test").to_pandas()
+        self._raw_data = load_dataset(self._hf_name, split="train").to_pandas()
 
     @property
     def raw_data(self) -> DataFrame:
@@ -71,8 +71,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             "dataset_columns": len(self._raw_data.columns),
             "dataset_duplicates": len(self._raw_data[self._raw_data.duplicated()]),
             "dataset_empty_rows": len(self._raw_data[self._raw_data.isna().any(axis=1)]),
-            "dataset_sample_min_len": len(min(self._raw_data["info"], key=len)),
-            "dataset_sample_max_len": len(max(self._raw_data["info"], key=len))
+            "dataset_sample_min_len": len(min(self._raw_data["comment"], key=len)),
+            "dataset_sample_max_len": len(max(self._raw_data["comment"], key=len))
         }
 
     @report_time
@@ -82,8 +82,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         self._data = self._raw_data.rename(
             columns={
-                "info": ColumnNames.SOURCE,
-                "summary": ColumnNames.TARGET,
+                "comment": ColumnNames.SOURCE,
+                "toxic": ColumnNames.TARGET,
             }
         ).reset_index(drop=True)
 
@@ -158,7 +158,8 @@ class LLMPipeline(AbstractLLMPipeline):
             device (str): The device for inference
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
-        self._model = AutoModelForSeq2SeqLM.from_pretrained(self._model_name)
+        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self._model = BertForSequenceClassification.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -168,34 +169,32 @@ class LLMPipeline(AbstractLLMPipeline):
             dict: Properties of a model
         """
 
-        tensor_data = torch.ones(
-            1,
-            self._model.config.decoder.max_position_embeddings,
-            dtype=torch.long,
-        )
-        input_data = {
-            "input_ids": tensor_data,
-            "token_type_ids": tensor_data,
-            "attention_mask": tensor_data,
+        embeddings_length = self._model.config.max_position_embeddings
+        ids = torch.ones(1, embeddings_length, dtype=torch.long)
+
+        data = {
+            'input_ids': ids,
+            'attention_mask': ids
         }
 
-        model_statistics = torchinfo.summary(
-            model=self._model,
-            input_data=input_data,
-            decoder_input_ids=tensor_data,
-            verbose=False,
+        model_summary = torchinfo.summary(
+            self._model,
+            input_data=data,
+            verbose=0,
         )
 
-        model_info = {
-            "input_shape": list(input_data["input_ids"].shape),
-            "embedding_size": self._model.config.decoder.max_position_embeddings,
-            "output_shape": model_statistics.summary_list[-1].output_size,
-            "num_trainable_params": model_statistics.trainable_params,
-            "vocab_size": self._model.config.decoder.vocab_size,
-            "size": model_statistics.total_param_bytes,
-            "max_context_length": self._model.config.max_length,
+        return {
+            "input_shape": {
+                "attention_mask": list(model_summary.input_size["attention_mask"]),
+                "input_ids": list(model_summary.input_size["input_ids"])
+            },
+            "embedding_size": embeddings_length,
+            "output_shape": model_summary.summary_list[-1].output_size,
+            "num_trainable_params": model_summary.trainable_params,
+            "vocab_size": self._model.config.vocab_size,
+            "size": model_summary.total_param_bytes,
+            "max_context_length": self._model.config.max_length
         }
-        return model_info
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
         """
