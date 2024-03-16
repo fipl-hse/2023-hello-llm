@@ -83,12 +83,22 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._data = self._raw_data.rename(
-            columns={
-                "text": ColumnNames.SOURCE,
-                "label": ColumnNames.TARGET,
-            }
-        ).reset_index(drop=True)
+        self._data = (
+            self._raw_data.rename(
+                columns={
+                    "text": ColumnNames.SOURCE.value,
+                    "label": ColumnNames.TARGET.value,
+                }
+            )
+            # .sample() shuffles the dataset.
+            # This is necessary to fix the f1-measure:
+            # The imdb dataset is sorted by label,
+            # Which means for a smaller sample f1 can only
+            # Be equal to 0 or 1.
+            .sample(frac=1, random_state=42)
+            .reset_index(drop=True)
+        )
+        self._data.replace({True: 1, False: 0}, inplace=True)
 
 
 class TaskDataset(Dataset):
@@ -124,7 +134,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data.iloc[index][ColumnNames.SOURCE],
+        return self._data.iloc[index][ColumnNames.SOURCE.value],
 
     @property
     def data(self) -> DataFrame:
@@ -163,7 +173,7 @@ class LLMPipeline(AbstractLLMPipeline):
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self._tokenizer = AutoTokenizer.from_pretrained(model_name)
         self._model = AlbertForSequenceClassification.from_pretrained(
-            self._model_name)
+            self._model_name, num_labels=2)
 
     def analyze_model(self) -> dict:
         """
@@ -211,7 +221,9 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        return self._infer_batch((sample,))[0]
+        if self._model is None:
+            return None
+        return self._infer_batch([sample])[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -227,9 +239,12 @@ class LLMPipeline(AbstractLLMPipeline):
         for batch in loader:
             prediction.extend(self._infer_batch(batch))
 
+        print("Predictions:", prediction)
+        print("Targets:    ", self._dataset.data[ColumnNames.TARGET.value].tolist())
+
         self._dataset.data["predictions"] = prediction
         return DataFrame({
-            "target": self._dataset.data[ColumnNames.TARGET].tolist(),
+            "target": self._dataset.data[ColumnNames.TARGET.value].tolist(),
             "predictions": prediction
         })
 
@@ -244,15 +259,20 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
+        if self._model is None:
+            return []
+
         inputs = self._tokenizer(
             sample_batch[0],
-            max_length=self._max_length,
+            return_tensors="pt",
             padding=True,
             truncation=True,
-            return_tensors="pt",
-        )
-        outputs = self._model(**inputs).logits
-        return list(map(lambda x: str(x.item()), torch.argmax(outputs, dim=1)))
+            max_length=self._max_length
+        ).to(self._device)
+
+        outputs = self._model(**inputs)
+
+        return list(str(prediction.item()) for prediction in torch.argmax(outputs.logits, dim=1))
 
 
 class TaskEvaluator(AbstractTaskEvaluator):
