@@ -5,8 +5,8 @@ Neural machine translation module.
 from pathlib import Path
 from typing import Iterable, Sequence
 
-import numpy as np
-import pandas as pd
+# import numpy as np
+# import pandas as pd
 import torch
 from datasets import load_dataset
 from evaluate import load
@@ -37,7 +37,10 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = load_dataset(self._hf_name, split="train").to_pandas()
+        df = load_dataset(self._hf_name, split="train").to_pandas()
+        if not isinstance(df, pd.DataFrame):
+            raise TypeError()
+        self._raw_data = df
 
     @property
     def raw_data(self) -> DataFrame:
