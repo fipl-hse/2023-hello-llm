@@ -16,7 +16,7 @@ from pandas import DataFrame, read_csv
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchinfo import torchinfo
-from transformers import AlbertForSequenceClassification, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -70,8 +70,8 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             "dataset_columns": self._raw_data.shape[1],
             "dataset_duplicates": self._raw_data.duplicated().sum(),
             "dataset_empty_rows": self._raw_data.isna().sum().sum(),
-            "dataset_sample_min_len": len(min(self._raw_data["text"], key=len)),
-            "dataset_sample_max_len": len(max(self._raw_data["text"], key=len))
+            "dataset_sample_min_len": len(min(self._raw_data["instruction"], key=len)),
+            "dataset_sample_max_len": len(max(self._raw_data["instruction"], key=len))
         }
 
     @report_time
@@ -80,22 +80,16 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Apply preprocessing transformations to the raw dataset.
         """
         self._data = (
-            self._raw_data.rename(
+            self._raw_data[self._raw_data["category"] == "open_qa"]
+            .rename(
                 columns={
-                    "text": ColumnNames.SOURCE.value,
-                    "label": ColumnNames.TARGET.value,
+                    "instruction": ColumnNames.QUESTION.value,
+                    "response": ColumnNames.TARGET.value,
                 }
             )
-            # .sample() shuffles the dataset.
-            # This is necessary to fix the f1-measure:
-            # The imdb dataset is sorted by label,
-            # Which means for a smaller sample f1 can only
-            # Be equal to 0 or 1.
-            .sample(frac=1, random_state=42)
+            .filter([ColumnNames.QUESTION.value, ColumnNames.TARGET.value])
             .reset_index(drop=True)
         )
-        self._data.replace({True: 1, False: 0}, inplace=True)
-
 
 class TaskDataset(Dataset):
     """
@@ -130,7 +124,8 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return (self._data.iloc[index][ColumnNames.SOURCE.value],)
+        return (self._data.iloc[index][ColumnNames.QUESTION.value],
+                self._data.iloc[index][ColumnNames.TARGET.value])
 
     @property
     def data(self) -> DataFrame:
@@ -169,8 +164,8 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self._tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self._model = AlbertForSequenceClassification.from_pretrained(
-            self._model_name, num_labels=2)
+        self._tokenizer.pad_token = self._tokenizer.eos_token
+        self._model = AutoModelForCausalLM.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -236,10 +231,6 @@ class LLMPipeline(AbstractLLMPipeline):
         for batch in loader:
             prediction.extend(self._infer_batch(batch))
 
-        print("Predictions:", prediction)
-        print("Targets:    ",
-              self._dataset.data[ColumnNames.TARGET.value].tolist())
-
         self._dataset.data["predictions"] = prediction
         return DataFrame({
             "target": self._dataset.data[ColumnNames.TARGET.value].tolist(),
@@ -260,18 +251,19 @@ class LLMPipeline(AbstractLLMPipeline):
         if self._model is None:
             return []
 
-        inputs = self._tokenizer(
+        tokens = self._tokenizer(
             sample_batch[0],
             return_tensors="pt",
             padding=True,
             truncation=True,
-            max_length=self._max_length
-        ).to(self._device)
+        )
 
-        outputs = self._model(**inputs)
+        output = self._model.generate(**tokens, max_length=self._max_length)
+        predictions = self._tokenizer.batch_decode(output, skip_special_tokens=True)
 
-        return list(str(prediction.item()) for prediction in torch.argmax(outputs.logits, dim=1))
-
+        return [
+            prediction[len(sample_batch[0][i]) + 1:] for i, prediction in enumerate(predictions)
+                ]
 
 class TaskEvaluator(AbstractTaskEvaluator):
     """
@@ -301,9 +293,19 @@ class TaskEvaluator(AbstractTaskEvaluator):
 
         evaluations = {}
         for metric in self._metrics:
-            metric_instance = load(metric.value)
-            evaluations[metric.value] = metric_instance.compute(
-                predictions=predictions_df["predictions"].tolist(),
-                references=predictions_df["target"].tolist(),
-            )[metric.value]
+
+            if metric.value == "bleu":
+                bleu_score = load(metric.value).compute(
+                    references=predictions_df["target"],
+                    predictions=predictions_df["predictions"],
+                )
+                evaluations.update({"bleu": bleu_score.get("bleu")})
+
+            elif metric.value == "rouge":
+                rouge_score = load(metric.value).compute(
+                    references=predictions_df["target"],
+                    predictions=predictions_df["predictions"],
+                )
+                evaluations.update({"rouge": rouge_score.get("rougeL")})
+
         return evaluations
