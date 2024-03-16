@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Iterable, Iterator, Sequence
 
 import numpy as np
+from torch.utils.data import DataLoader
 from torchinfo import torchinfo
 from transformers import AlbertForSequenceClassification, AutoTokenizer
 
@@ -206,6 +207,7 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        return self._infer_batch((sample,))[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
@@ -215,6 +217,17 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             pd.DataFrame: Data with predictions
         """
+        loader = DataLoader(self._dataset, batch_size=self._batch_size)
+        prediction = []
+
+        for batch in loader:
+            prediction.extend(self._infer_batch(batch))
+
+        self._dataset.data["predictions"] = prediction
+        return DataFrame({
+            "target": self._dataset.data[ColumnNames.TARGET.value].tolist(),
+            "predictions": prediction
+        })
 
     @torch.no_grad()
     def _infer_batch(self, sample_batch: Sequence[tuple[str, ...]]) -> list[str]:
@@ -227,7 +240,15 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             list[str]: Model predictions as strings
         """
-
+        inputs = self._tokenizer(
+            sample_batch[0],
+            max_length=self._max_length,
+            padding=True,
+            truncation=True,
+            return_tensors="pt",
+        )
+        outputs = self._model(**inputs).logits
+        return list(map(lambda x: str(x.item()), torch.argmax(outputs, dim=1)))
 
 class TaskEvaluator(AbstractTaskEvaluator):
     """

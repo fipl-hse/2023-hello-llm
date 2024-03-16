@@ -42,7 +42,8 @@ def main() -> None:
         device="cpu",
     )
 
-    result = pipeline.analyze_model()
+    pipeline.analyze_model()
+    result = pipeline.infer_sample(next(iter(dataset)))
     print(result)
     assert result is not None, "Demo does not work correctly"
 
