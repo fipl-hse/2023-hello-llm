@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 from evaluate import load
-from pandas import read_csv
 from torch.utils.data import DataLoader
 from torchinfo import torchinfo
 from transformers import AlbertForSequenceClassification, AutoTokenizer
@@ -22,7 +21,7 @@ except ImportError:
         lambda: lambda fn: fn)  # type: ignore
 
 try:
-    from pandas import DataFrame
+    from pandas import DataFrame, read_csv
 except ImportError:
     print('Library "pandas" not installed. Failed to import.')
     DataFrame = dict  # type: ignore
@@ -134,7 +133,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return self._data.iloc[index][ColumnNames.SOURCE.value],
+        return (self._data.iloc[index][ColumnNames.SOURCE.value],)
 
     @property
     def data(self) -> DataFrame:

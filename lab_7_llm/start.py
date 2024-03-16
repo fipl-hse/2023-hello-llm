@@ -2,8 +2,6 @@
 Neural machine translation starter.
 """
 # pylint: disable= too-many-locals
-import json
-from pprint import pprint
 
 from config.constants import PROJECT_ROOT
 from config.lab_settings import LabSettings
