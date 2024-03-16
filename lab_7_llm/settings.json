@@ -1,8 +1,8 @@
 {
   "parameters": {
-    "model": "cointegrated/rubert-tiny2-cedr-emotion-detection",
-    "dataset": "seara/ru_go_emotions",
+    "model": "",
+    "dataset": "",
     "metrics": []
   },
-  "target_score": 6
+  "target_score": 0
 }
