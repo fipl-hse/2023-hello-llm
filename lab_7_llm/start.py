@@ -42,9 +42,8 @@ def main() -> None:
         device="cpu",
     )
 
-    print(pipeline.analyze_model())
-
-    result = None
+    result = pipeline.analyze_model()
+    print(result)
     assert result is not None, "Demo does not work correctly"
 
 if __name__ == "__main__":
