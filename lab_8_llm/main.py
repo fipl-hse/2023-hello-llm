@@ -7,6 +7,7 @@ Working with Large Language Models.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
+from datasets import load_dataset
 
 try:
     import torch
@@ -43,6 +44,8 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
+        self._raw_data = load_dataset(
+            self._hf_name, split='validation').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -57,6 +60,15 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        dataset_properties = {'dataset_number_of_samples': len(self._raw_data),
+                              'dataset_columns': self._raw_data.shape[1],
+                              'dataset_duplicates': self._raw_data.duplicated(subset=['question']).sum(),
+                              'dataset_empty_rows': self._raw_data.isna().sum().sum(),
+                              'dataset_sample_min_len': min(len(min(self._raw_data['context'], key=len)),
+                                                            len(min(self._raw_data['question'], key=len))),
+                              'dataset_sample_max_len': max(len(max(self._raw_data['context'], key=len)),
+                                                            len(max(self._raw_data['question'], key=len)))}
+        return dataset_properties
 
     @report_time
     def transform(self) -> None:
