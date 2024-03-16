@@ -5,15 +5,9 @@ Neural machine translation starter.
 import json
 from pprint import pprint
 
-from core_utils.llm.time_decorator import report_time
-
 from config.constants import PROJECT_ROOT
-from lab_7_llm.main import (
-    RawDataImporter,
-    RawDataPreprocessor,
-    TaskDataset,
-    LLMPipeline,
-)
+from core_utils.llm.time_decorator import report_time
+from lab_7_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset
 
 SETTINGS = PROJECT_ROOT / "lab_7_llm" / "settings.json"
 
