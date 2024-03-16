@@ -1,12 +1,12 @@
 """
-Neural machine translation module.
+Laboratory work.
+
+Working with Large Language Models.
 """
-# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+# pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
-
-from datasets import load_dataset
 
 try:
     import torch
@@ -43,10 +43,6 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = load_dataset(
-            self._hf_name,
-            name='section',
-            split='test').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -61,14 +57,6 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
-        dataset_properties = {'dataset_number_of_samples': len(self._raw_data),
-                              'dataset_columns': self._raw_data.shape[1],
-                              'dataset_duplicates': self._raw_data.duplicated().sum(),
-                              'dataset_empty_rows': self._raw_data.isna().sum().sum(),
-                              'dataset_sample_min_len': len(min(self._raw_data['article'], key=len)),
-                              'dataset_sample_max_len': len(max(self._raw_data['article'], key=len))}
-
-        return dataset_properties
 
     @report_time
     def transform(self) -> None:
