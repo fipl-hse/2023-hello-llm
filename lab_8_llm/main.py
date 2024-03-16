@@ -4,23 +4,16 @@ Laboratory work.
 Working with Large Language Models.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called, duplicate-code
-from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
-try:
-    import torch
-    from torch.utils.data.dataset import Dataset
-except ImportError:
-    print('Library "torch" not installed. Failed to import.')
-    Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
-
-try:
-    from pandas import DataFrame
-except ImportError:
-    print('Library "pandas" not installed. Failed to import.')
-    DataFrame = dict  # type: ignore
+import pandas as pd
+import torch
+from datasets import load_dataset
+from pandas import DataFrame
+from torch.utils.data.dataset import Dataset
+from torchinfo import summary
+from transformers import AutoModelForQuestionAnswering, AutoTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
@@ -44,6 +37,14 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
 
+        self._raw_data = load_dataset(
+            self._hf_name,
+            split='test'
+        ).to_pandas()
+
+        if not isinstance(self._raw_data, pd.DataFrame):
+            raise TypeError
+
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
@@ -57,6 +58,17 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+
+        pro_dict = {
+            'dataset_number_of_samples': len(self._raw_data),
+            'dataset_columns': len(self._raw_data.columns),
+            'dataset_duplicates': self._raw_data.duplicated().sum(),
+            'dataset_empty_rows': self._raw_data.isna().sum().sum(),
+            'dataset_sample_min_len': len(min(self._raw_data['instruction'], key=len)),
+            'dataset_sample_max_len': len(max(self._raw_data['instruction'], key=len)),
+        }
+
+        return pro_dict
 
     @report_time
     def transform(self) -> None:
