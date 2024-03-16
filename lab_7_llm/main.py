@@ -2,6 +2,7 @@
 Neural machine translation module.
 """
 # pylint: disable=too-few-public-methods, undefined-variable, too-many-arguments, super-init-not-called
+import numpy as np
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
