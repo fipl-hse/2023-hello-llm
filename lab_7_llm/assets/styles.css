@@ -1,0 +1,62 @@
+:root {
+  --bg-color: #242424;
+  --shade-color: #393939;
+  --txt-color: #ffffff;
+  --highlight-color: #454545;
+  --press-color: #636363;
+}
+
+body {
+	font-family: "Noto Sans", sans-serif;
+	background-color: var(--bg-color);
+    color: var(--txt-color);
+    margin: auto;
+    padding: 0 40px;
+    max-width: 800px;
+    height: 100%;
+    display: table;
+	font-size: 120%;
+
+
+    position: absolute;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+.wrapper {
+    vertical-align: middle;
+    display: table-cell;
+    text-align: center;
+}
+.button {
+    padding: 20px 50px;
+    border-radius: 50px;
+    background-color: var(--shade-color);
+    font-weight: bold;
+    transition: 150ms linear;
+    display: inline-block;
+}
+.button:hover {
+    background-color: var(--highlight-color);
+    cursor: pointer;
+}
+
+.button:active {
+    background-color: var(--press-color);
+    transition: 50ms linear;
+    cursor: pointer;
+}
+
+a, a:visited {
+    color: inherit;
+}
+
+
+.container {
+    text-align: center;
+}
+textarea {
+    width: 100%;
+    height: 100px;
+}
