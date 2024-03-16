@@ -37,10 +37,10 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        df = load_dataset(self._hf_name, split="train").to_pandas()
-        if not isinstance(df, DataFrame):
+        dataframe = load_dataset(self._hf_name, split="train").to_pandas()
+        if not isinstance(dataframe, DataFrame):
             raise TypeError()
-        self._raw_data = df
+        self._raw_data = dataframe
 
     @property
     def raw_data(self) -> DataFrame:
