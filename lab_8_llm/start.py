@@ -6,7 +6,7 @@ import json
 
 from config.constants import PROJECT_ROOT
 from core_utils.llm.time_decorator import report_time
-from lab_8_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset)
+from lab_8_llm.main import LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset
 
 
 @report_time
