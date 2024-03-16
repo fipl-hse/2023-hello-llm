@@ -44,6 +44,8 @@ class RawDataImporter(AbstractRawDataImporter):
 
     @property
     def raw_data(self) -> DataFrame:
+        # Necessary for MyPy. MyPy assumes the type is (DataFrame | None)
+        # Despite an identical check in obtain().
         if not isinstance(self._raw_data, DataFrame):
             raise TypeError()
         return self._raw_data
