@@ -1,8 +1,8 @@
 {
   "parameters": {
-    "model": "XSY/albert-base-v2-imdb-calssification",
-    "dataset": "imdb",
-    "metrics": ["f1"]
+    "model": "EleutherAI/gpt-neo-125m",
+    "dataset": "lionelchg/dolly_open_qa",
+    "metrics": ["bleu", "rouge"]
   },
   "target_score": 10
 }
