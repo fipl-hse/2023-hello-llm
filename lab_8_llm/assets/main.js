@@ -15,8 +15,5 @@ submitButton.addEventListener("click", async function() {
     });
 
     const data = await response.json();
-    responseDiv.textContent = {
-        "0": "Negative sentiment",
-        "1": "Positive sentiment",
-    }[data.infer];
+    responseDiv.textContent = data.infer;
 });
