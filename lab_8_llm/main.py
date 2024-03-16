@@ -13,12 +13,12 @@ from datasets import load_dataset
 from pandas import DataFrame
 from torch.utils.data.dataset import Dataset
 from torchinfo import summary
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForQuestionAnswering, AutoTokenizer
 
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -76,12 +76,6 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Apply preprocessing transformations to the raw dataset.
         """
 
-        self._data = self._raw_data.rename(
-            columns={"instruction": str(ColumnNames.QUESTION.value),
-                     "response": str(ColumnNames.TARGET.value)})
-        self._data = ((self._data.drop(['context', 'category', 'text'], axis=1))
-                      .reset_index(drop=True))
-
 
 class TaskDataset(Dataset):
     """
@@ -96,8 +90,6 @@ class TaskDataset(Dataset):
             data (pandas.DataFrame): Original data
         """
 
-        self._data = data
-
     def __len__(self) -> int:
         """
         Return the number of items in the dataset.
@@ -105,8 +97,6 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
-
-        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -119,8 +109,6 @@ class TaskDataset(Dataset):
             tuple[str, ...]: The item to be received
         """
 
-        return str(self._data[ColumnNames.QUESTION.value].iloc[index])
-
     @property
     def data(self) -> DataFrame:
         """
@@ -129,8 +117,6 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
-
-        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
@@ -157,16 +143,6 @@ class LLMPipeline(AbstractLLMPipeline):
             device (str): The device for inference
         """
 
-        super().__init__(model_name,
-                         dataset,
-                         max_length,
-                         batch_size,
-                         device)
-
-        self._model = AutoModelForCausalLM.from_pretrained(self._model_name)
-        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
-        self._tokenizer.pad_token = self._tokenizer.eos_token
-
     def analyze_model(self) -> dict:
         """
         Analyze model computing properties.
@@ -174,33 +150,6 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-
-        if self._model is None:
-            return {}
-
-        tensor_data = torch.ones(1,
-                                 self._model.config.max_position_embeddings,
-                                 dtype=torch.long)
-
-        input_data = {"input_ids": tensor_data,
-                      "attention_mask": tensor_data}
-
-        model_statistics = summary(self._model,
-                                   input_data=input_data,
-                                   verbose=False)
-
-        size, num_trainable_params, last_layer = (model_statistics.total_param_bytes,
-                                                  model_statistics.trainable_params,
-                                                  model_statistics.summary_list[-1].output_size)
-
-        return {"input_shape": {"input_ids": [tensor_data.shape[0], tensor_data.shape[1]],
-                                "attention_mask": [tensor_data.shape[0], tensor_data.shape[1]]},
-                "embedding_size": self._model.config.max_position_embeddings,
-                "output_shape": last_layer,
-                "num_trainable_params": num_trainable_params,
-                "vocab_size": self._model.config.vocab_size,
-                "size": size,
-                "max_context_length": self._model.config.max_length}
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -213,17 +162,6 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-
-        if self._model is None or self._tokenizer is None:
-            return None
-
-        tokens = self._tokenizer(sample[0],
-                                 max_length=self._max_length,
-                                 padding=True,
-                                 truncation=True,
-                                 return_tensors='pt')
-        output_tokens = self._model.generate(**tokens, max_length=self._max_length)
-        return self._tokenizer.batch_decode(output_tokens, skip_special_tokens=True)[0][len(sample[0]) + 1:]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
