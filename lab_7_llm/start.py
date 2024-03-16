@@ -14,6 +14,7 @@ from lab_7_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, T
 SETTINGS = PROJECT_ROOT / "lab_7_llm" / "settings.json"
 PREDICTIONS = PROJECT_ROOT / "lab_7_llm" / "dist" / "predictions.csv"
 
+
 @report_time
 def main() -> None:
     """

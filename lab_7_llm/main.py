@@ -240,7 +240,8 @@ class LLMPipeline(AbstractLLMPipeline):
             prediction.extend(self._infer_batch(batch))
 
         print("Predictions:", prediction)
-        print("Targets:    ", self._dataset.data[ColumnNames.TARGET.value].tolist())
+        print("Targets:    ",
+              self._dataset.data[ColumnNames.TARGET.value].tolist())
 
         self._dataset.data["predictions"] = prediction
         return DataFrame({
