@@ -17,7 +17,8 @@ try:
 except ImportError:
     print('Library "torch" not installed. Failed to import.')
     Dataset = dict
-    torch = namedtuple('torch', 'no_grad')(lambda: lambda fn: fn)  # type: ignore
+    torch = namedtuple('torch', 'no_grad')(
+        lambda: lambda fn: fn)  # type: ignore
 
 try:
     from pandas import DataFrame
@@ -160,7 +161,8 @@ class LLMPipeline(AbstractLLMPipeline):
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
         self._tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self._model = AlbertForSequenceClassification.from_pretrained(self._model_name)
+        self._model = AlbertForSequenceClassification.from_pretrained(
+            self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -196,6 +198,7 @@ class LLMPipeline(AbstractLLMPipeline):
             "size": model_summary.total_param_bytes,
             "max_context_length": self._model.config.max_length
         }
+
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
         """
@@ -249,6 +252,7 @@ class LLMPipeline(AbstractLLMPipeline):
         )
         outputs = self._model(**inputs).logits
         return list(map(lambda x: str(x.item()), torch.argmax(outputs, dim=1)))
+
 
 class TaskEvaluator(AbstractTaskEvaluator):
     """
