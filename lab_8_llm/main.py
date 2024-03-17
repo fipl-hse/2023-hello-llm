@@ -7,6 +7,7 @@ Working with Large Language Models.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
+
 from datasets import load_dataset
 from torchinfo import summary
 from transformers import AutoModelForQuestionAnswering, AutoTokenizer
@@ -191,14 +192,16 @@ class LLMPipeline(AbstractLLMPipeline):
             str | None: A prediction
         """
         tokens = self._tokenizer(sample[0],
-                                 max_length=self._max_length,
+                                 sample[1],
+                                 max_length=120,
                                  padding=True,
-                                 truncation=True,
-                                 return_tensors='pt')
+                                 return_tensors='pt',
+                                 truncation=True)
+
         output_tokens = self._model(**tokens)
-        answer_start_index = output_tokens.start_logits.argmax()
-        answer_end_index = output_tokens.end_logits.argmax()
-        return self._tokenizer.decode(tokens.input_ids[0, answer_start_index: answer_end_index + 1])
+        start_index = output_tokens.start_logits.argmax()
+        end_index = output_tokens.end_logits.argmax()
+        return self._tokenizer.decode(tokens.input_ids[0, start_index: end_index + 1])
 
     @report_time
     def infer_dataset(self) -> DataFrame:
