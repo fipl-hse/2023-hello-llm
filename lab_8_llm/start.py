@@ -2,11 +2,12 @@
 Neural machine translation starter.
 """
 import json
+from random import randint
 
 from config.constants import PROJECT_ROOT
 # pylint: disable= too-many-locals
 from core_utils.llm.time_decorator import report_time
-from lab_8_llm.main import RawDataImporter, RawDataPreprocessor, TaskDataset
+from lab_8_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset)
 
 
 @report_time
@@ -20,13 +21,17 @@ def main():
     file_importer.obtain()
 
     preprocessor = RawDataPreprocessor(file_importer.raw_data)
+    print(preprocessor.analyze())
 
-    analysis = preprocessor.analyze()
-    transform = preprocessor.transform()
+    preprocessor.transform()
 
-    task = TaskDataset(file_importer.raw_data)
+    dataset = TaskDataset(preprocessor.data.head(100))
 
-    result = analysis, transform, task
+    llm = LLMPipeline(settings["parameters"]["model"], dataset, 120, 64, "cpu")
+    print(llm.analyze_model())
+
+    result = llm.infer_sample(dataset[0])
+    print(result)
 
     assert result is not None, "Demo does not work correctly"
 

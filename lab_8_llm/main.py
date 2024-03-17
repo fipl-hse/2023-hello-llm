@@ -10,6 +10,9 @@ from typing import Iterable, Sequence
 
 import pandas as pd
 from datasets import load_dataset
+from torch.utils.data import DataLoader
+from torchinfo import summary
+from transformers import AutoTokenizer, GPTNeoXForCausalLM
 
 try:
     import torch
@@ -28,7 +31,7 @@ except ImportError:
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
-from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor
+from core_utils.llm.raw_data_preprocessor import AbstractRawDataPreprocessor, ColumnNames
 from core_utils.llm.task_evaluator import AbstractTaskEvaluator
 from core_utils.llm.time_decorator import report_time
 
@@ -104,7 +107,7 @@ class TaskDataset(Dataset):
     A class that converts pd.DataFrame to Dataset and works with it.
     """
 
-    def __init__(self, data: DataFrame) -> None:
+    def __init__(self, data: DataFrame):
         """
         Initialize an instance of TaskDataset.
 
@@ -149,6 +152,7 @@ class LLMPipeline(AbstractLLMPipeline):
     """
     A class that initializes a model, analyzes its properties and infers it.
     """
+    _model: torch.nn.Module
 
     def __init__(
             self,
@@ -157,7 +161,7 @@ class LLMPipeline(AbstractLLMPipeline):
             max_length: int,
             batch_size: int,
             device: str
-    ) -> None:
+    ):
         """
         Initialize an instance of LLMPipeline.
 
@@ -168,6 +172,11 @@ class LLMPipeline(AbstractLLMPipeline):
             batch_size (int): The size of the batch inside DataLoader
             device (str): The device for inference
         """
+        super().__init__(model_name, dataset, max_length, batch_size, device)
+
+        self._tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side='left')
+        self._tokenizer.pad_token = self._tokenizer.eos_token
+        self._model = GPTNeoXForCausalLM.from_pretrained(self._model_name)
 
     def analyze_model(self) -> dict:
         """
@@ -176,6 +185,20 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
+        tensor_data = torch.ones(1, self._model.config.max_position_embeddings, dtype=torch.long)
+        input_data = {'attention_mask': tensor_data,
+                      "input_ids": tensor_data}
+        analytics = summary(self._model, input_data=input_data, verbose=False)
+        return {
+            "embedding_size": self._model.config.max_position_embeddings,
+            "input_shape": {'attention_mask': list(analytics.input_size['attention_mask']),
+                            'input_ids': list(analytics.input_size['input_ids'])},
+            "max_context_length": self._model.config.max_length,
+            "num_trainable_params": analytics.trainable_params,
+            "output_shape": analytics.summary_list[-1].output_size,
+            "size": analytics.total_param_bytes,
+            "vocab_size": self._model.config.vocab_size
+        }
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -188,6 +211,9 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
+        if not self._model:
+            return None
+        return self._infer_batch([sample])[0]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
