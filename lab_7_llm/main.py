@@ -34,7 +34,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
 
     @report_time
-    def obtain(self):
+    def obtain(self) -> None:
         """
         Download a dataset.
 
@@ -62,11 +62,11 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Apply preprocessing transformations to the raw dataset.
         """
 
+
 class TaskDataset(Dataset):
     """
     A class that converts pd.DataFrame to Dataset and works with it.
     """
-
 
     def __init__(self, data: DataFrame) -> None:
         """
@@ -103,6 +103,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
+
 
 class LLMPipeline(AbstractLLMPipeline):
     """
