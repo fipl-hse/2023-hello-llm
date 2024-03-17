@@ -28,6 +28,7 @@ except ImportError:
     DataFrame = dict  # type: ignore
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
+
 from core_utils.llm.llm_pipeline import AbstractLLMPipeline
 from core_utils.llm.metrics import Metrics
 from core_utils.llm.raw_data_importer import AbstractRawDataImporter
@@ -118,7 +119,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
-        return (self._data['question'][index],)
+        return self._data['question'].iloc[index]
 
     @property
     def data(self) -> DataFrame:
@@ -155,9 +156,10 @@ class LLMPipeline(AbstractLLMPipeline):
             device (str): The device for inference
         """
         super().__init__(model_name, dataset, max_length, batch_size, device)
-        self._tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side='left')
-        self._tokenizer.pad_token = self._tokenizer.eos_token
+
         self._model = AutoModelForCausalLM.from_pretrained(self._model_name)
+        self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+        self._tokenizer.pad_token = self._tokenizer.eos_token
 
     def analyze_model(self) -> dict:
         """
@@ -166,20 +168,27 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             dict: Properties of a model
         """
-        config = self._model.config
-        simulation = torch.ones(1, config.max_position_embeddings, dtype=torch.long)
-        model = summary(self._model, input_data=simulation, device=self._device, verbose=0)
+        tensor = torch.ones(1, self._model.config.max_position_embeddings,
+                            dtype=torch.long)
 
-        return {
-            'input_shape': {'attention_mask': list(model.input_size),
-                            'input_ids': list(model.input_size)},
-            'embedding_size': config.max_position_embeddings,
-            'output_shape': model.summary_list[-1].output_size,
-            'num_trainable_params': model.trainable_params,
-            'vocab_size': config.vocab_size,
-            'size': model.total_param_bytes,
-            'max_context_length': config.max_length
-        }
+        input_data = {"input_ids": tensor,
+                      "attention_mask": tensor}
+
+        statistics = summary(self._model, input_data=input_data, verbose=False)
+
+        size, num_trainable_params, last_layer = (statistics.total_param_bytes,
+                                                  statistics.trainable_params,
+                                                  statistics.summary_list[-1].output_size)
+
+        return {"input_shape": {"input_ids": [tensor.shape[0], tensor.shape[1]],
+                                "attention_mask": [tensor.shape[0], tensor.shape[1]]},
+                "embedding_size": self._model.config.max_position_embeddings,
+                "output_shape": last_layer,
+                "num_trainable_params": num_trainable_params,
+                "vocab_size": self._model.config.vocab_size,
+                "size": size,
+                "max_context_length": self._model.config.max_length
+                }
 
     @report_time
     def infer_sample(self, sample: tuple[str, ...]) -> str | None:
@@ -193,12 +202,13 @@ class LLMPipeline(AbstractLLMPipeline):
             str | None: A prediction
         """
         tokens = self._tokenizer(sample[0],
+                                 sample[1],
                                  max_length=self._max_length,
                                  padding=True,
                                  truncation=True,
                                  return_tensors='pt')
         output_tokens = self._model.generate(**tokens, max_length=self._max_length)
-        return self._tokenizer.batch_decode(output_tokens, skip_special_tokens=True)[0]
+        return self._tokenizer.batch_decode(output_tokens, skip_special_tokens=True)[0][len(sample[0]) + 1:]
 
     @report_time
     def infer_dataset(self) -> DataFrame:

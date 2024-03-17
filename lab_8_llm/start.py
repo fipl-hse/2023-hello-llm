@@ -22,14 +22,12 @@ def main() -> None:
     importer.obtain()
 
     preprocessor = RawDataPreprocessor(importer.raw_data)
-    preprocessor.analyze()
     preprocessor.transform()
 
     dataset = TaskDataset(preprocessor.data.head(100))
     pipeline = LLMPipeline(settings['parameters']['model'], dataset,
                            120, 1, 'cpu')
-    model_analysis = pipeline.analyze_model()
-    print(model_analysis)
+    pipeline.analyze_model()
 
     result = pipeline.infer_sample(dataset[0])
 
