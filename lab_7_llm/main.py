@@ -5,8 +5,6 @@ Neural machine translation module.
 from pathlib import Path
 from typing import Iterable, Sequence
 
-# import numpy as np
-# import pandas as pd
 import torch
 from datasets import load_dataset
 from evaluate import load
@@ -41,14 +39,6 @@ class RawDataImporter(AbstractRawDataImporter):
         if not isinstance(dataframe, DataFrame):
             raise TypeError()
         self._raw_data = dataframe
-
-    @property
-    def raw_data(self) -> DataFrame:
-        # Necessary for MyPy. MyPy assumes the type is (DataFrame | None)
-        # Despite an identical check in obtain().
-        if not isinstance(self._raw_data, DataFrame):
-            raise TypeError()
-        return self._raw_data
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
