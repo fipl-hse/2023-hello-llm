@@ -46,7 +46,7 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
         self._raw_data = load_dataset(path=self._hf_name,
-                                      name='document', split='train').to_pandas()
+                                      name='document', split='test').to_pandas()
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
