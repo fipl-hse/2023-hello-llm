@@ -6,7 +6,7 @@ import json
 from config.constants import PROJECT_ROOT
 # pylint: disable= too-many-locals
 from core_utils.llm.time_decorator import report_time
-from lab_8_llm.main import RawDataImporter, RawDataPreprocessor
+from lab_8_llm.main import RawDataImporter, RawDataPreprocessor, TaskDataset
 
 
 @report_time
@@ -24,7 +24,9 @@ def main():
     analysis = preprocessor.analyze()
     transform = preprocessor.transform()
 
-    result = analysis, transform
+    task = TaskDataset(file_importer.raw_data)
+
+    result = analysis, transform, task
 
     assert result is not None, "Demo does not work correctly"
 

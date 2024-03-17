@@ -7,6 +7,8 @@ Working with Large Language Models.
 from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
+
+import pandas as pd
 from datasets import load_dataset
 
 try:
@@ -37,7 +39,7 @@ class RawDataImporter(AbstractRawDataImporter):
     """
 
     @report_time
-    def obtain(self) -> None:
+    def obtain(self):
         """
         Download a dataset.
 
@@ -46,6 +48,22 @@ class RawDataImporter(AbstractRawDataImporter):
         """
         self._raw_data = load_dataset(self._hf_name,
                                       split='train').to_pandas()
+
+        if not isinstance(self._raw_data, pd.DataFrame):
+            raise TypeError
+
+    @property
+    def raw_data(self) -> DataFrame:
+        """
+        Property for original dataset in a table format.
+
+        Returns:
+            pandas.DataFrame: A dataset in a table format
+        """
+        if not isinstance(self._raw_data, pd.DataFrame):
+            raise TypeError
+
+        return self._raw_data
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
@@ -60,14 +78,16 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
-        props_analyzed = {'dataset_number_of_samples': len(self._raw_data),
-                          'dataset_columns': len(self._raw_data.columns),
-                          'dataset_duplicates': self._raw_data.duplicated().sum(),
-                          'dataset_empty_rows': self._raw_data.isna().sum().sum(),
-                          'dataset_sample_min_len': len(min(self._raw_data['instruction'], key=len)),
-                          'dataset_sample_max_len': len(max(self._raw_data['instruction'], key=len))}
 
-        return props_analyzed
+        empty_rows_free = self._raw_data.replace("", pd.NA).dropna().reset_index()
+
+        return {'dataset_number_of_samples': self._raw_data.shape[0],
+                'dataset_columns': self._raw_data.shape[1],
+                'dataset_duplicates': self._raw_data.duplicated().sum(),
+                'dataset_empty_rows': self._raw_data.replace("", pd.NA).isna().sum().sum(),
+                'dataset_sample_min_len': len(min(empty_rows_free["instruction"], key=len)),
+                'dataset_sample_max_len': len(max(empty_rows_free["instruction"], key=len)),
+                }
 
     @report_time
     def transform(self):
@@ -91,6 +111,7 @@ class TaskDataset(Dataset):
         Args:
             data (pandas.DataFrame): Original data
         """
+        self._data = data
 
     def __len__(self) -> int:
         """
@@ -99,6 +120,7 @@ class TaskDataset(Dataset):
         Returns:
             int: The number of items in the dataset
         """
+        return len(self._data)
 
     def __getitem__(self, index: int) -> tuple[str, ...]:
         """
@@ -110,6 +132,7 @@ class TaskDataset(Dataset):
         Returns:
             tuple[str, ...]: The item to be received
         """
+        return self._data.iloc[index]['question'], self._data.iloc[index]['target']
 
     @property
     def data(self) -> DataFrame:
@@ -119,6 +142,7 @@ class TaskDataset(Dataset):
         Returns:
             pandas.DataFrame: Preprocessed DataFrame
         """
+        return self._data
 
 
 class LLMPipeline(AbstractLLMPipeline):
