@@ -10,7 +10,6 @@ from typing import Iterable, Sequence
 
 import pandas as pd
 from datasets import load_dataset
-from torch.utils.data import DataLoader
 from torchinfo import summary
 from transformers import AutoTokenizer, GPTNeoXForCausalLM
 
@@ -211,9 +210,13 @@ class LLMPipeline(AbstractLLMPipeline):
         Returns:
             str | None: A prediction
         """
-        if not self._model:
-            return None
-        return self._infer_batch([sample])[0]
+        tokens = self._tokenizer(sample[0],
+                                 max_length=self._max_length,
+                                 padding=True,
+                                 truncation=True,
+                                 return_tensors='pt')
+        output_tokens = self._model.generate(**tokens, max_length=self._max_length)
+        return self._tokenizer.batch_decode(output_tokens, skip_special_tokens=True)[0][len(sample[0]) + 1:]
 
     @report_time
     def infer_dataset(self) -> DataFrame:
