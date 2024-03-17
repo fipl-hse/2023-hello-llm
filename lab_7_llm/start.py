@@ -24,9 +24,9 @@ def main() -> None:
     data_loader = RawDataImporter(parameters.dataset)
     data_loader.obtain()
 
-    preprocessor = RawDataPreprocessor(data_loader.raw_data)
-    if not isinstance(preprocessor, DataFrame):
+    if not isinstance(data_loader.raw_data, DataFrame):
         raise TypeError()
+    preprocessor = RawDataPreprocessor(data_loader.raw_data)
     print(preprocessor.analyze())
     preprocessor.transform()
 
