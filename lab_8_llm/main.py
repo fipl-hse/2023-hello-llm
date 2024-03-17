@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 import pandas as pd
-
+import torch
 from datasets import load_dataset
 from torchinfo import summary
 
@@ -49,7 +49,8 @@ class RawDataImporter(AbstractRawDataImporter):
         Raises:
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
-        self._raw_data = load_dataset(self._hf_name, split='train').to_pandas()
+        self._raw_data = load_dataset(self._hf_name, split='test').to_pandas()
+
 
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
