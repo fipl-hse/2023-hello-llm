@@ -3,13 +3,14 @@ Neural machine translation starter.
 """
 from pandas import DataFrame
 
-# pylint: disable= too-many-locals
-
 from config.constants import PROJECT_ROOT
 from config.lab_settings import LabSettings
 from core_utils.llm.time_decorator import report_time
 from lab_7_llm.main import (LLMPipeline, RawDataImporter, RawDataPreprocessor, TaskDataset,
                             TaskEvaluator)
+
+# pylint: disable= too-many-locals
+
 
 SETTINGS = PROJECT_ROOT / "lab_7_llm" / "settings.json"
 PREDICTIONS = PROJECT_ROOT / "lab_7_llm" / "dist" / "predictions.csv"
@@ -24,6 +25,7 @@ def main() -> None:
     data_loader = RawDataImporter(parameters.dataset)
     data_loader.obtain()
 
+    # Enforce type safety for MyPy
     if not isinstance(data_loader.raw_data, DataFrame):
         raise TypeError()
     preprocessor = RawDataPreprocessor(data_loader.raw_data)
