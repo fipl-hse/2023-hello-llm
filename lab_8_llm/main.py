@@ -202,7 +202,6 @@ class LLMPipeline(AbstractLLMPipeline):
             str | None: A prediction
         """
         tokens = self._tokenizer(sample[0],
-                                 sample[1],
                                  max_length=self._max_length,
                                  padding=True,
                                  truncation=True,
