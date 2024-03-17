@@ -6,7 +6,6 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterable, Sequence
 
-from datasets import load_dataset
 
 try:
     import torch
@@ -44,9 +43,6 @@ class RawDataImporter(AbstractRawDataImporter):
             TypeError: In case of downloaded dataset is not pd.DataFrame
         """
 
-        self._raw_data = load_dataset(self._hf_name,
-                                      split='train').to_pandas()
-
 
 class RawDataPreprocessor(AbstractRawDataPreprocessor):
     """
@@ -61,24 +57,11 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
             dict: Dataset key properties
         """
 
-        props_analyzed = {'dataset_number_of_samples': len(self._raw_data),
-                          'dataset_columns': self._raw_data.shape[1],
-                          'dataset_duplicates': self._raw_data.duplicated().sum(),
-                          'dataset_empty_rows': self._raw_data.isna().sum().sum(),
-                          'dataset_sample_min_len': len(min(self._raw_data['article_content'], key=len)),
-                          'dataset_sample_max_len': len(max(self._raw_data['article_content'], key=len))}
-
-        return props_analyzed
-
     @report_time
     def transform(self):
         """
         Apply preprocessing transformations to the raw dataset.
         """
-        self._data = (self._raw_data
-                      .rename(columns={'article_content': 'source', 'summary': 'target'})
-                      .drop(columns=['title', 'date', 'url'])
-                      .reset_index(drop=True))
 
 
 class TaskDataset(Dataset):
