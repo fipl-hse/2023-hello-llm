@@ -1,6 +1,8 @@
 """
 Neural machine translation starter.
 """
+from pandas import DataFrame
+
 # pylint: disable= too-many-locals
 
 from config.constants import PROJECT_ROOT
@@ -23,6 +25,8 @@ def main() -> None:
     data_loader.obtain()
 
     preprocessor = RawDataPreprocessor(data_loader.raw_data)
+    if not isinstance(preprocessor, DataFrame):
+        raise TypeError()
     print(preprocessor.analyze())
     preprocessor.transform()
 
