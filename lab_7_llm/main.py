@@ -61,13 +61,16 @@ class RawDataPreprocessor(AbstractRawDataPreprocessor):
         Returns:
             dict: Dataset key properties
         """
+        processed_data = self._raw_data.dropna().reset_index(drop=True)
+        column_length = processed_data["article"].astype(str).str.len()
+
         return {
             'dataset_number_of_samples': len(self._raw_data),
             'dataset_columns': self._raw_data.shape[1],
             'dataset_duplicates': self._raw_data.duplicated().sum(),
             'dataset_empty_rows': self._raw_data.isna().sum().sum(),
-            'dataset_sample_min_len': len(min(self._raw_data['article'], key=len)),
-            'dataset_sample_max_len': len(max(self._raw_data['article'], key=len))
+            'dataset_sample_min_len': int(column_length.min()),
+            'dataset_sample_max_len': int(column_length.max())
         }
 
     @report_time
