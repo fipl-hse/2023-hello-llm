@@ -4,6 +4,7 @@ datasets==2.16.1
 evaluate==0.4.1
 fastapi==0.109.2
 pandas==2.1.4
+protobuf==4.25.3
 rouge_score==0.1.2
 scikit-learn==1.4.0
 sentencepiece==0.2.0
