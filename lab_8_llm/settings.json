@@ -1,6 +1,6 @@
 {
   "parameters": {
-    "model": "EleutherAI/gpt-neo-125m",
+    "model": "JackFram/llama-68m",
     "dataset": "lionelchg/dolly_open_qa",
     "metrics": ["bleu", "rouge"]
   },
